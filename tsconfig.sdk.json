@@ -1,0 +1,10 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./packages/api/lib",
+        "sourceMap": false,
+        "target": "ES2015",
+        "moduleDetection": "auto"
+    },
+    "include": ["./sdk"]
+}
