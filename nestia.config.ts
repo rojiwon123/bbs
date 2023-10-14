@@ -12,8 +12,8 @@ const NESTIA_CONFIG: nestia.INestiaConfig = {
         decompose: true,
         output: "packages/api/swagger/swagger.json",
         info: {
-            title: "Server Title",
-            description: "Service Description",
+            title: "BBS Server",
+            description: "RESTFul API Server for Bulletin Board System",
             version: "0.0.1",
         },
         servers: [

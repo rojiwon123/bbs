@@ -1,11 +1,11 @@
-# Backend Template
+# NestJS Bulletin Board System
 
 <div align=center>
 
 ![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
 
-[![Test Status](https://github.com/industriously/nestia-template/actions/workflows/pr_check.yml/badge.svg?branch=develop)](https://github.com/industriously/nestia-template/actions/workflows/pr_check.yml)
+[![Test Status](https://github.com/industriously/bbs/actions/workflows/pr_check.yml/badge.svg?branch=develop)](https://github.com/industriously/bbs/actions/workflows/pr_check.yml)
 
 </div>
 
@@ -14,31 +14,21 @@
   <ol>
     <li><a href="#소개">소개</a></li>
     <li><a href="#api-문서화">API 문서화 방식</a></li>
-    <li><a href="./ERD.md">erd 문서</a></li>
+    <li><a href="#요구사항">요구사항</a></li>
+    <li><a href="./ERD.md">ERD 문서</a></li>
     <li><a href="#커밋-컨벤션">커밋 컨벤션</a></li>
   </ol>
 </details>
 
 ## 소개
 
-Nestia와 prisma를 미리 적용한 템플릿 프로젝트
+NestJS 기반의 전자 게시판(BBS) API 서버
 
 ### 특징
 
--   ts 타입기반의 검증 방식 사용
-
-    -   nestia, typia 라이브러리를 활용
-
--   문서 자동화
-
-    -   swagger api 문서, sdk 라이브러리 자동빌드
-    -   prisma model과 연동된 erd 자동빌드
-
--   e2e test 환경 세팅 적용
-
--   안전한 merge
-
-    -   github action에서 e2e test를 통한 pr check
+-   type-safe
+-   시나리오 테스트 코드 보유
+-   ERD/API 문서 자동화
 
 ## API 문서화
 
@@ -53,6 +43,20 @@ npm run build:nestia
 ```bash
 npm run swagger
 ```
+
+## 요구사항
+
+## 필수 사항
+
+-   소셜 간편 로그인
+-   게시글 변경이력 저장
+-   게시글 첨부파일 제공
+-   위지윅 에디터 연동
+
+## 추가 사항
+
+-   권한 관리(비공개 게시판)
+-   소셜 간편가입 추가 프로세스
 
 ## 커밋 컨벤션
 

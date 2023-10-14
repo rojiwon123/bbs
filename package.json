@@ -1,7 +1,7 @@
 {
-    "name": "nestia-template",
+    "name": "@industriously/bbs",
     "version": "0.0.0",
-    "description": "nestia를 적용한 nestjs 서버",
+    "description": "Bulletin Board System RESTFul API Server",
     "main": "build/main",
     "scripts": {
         "check": "ts-patch check",
@@ -33,11 +33,12 @@
     "license": "UNLICENSED",
     "repository": {
         "type": "git",
-        "url": "https://github.com/industriously/nestia-template.git"
+        "url": "https://github.com/industriously/bbs.git"
     },
     "keywords": [
         "nestjs",
-        "nestia"
+        "nestia",
+        "bbs"
     ],
     "dependencies": {
         "@fxts/core": "^0.21.0",
