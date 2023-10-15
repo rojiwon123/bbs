@@ -9,13 +9,6 @@
 
 ```mermaid
 erDiagram
-attachments {
-    String id PK
-    String name
-    String extension
-    String url
-    DateTime created_at
-}
 articles {
     String id PK
     String author_id FK
@@ -36,6 +29,13 @@ article_snapshot_attachments {
     String article_snapshot_id FK
     String attachment_id FK
 }
+attachments {
+    String id PK
+    String name
+    String extension
+    String url
+    DateTime created_at
+}
 comments {
     String id PK
     String author_id FK
@@ -50,6 +50,11 @@ comment_snapshots {
     String body
     DateTime created_at
     DateTime deleted_at "nullable"
+}
+comment_snapshot_attachments {
+    String id PK
+    String comment_snapshot_id FK
+    String attachment_id FK
 }
 users {
     String id PK
@@ -68,24 +73,9 @@ comments }|--|| users : author
 comments }|--|| articles : article
 comments }o--o| comments : parent
 comment_snapshots }|--|| comments : comment
+comment_snapshot_attachments }|--|| comment_snapshots : comment_snapshot
+comment_snapshot_attachments }|--|| attachments : attachment
 ```
-
-### `attachments`
-
-Attachment Entity
-
-All the attachment resources managed in the BBS
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `name`: name of attachment resource
--   `extension`: extension of resource like `md`, `html`, `jpeg`...
--   `url`: URL path of real resource
--   `created_at`: creation time of record
 
 ### `articles`
 
@@ -157,9 +147,26 @@ If author add attachment to an article, a new record of `article_snapshot_attach
     >
     > `uuid` type
 
+### `attachments`
+
+Attachment Entity
+
+All the attachment resources managed in the BBS
+
+**Properties**
+
+-   `id`
+    > record identity
+    >
+    > `uuid` type
+-   `name`: name of attachment resource
+-   `extension`: extension of resource like `md`, `html`, `jpeg`...
+-   `url`: URL path of real resource
+-   `created_at`: creation time of record
+
 ### `comments`
 
-Root Entity of Article Comment
+Root Entity of Comment
 
 **Properties**
 
@@ -189,7 +196,7 @@ Root Entity of Article Comment
 
 ### `comment_snapshots`
 
-Snapshot of Article Comment
+Snapshot of Comment
 
 **Properties**
 
@@ -207,6 +214,29 @@ Snapshot of Article Comment
     > deletion time of record
     >
     > if null, a record is soft-deleted
+
+### `comment_snapshot_attachments`
+
+Relation Attachment with Comment Snapshot
+
+an `comment_snapshot_attachments` entity connects an `comment_snapshots` record with an `attachments` record.
+
+If author add attachment to an comment, a new record of `comment_snapshot_attachments` is created.
+
+**Properties**
+
+-   `id`
+    > record identity
+    >
+    > `uuid` type
+-   `comment_snapshot_id`
+    > referenced in `comment_snapshots`
+    >
+    > `uuid` type
+-   `attachment_id`
+    > referenced in `attachments`
+    >
+    > `uuid` type
 
 ### `users`
 

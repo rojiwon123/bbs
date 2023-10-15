@@ -25,35 +25,6 @@ enum ArticleBodyFormatType {
   txt
 }
 
-/// Attachment Entity
-/// 
-/// All the attachment resources managed in the BBS
-/// 
-/// @namespace BBS
-/// 
-/// @author industriously
-/// 
-model attachments {
-  /// record identity
-  /// 
-  /// `uuid` type
-  /// 
-  id                         String                         @id @database.Uuid
-  /// name of attachment resource
-  /// 
-  name                       String
-  /// extension of resource like `md`, `html`, `jpeg`...
-  /// 
-  extension                  String
-  /// URL path of real resource
-  /// 
-  url                        String
-  /// creation time of record
-  /// 
-  created_at                 DateTime                       @database.Timestamptz
-  article_snapshot_relations article_snapshot_attachments[]
-}
-
 /// Root Entity of Article
 /// 
 /// @namespace BBS
@@ -156,7 +127,37 @@ model article_snapshot_attachments {
   attachment          attachments       @relation(fields: [attachment_id], references: [id])
 }
 
-/// Root Entity of Article Comment
+/// Attachment Entity
+/// 
+/// All the attachment resources managed in the BBS
+/// 
+/// @namespace BBS
+/// 
+/// @author industriously
+/// 
+model attachments {
+  /// record identity
+  /// 
+  /// `uuid` type
+  /// 
+  id                         String                         @id @database.Uuid
+  /// name of attachment resource
+  /// 
+  name                       String
+  /// extension of resource like `md`, `html`, `jpeg`...
+  /// 
+  extension                  String
+  /// URL path of real resource
+  /// 
+  url                        String
+  /// creation time of record
+  /// 
+  created_at                 DateTime                       @database.Timestamptz
+  article_snapshot_relations article_snapshot_attachments[]
+  comment_snapshot_relations comment_snapshot_attachments[]
+}
+
+/// Root Entity of Comment
 /// 
 /// @namespace BBS
 /// 
@@ -200,7 +201,7 @@ model comments {
   children   comments[]          @relation(name: "HierarchicalComment")
 }
 
-/// Snapshot of Article Comment
+/// Snapshot of Comment
 /// 
 /// @namespace BBS
 /// 
@@ -211,22 +212,53 @@ model comment_snapshots {
   /// 
   /// `uuid` type
   /// 
-  id         String    @id @database.Uuid
+  id                   String                         @id @database.Uuid
   /// referenced in `comments`
   /// 
   /// `uuid` type
   /// 
-  comment_id String    @database.Uuid
-  comment    comments  @relation(fields: [comment_id], references: [id])
-  body       String
+  comment_id           String                         @database.Uuid
+  comment              comments                       @relation(fields: [comment_id], references: [id])
+  body                 String
   /// creation time of record
   /// 
-  created_at DateTime  @database.Timestamptz
+  created_at           DateTime                       @database.Timestamptz
   /// deletion time of record
   /// 
   /// if null, a record is soft-deleted
   /// 
-  deleted_at DateTime? @database.Timestamptz
+  deleted_at           DateTime?                      @database.Timestamptz
+  attachment_relations comment_snapshot_attachments[]
+}
+
+/// Relation Attachment with Comment Snapshot
+/// 
+/// an `comment_snapshot_attachments` entity connects an `comment_snapshots` record with an `attachments` record.
+/// 
+/// If author add attachment to an comment, a new record of `comment_snapshot_attachments` is created.
+/// 
+/// @namespace BBS
+/// 
+/// @author industriously
+/// 
+model comment_snapshot_attachments {
+  /// record identity
+  /// 
+  /// `uuid` type
+  /// 
+  id                  String            @id @database.Uuid
+  /// referenced in `comment_snapshots`
+  /// 
+  /// `uuid` type
+  /// 
+  comment_snapshot_id String            @database.Uuid
+  comment_snapshot    comment_snapshots @relation(fields: [comment_snapshot_id], references: [id])
+  /// referenced in `attachments`
+  /// 
+  /// `uuid` type
+  /// 
+  attachment_id       String            @database.Uuid
+  attachment          attachments       @relation(fields: [attachment_id], references: [id])
 }
 
 /// Authentication Entity of User
