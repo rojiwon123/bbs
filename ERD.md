@@ -26,7 +26,7 @@ article_snapshots {
 }
 article_snapshot_attachments {
     String id PK
-    String article_snapshot_id FK
+    String snapshot_id FK
     String attachment_id FK
 }
 attachments {
@@ -53,7 +53,7 @@ comment_snapshots {
 }
 comment_snapshot_attachments {
     String id PK
-    String comment_snapshot_id FK
+    String snapshot_id FK
     String attachment_id FK
 }
 users {
@@ -67,13 +67,13 @@ users {
 }
 articles }|--|| users : author
 article_snapshots }|--|| articles : article
-article_snapshot_attachments }|--|| article_snapshots : article_snapshot
+article_snapshot_attachments }|--|| article_snapshots : snapshot
 article_snapshot_attachments }|--|| attachments : attachment
 comments }|--|| users : author
 comments }|--|| articles : article
 comments }o--o| comments : parent
 comment_snapshots }|--|| comments : comment
-comment_snapshot_attachments }|--|| comment_snapshots : comment_snapshot
+comment_snapshot_attachments }|--|| comment_snapshots : snapshot
 comment_snapshot_attachments }|--|| attachments : attachment
 ```
 
@@ -138,7 +138,7 @@ If author add attachment to an article, a new record of `article_snapshot_attach
     > record identity
     >
     > `uuid` type
--   `article_snapshot_id`
+-   `snapshot_id`
     > referenced in `article_snapshots`
     >
     > `uuid` type
@@ -229,7 +229,7 @@ If author add attachment to an comment, a new record of `comment_snapshot_attach
     > record identity
     >
     > `uuid` type
--   `comment_snapshot_id`
+-   `snapshot_id`
     > referenced in `comment_snapshots`
     >
     > `uuid` type

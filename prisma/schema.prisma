@@ -112,19 +112,19 @@ model article_snapshot_attachments {
   /// 
   /// `uuid` type
   /// 
-  id                  String            @id @database.Uuid
+  id            String            @id @database.Uuid
   /// referenced in `article_snapshots`
   /// 
   /// `uuid` type
   /// 
-  article_snapshot_id String            @database.Uuid
-  article_snapshot    article_snapshots @relation(fields: [article_snapshot_id], references: [id])
+  snapshot_id   String            @database.Uuid
+  snapshot      article_snapshots @relation(fields: [snapshot_id], references: [id])
   /// referenced in `attachments`
   /// 
   /// `uuid` type
   /// 
-  attachment_id       String            @database.Uuid
-  attachment          attachments       @relation(fields: [attachment_id], references: [id])
+  attachment_id String            @database.Uuid
+  attachment    attachments       @relation(fields: [attachment_id], references: [id])
 }
 
 /// Attachment Entity
@@ -246,19 +246,19 @@ model comment_snapshot_attachments {
   /// 
   /// `uuid` type
   /// 
-  id                  String            @id @database.Uuid
+  id            String            @id @database.Uuid
   /// referenced in `comment_snapshots`
   /// 
   /// `uuid` type
   /// 
-  comment_snapshot_id String            @database.Uuid
-  comment_snapshot    comment_snapshots @relation(fields: [comment_snapshot_id], references: [id])
+  snapshot_id   String            @database.Uuid
+  snapshot      comment_snapshots @relation(fields: [snapshot_id], references: [id])
   /// referenced in `attachments`
   /// 
   /// `uuid` type
   /// 
-  attachment_id       String            @database.Uuid
-  attachment          attachments       @relation(fields: [attachment_id], references: [id])
+  attachment_id String            @database.Uuid
+  attachment    attachments       @relation(fields: [attachment_id], references: [id])
 }
 
 /// Authentication Entity of User
