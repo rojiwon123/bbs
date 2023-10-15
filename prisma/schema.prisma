@@ -14,6 +14,11 @@ generator erd {
   title    = "BBS"
 }
 
+enum OauthType {
+  github
+  kakao
+}
+
 enum ArticleBodyFormatType {
   html
   md
@@ -224,7 +229,47 @@ model comment_snapshots {
   deleted_at DateTime? @database.Timestamptz
 }
 
-/// Root Entity of User
+/// Authentication Entity of User
+/// 
+/// @namespace User
+/// 
+/// @author industriously
+/// 
+model authentications {
+  /// record identity
+  /// 
+  /// `uuid` type
+  /// 
+  id         String    @id @database.Uuid
+  /// one of `github`, `kakao`
+  /// 
+  oauth_type OauthType
+  /// oauth server user id
+  /// 
+  oauth_sub  String
+  /// verified information
+  /// 
+  email      String?
+  /// verified information
+  /// 
+  phone      String?
+  /// creation time of record
+  /// 
+  created_at DateTime  @database.Timestamptz
+  /// revision time of record
+  /// 
+  updated_at DateTime  @database.Timestamptz
+  /// deletion time of record
+  /// 
+  /// if null, a record is soft-deleted
+  /// 
+  deleted_at DateTime? @database.Timestamptz
+  user       users?
+}
+
+/// Root Entity of User Profile
+/// 
+/// @namespace BBS
 /// 
 /// @namespace User
 /// 
@@ -235,8 +280,30 @@ model users {
   /// 
   /// `uuid` type
   /// 
-  id       String     @id @database.Uuid
-  name     String
-  articles articles[]
-  comments comments[]
+  id                String          @id @database.Uuid
+  /// referenced in `authentications`
+  /// 
+  /// `uuid` type
+  /// 
+  authentication_id String          @unique @database.Uuid
+  authentication    authentications @relation(fields: [authentication_id], references: [id])
+  /// displayed name of user
+  /// 
+  nickname          String
+  /// real name of user
+  /// 
+  name              String
+  /// creation time of record
+  /// 
+  created_at        DateTime        @database.Timestamptz
+  /// revision time of record
+  /// 
+  updated_at        DateTime        @database.Timestamptz
+  /// deletion time of record
+  /// 
+  /// if null, a record is soft-deleted
+  /// 
+  deleted_at        DateTime?       @database.Timestamptz
+  articles          articles[]
+  comments          comments[]
 }

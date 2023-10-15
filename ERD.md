@@ -51,9 +51,20 @@ comment_snapshots {
     DateTime created_at
     DateTime deleted_at "nullable"
 }
+users {
+    String id PK
+    String authentication_id FK
+    String nickname
+    String name
+    DateTime created_at
+    DateTime updated_at
+    DateTime deleted_at "nullable"
+}
+articles }|--|| users : author
 article_snapshots }|--|| articles : article
 article_snapshot_attachments }|--|| article_snapshots : article_snapshot
 article_snapshot_attachments }|--|| attachments : attachment
+comments }|--|| users : author
 comments }|--|| articles : article
 comments }o--o| comments : parent
 comment_snapshots }|--|| comments : comment
@@ -197,19 +208,9 @@ Snapshot of Article Comment
     >
     > if null, a record is soft-deleted
 
-## User
-
-```mermaid
-erDiagram
-users {
-    String id PK
-    String name
-}
-```
-
 ### `users`
 
-Root Entity of User
+Root Entity of User Profile
 
 **Properties**
 
@@ -217,4 +218,85 @@ Root Entity of User
     > record identity
     >
     > `uuid` type
--   `name`:
+-   `authentication_id`
+    > referenced in `authentications`
+    >
+    > `uuid` type
+-   `nickname`: displayed name of user
+-   `name`: real name of user
+-   `created_at`: creation time of record
+-   `updated_at`: revision time of record
+-   `deleted_at`
+    > deletion time of record
+    >
+    > if null, a record is soft-deleted
+
+## User
+
+```mermaid
+erDiagram
+authentications {
+    String id PK
+    OauthType oauth_type
+    String oauth_sub
+    String email "nullable"
+    String phone "nullable"
+    DateTime created_at
+    DateTime updated_at
+    DateTime deleted_at "nullable"
+}
+users {
+    String id PK
+    String authentication_id FK
+    String nickname
+    String name
+    DateTime created_at
+    DateTime updated_at
+    DateTime deleted_at "nullable"
+}
+users |o--|| authentications : authentication
+```
+
+### `authentications`
+
+Authentication Entity of User
+
+**Properties**
+
+-   `id`
+    > record identity
+    >
+    > `uuid` type
+-   `oauth_type`: one of `github`, `kakao`
+-   `oauth_sub`: oauth server user id
+-   `email`: verified information
+-   `phone`: verified information
+-   `created_at`: creation time of record
+-   `updated_at`: revision time of record
+-   `deleted_at`
+    > deletion time of record
+    >
+    > if null, a record is soft-deleted
+
+### `users`
+
+Root Entity of User Profile
+
+**Properties**
+
+-   `id`
+    > record identity
+    >
+    > `uuid` type
+-   `authentication_id`
+    > referenced in `authentications`
+    >
+    > `uuid` type
+-   `nickname`: displayed name of user
+-   `name`: real name of user
+-   `created_at`: creation time of record
+-   `updated_at`: revision time of record
+-   `deleted_at`
+    > deletion time of record
+    >
+    > if null, a record is soft-deleted
