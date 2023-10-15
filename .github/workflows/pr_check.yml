@@ -8,6 +8,7 @@ env:
     DATABASE_URL: postgresql://test:test@localhost:5432/test
 
 permissions:
+    contents: read
     pull-requests: write
 
 jobs:
