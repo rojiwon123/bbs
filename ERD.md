@@ -27,7 +27,7 @@ article_snapshots {
     String article_id FK
     String title
     String body_url
-    String body_format
+    ArticleBodyFormatType body_format
     DateTime created_at
     DateTime deleted_at "nullable"
 }
@@ -116,7 +116,7 @@ When a user edit an article, a new snapshot record is created, and readers will 
     > `uuid` type
 -   `title`: title of article
 -   `body_url`: URL path of article body resource
--   `body_format`: Format of Body like `html`, `md`, `txt`
+-   `body_format`: one of `html`, `md`, `txt`
 -   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record

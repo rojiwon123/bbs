@@ -1,3 +1,4 @@
+import { ArticleBodyFormatType } from "../enums";
 import { Description } from "../util/description";
 import { Table } from "../util/table";
 
@@ -67,8 +68,8 @@ Table.create({
     Table.addColumn("string")("body_url", {
         comments: Description.lines("URL path of article body resource"),
     }),
-    Table.addColumn("string")("body_format", {
-        comments: Description.lines("Format of Body like `html`, `md`, `txt`"),
+    Table.addColumn("enum")("body_format", ArticleBodyFormatType, {
+        comments: Description.lines("one of `html`, `md`, `txt`"),
     }),
     Table.setCreatable,
     Table.setDeletable,
