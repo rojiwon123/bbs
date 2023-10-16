@@ -1,44 +1,25 @@
 import typia from "typia";
 
 import { IOauth } from "./IOauth";
+import { IToken } from "./IToken";
+
+export interface IAuthentication {
+    status: "active";
+    access_token: IToken.IOutput;
+}
 
 export namespace IAuthentication {
-    export interface IUrl {
-        url: string & typia.tags.Format<"url">;
-    }
+    // 추후에 oauth 인증 -> 사용자 생성 단계를 분리하면 pending 상태가 추가됨
+    // pending 상태일 때는 사용자 생성 권한 밖에 없음
+    // pending 상태인 경우, oauth profile을 함께 리턴함
+    // export type Type = "pending" | "active";
+    export type IOauthUrls = Record<
+        IOauth.Type,
+        string & typia.tags.Format<"url">
+    >;
 
-    export interface IOauthType {
-        oauth: IOauth.Type;
-    }
-
-    export interface IOauthRequest {
+    export interface IOauthInput {
         oauth_type: IOauth.Type;
         code: string;
-    }
-
-    /**
-     * 토큰 발급시, 제공되는 형태
-     */
-    export interface ITokenResponse {
-        token: string;
-        /** 토큰 만료일자 */
-        expired_at: string & typia.tags.Format<"date-time">;
-    }
-
-    export interface ISignInResponse {
-        access_token: ITokenResponse;
-        refresh_token: ITokenResponse;
-    }
-
-    export interface IRefreshRequest {
-        refresh_token: string;
-    }
-
-    export interface IRefreshResponse {
-        access_token: ITokenResponse;
-        /**
-         * 만약 리프레시 토큰의 만료일이 얼마 안남은 경우, 리프레스 토큰가 응답 데이터에 추가된다.
-         */
-        refresh_token?: ITokenResponse;
     }
 }

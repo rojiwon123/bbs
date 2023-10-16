@@ -1,6 +1,10 @@
+import typia from "typia";
+
 export namespace DateMapper {
     /** ISO8601 */
-    export const toISO = (date?: Date): string => {
+    export const toISO = (
+        date?: Date,
+    ): string & typia.tags.Format<"date-time"> => {
         const time = date ?? new Date();
         return time.toISOString();
     };
@@ -20,7 +24,7 @@ export namespace DateMapper {
     };
 
     /** YYYY-MM-DD */
-    export const toDate = (date?: Date): string => {
+    export const toDate = (date?: Date): string & typia.tags.Format<"date"> => {
         const time = date ?? new Date();
 
         const year = time.getFullYear();

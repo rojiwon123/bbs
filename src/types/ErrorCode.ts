@@ -9,7 +9,8 @@ export namespace ErrorCode {
     export type Authorization = "UNAUTHORIZED_REQUEST";
     /**
      * 인증 실패
-     * oauth 인증이 실패하거나 하는 경우
+     *
+     * oauth 인증이 실패하는 경우
      */
     export type Authentication = "AUTHENTICATION_FAIL";
 

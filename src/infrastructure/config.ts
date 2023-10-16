@@ -24,7 +24,6 @@ const init = () => {
               PORT: 4000,
               ...process.env,
               ACCESS_TOKEN_KEY: Random.string(32),
-              REFRESH_TOKEN_KEY: Random.string(32),
           } as unknown as IEnv)
         : typia.assert<IEnv>({ PORT: 4000, ...process.env });
 };
@@ -41,5 +40,4 @@ interface IEnv {
     readonly KAKAO_REDIRECT_URI: string;
 
     readonly ACCESS_TOKEN_KEY: string;
-    readonly REFRESH_TOKEN_KEY: string;
 }
