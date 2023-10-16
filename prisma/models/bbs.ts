@@ -1,4 +1,4 @@
-import { ArticleBodyFormatType } from "../enums";
+import { ArticleBodyFormat, ArticleStatus } from "../enums";
 import { Description } from "../util/description";
 import { Table } from "../util/table";
 
@@ -10,7 +10,14 @@ Table.create({
 })(
     Table.addId(),
     Table.addRelationalString("author")("users"),
+    Table.addColumn("enum")("status", ArticleStatus, {
+        comments: Description.lines("one of `pending`, `active`, `deleted`"),
+    }),
     Table.setCreatable,
+    Table.addTimestamptz("posted_at", {
+        optional: true,
+        comments: Description.lines("posting time of article"),
+    }),
     Table.setDeletable,
     Table.addRelation({
         tableName: "article_snapshots",
@@ -40,7 +47,7 @@ Table.create({
     Table.addColumn("string")("body_url", {
         comments: Description.lines("URL path of article body resource"),
     }),
-    Table.addColumn("enum")("body_format", ArticleBodyFormatType, {
+    Table.addColumn("enum")("body_format", ArticleBodyFormat, {
         comments: Description.lines("one of `html`, `md`, `txt`"),
     }),
     Table.setCreatable,

@@ -9,6 +9,7 @@ Table.create({
     comments: Description.lines("Authentication Entity of User", ...tags),
 })(
     Table.addId(),
+    Table.addRelationalString("user", { optional: true })("users"),
     Table.addColumn("enum")("oauth_type", OauthType, {
         comments: Description.lines("one of `github`, `kakao`"),
     }),
@@ -17,20 +18,11 @@ Table.create({
     }),
     Table.addColumn("string")("email", {
         optional: true,
-        comments: Description.lines("verified information"),
-    }),
-    Table.addColumn("string")("phone", {
-        optional: true,
-        comments: Description.lines("verified information"),
+        comments: Description.lines("verified email"),
     }),
     Table.setCreatable,
     Table.setUpdatable,
     Table.setDeletable,
-    Table.addRelation({
-        tableName: "users",
-        fieldName: "user",
-        options: { optional: true },
-    }),
 );
 
 Table.create({
@@ -42,18 +34,19 @@ Table.create({
     ),
 })(
     Table.addId(),
-    Table.addRelationalString("authentication", { unique: true })(
-        "authentications",
-    ),
-    Table.addColumn("string")("nickname", {
+    Table.addColumn("string")("name", {
         comments: Description.lines("displayed name of user"),
     }),
-    Table.addColumn("string")("name", {
-        comments: Description.lines("real name of user"),
+    Table.addColumn("string")("introduction", {
+        comments: Description.lines("user introduction"),
     }),
     Table.setCreatable,
     Table.setUpdatable,
     Table.setDeletable,
+    Table.addRelation({
+        tableName: "authentications",
+        options: { list: true },
+    }),
     Table.addRelation({
         tableName: "articles",
         options: { list: true },

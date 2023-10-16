@@ -12,7 +12,9 @@ erDiagram
 articles {
     String id PK
     String author_id FK
+    ArticleStatus status
     DateTime created_at
+    DateTime posted_at "nullable"
     DateTime deleted_at "nullable"
 }
 article_snapshots {
@@ -20,7 +22,7 @@ article_snapshots {
     String article_id FK
     String title
     String body_url
-    ArticleBodyFormatType body_format
+    ArticleBodyFormat body_format
     DateTime created_at
     DateTime deleted_at "nullable"
 }
@@ -58,9 +60,8 @@ comment_snapshot_attachments {
 }
 users {
     String id PK
-    String authentication_id FK
-    String nickname
     String name
+    String introduction
     DateTime created_at
     DateTime updated_at
     DateTime deleted_at "nullable"
@@ -91,7 +92,9 @@ Root Entity of Article
     > referenced in `users`
     >
     > `uuid` type
+-   `status`: one of `pending`, `active`, `deleted`
 -   `created_at`: creation time of record
+-   `posted_at`: posting time of article
 -   `deleted_at`
     > deletion time of record
     >
@@ -248,12 +251,8 @@ Root Entity of User Profile
     > record identity
     >
     > `uuid` type
--   `authentication_id`
-    > referenced in `authentications`
-    >
-    > `uuid` type
--   `nickname`: displayed name of user
--   `name`: real name of user
+-   `name`: displayed name of user
+-   `introduction`: user introduction
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
 -   `deleted_at`
@@ -267,24 +266,23 @@ Root Entity of User Profile
 erDiagram
 authentications {
     String id PK
+    String user_id FK "nullable"
     OauthType oauth_type
     String oauth_sub
     String email "nullable"
-    String phone "nullable"
     DateTime created_at
     DateTime updated_at
     DateTime deleted_at "nullable"
 }
 users {
     String id PK
-    String authentication_id FK
-    String nickname
     String name
+    String introduction
     DateTime created_at
     DateTime updated_at
     DateTime deleted_at "nullable"
 }
-users |o--|| authentications : authentication
+authentications }o--|| users : user
 ```
 
 ### `authentications`
@@ -297,10 +295,13 @@ Authentication Entity of User
     > record identity
     >
     > `uuid` type
+-   `user_id`
+    > referenced in `users`
+    >
+    > `uuid` type
 -   `oauth_type`: one of `github`, `kakao`
 -   `oauth_sub`: oauth server user id
--   `email`: verified information
--   `phone`: verified information
+-   `email`: verified email
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
 -   `deleted_at`
@@ -318,12 +319,8 @@ Root Entity of User Profile
     > record identity
     >
     > `uuid` type
--   `authentication_id`
-    > referenced in `authentications`
-    >
-    > `uuid` type
--   `nickname`: displayed name of user
--   `name`: real name of user
+-   `name`: displayed name of user
+-   `introduction`: user introduction
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
 -   `deleted_at`

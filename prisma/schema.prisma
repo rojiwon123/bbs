@@ -19,10 +19,16 @@ enum OauthType {
   kakao
 }
 
-enum ArticleBodyFormatType {
+enum ArticleBodyFormat {
   html
   md
   txt
+}
+
+enum ArticleStatus {
+  pending
+  active
+  deleted
 }
 
 /// Root Entity of Article
@@ -43,9 +49,15 @@ model articles {
   /// 
   author_id  String              @database.Uuid
   author     users               @relation(fields: [author_id], references: [id])
+  /// one of `pending`, `active`, `deleted`
+  /// 
+  status     ArticleStatus
   /// creation time of record
   /// 
   created_at DateTime            @database.Timestamptz
+  /// posting time of article
+  /// 
+  posted_at  DateTime?           @database.Timestamptz
   /// deletion time of record
   /// 
   /// if null, a record is soft-deleted
@@ -85,7 +97,7 @@ model article_snapshots {
   body_url             String
   /// one of `html`, `md`, `txt`
   /// 
-  body_format          ArticleBodyFormatType
+  body_format          ArticleBodyFormat
   /// creation time of record
   /// 
   created_at           DateTime                       @database.Timestamptz
@@ -273,18 +285,21 @@ model authentications {
   /// `uuid` type
   /// 
   id         String    @id @database.Uuid
+  /// referenced in `users`
+  /// 
+  /// `uuid` type
+  /// 
+  user_id    String?   @database.Uuid
+  user       users?    @relation(fields: [user_id], references: [id])
   /// one of `github`, `kakao`
   /// 
   oauth_type OauthType
   /// oauth server user id
   /// 
   oauth_sub  String
-  /// verified information
+  /// verified email
   /// 
   email      String?
-  /// verified information
-  /// 
-  phone      String?
   /// creation time of record
   /// 
   created_at DateTime  @database.Timestamptz
@@ -296,7 +311,6 @@ model authentications {
   /// if null, a record is soft-deleted
   /// 
   deleted_at DateTime? @database.Timestamptz
-  user       users?
 }
 
 /// Root Entity of User Profile
@@ -312,30 +326,25 @@ model users {
   /// 
   /// `uuid` type
   /// 
-  id                String          @id @database.Uuid
-  /// referenced in `authentications`
-  /// 
-  /// `uuid` type
-  /// 
-  authentication_id String          @unique @database.Uuid
-  authentication    authentications @relation(fields: [authentication_id], references: [id])
+  id              String            @id @database.Uuid
   /// displayed name of user
   /// 
-  nickname          String
-  /// real name of user
+  name            String
+  /// user introduction
   /// 
-  name              String
+  introduction    String
   /// creation time of record
   /// 
-  created_at        DateTime        @database.Timestamptz
+  created_at      DateTime          @database.Timestamptz
   /// revision time of record
   /// 
-  updated_at        DateTime        @database.Timestamptz
+  updated_at      DateTime          @database.Timestamptz
   /// deletion time of record
   /// 
   /// if null, a record is soft-deleted
   /// 
-  deleted_at        DateTime?       @database.Timestamptz
-  articles          articles[]
-  comments          comments[]
+  deleted_at      DateTime?         @database.Timestamptz
+  authentications authentications[]
+  articles        articles[]
+  comments        comments[]
 }
