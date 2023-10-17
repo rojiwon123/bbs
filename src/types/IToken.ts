@@ -12,6 +12,7 @@ export namespace IToken {
     export type IInput = Pick<IPayload, "auth_id">;
     export interface IOutput {
         token: string;
+        /** 토큰 만료일자 */
         expired_at: string & typia.tags.Format<"date-time">;
     }
 }

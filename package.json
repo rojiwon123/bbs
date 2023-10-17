@@ -25,7 +25,7 @@
         "test": "npm run build:test && NODE_ENV=test node tbuild/test",
         "swagger": "npm run build:swagger && node ./packages/api/swagger/index.mjs",
         "-------------------------------------------------": "",
-        "db:sync": "npm run db:update && prisma migrate dev",
+        "db:sync": "npm run build:prisma && prisma migrate dev",
         "db:init": "prisma migrate reset --force",
         "db:deploy": "prisma migrate deploy"
     },

@@ -10,7 +10,7 @@ import {
     toArray,
 } from "@fxts/core";
 import { DynamicExecutor } from "@nestia/e2e";
-import api, { IConnection } from "@project/api";
+import { IConnection } from "@nestia/fetcher";
 
 import { Backend } from "@APP/application";
 import { Configuration } from "@APP/infrastructure/config";
@@ -80,17 +80,9 @@ export const run = async () => {
         host: `http://localhost:${Configuration.PORT}`,
     };
 
-    const response = await api.functional.health.check(connection);
-
-    if (!response.success) {
-        await Backend.end(app);
-        console.log("Server can't active");
-        process.exit(-1);
-    } else {
-        const state = await Util.log(() => test(connection))(
-            __dirname + "/../../test_log.md",
-        );
-        await Backend.end(app);
-        process.exit(state ? 0 : -1);
-    }
+    const state = await Util.log(() => test(connection))(
+        __dirname + "/../../test_log.md",
+    );
+    await Backend.end(app);
+    process.exit(state ? 0 : -1);
 };
