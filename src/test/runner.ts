@@ -10,15 +10,14 @@ import {
     toArray,
 } from "@fxts/core";
 import { DynamicExecutor } from "@nestia/e2e";
-import api from "@project/api";
+import api, { IConnection } from "@project/api";
 
 import { Backend } from "@APP/application";
 import { Configuration } from "@APP/infrastructure/config";
 
-import { ITarget } from "./internal/type";
 import { Util } from "./internal/utils";
 
-const test = async (connection: ITarget): Promise<boolean> => {
+const test = async (connection: IConnection): Promise<boolean> => {
     Util.md.header()("Test Report");
 
     const report = await DynamicExecutor.validate({
@@ -77,11 +76,11 @@ const test = async (connection: ITarget): Promise<boolean> => {
 
 export const run = async () => {
     const app = await Backend.start({ logger: false });
-    const connection: ITarget = {
+    const connection: IConnection = {
         host: `http://localhost:${Configuration.PORT}`,
     };
 
-    const response = await api.functional.health.get(connection);
+    const response = await api.functional.health.check(connection);
 
     if (!response.success) {
         await Backend.end(app);

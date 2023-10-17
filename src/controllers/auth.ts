@@ -7,7 +7,7 @@ import { IAuthentication } from "@APP/types/IAuthentication";
 @nest.Controller("auth/oauth")
 export class OAuthController {
     /**
-     * oauth 로그인 페이지 주소를 key:value 형식으로 나타낸 객체를 응답합니다.
+     * oauth 로그인 페이지 주소를 key:value 형식으로 응답
      *
      * @summary oauth 로그인 페이지 주소 목록
      * @tag auth
@@ -22,11 +22,11 @@ export class OAuthController {
     }
 
     /**
-     * oauth 인증을 통해 사용자 권한이 인가된 토큰을 응답받습니다.
+     * oauth 인증을 통해 사용자 권한이 인가된 토큰을 응답
      *
      * @summary oauth 인증
      * @tag auth
-     * @param body oauth 유형과 code 정보를 전달합니다.
+     * @param body oauth 유형과 code 정보를 전달
      * @return 권한 토큰
      */
     @core.TypedException<ErrorCode.Authentication>(
