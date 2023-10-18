@@ -4,16 +4,11 @@ CREATE TYPE "OauthType" AS ENUM ('github', 'kakao');
 -- CreateEnum
 CREATE TYPE "ArticleBodyFormat" AS ENUM ('html', 'md', 'txt');
 
--- CreateEnum
-CREATE TYPE "ArticleStatus" AS ENUM ('pending', 'active', 'deleted');
-
 -- CreateTable
 CREATE TABLE "articles" (
     "id" UUID NOT NULL,
     "author_id" UUID NOT NULL,
-    "status" "ArticleStatus" NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
-    "posted_at" TIMESTAMPTZ,
     "deleted_at" TIMESTAMPTZ,
 
     CONSTRAINT "articles_pkey" PRIMARY KEY ("id")
@@ -27,7 +22,6 @@ CREATE TABLE "article_snapshots" (
     "body_url" TEXT NOT NULL,
     "body_format" "ArticleBodyFormat" NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
-    "deleted_at" TIMESTAMPTZ,
 
     CONSTRAINT "article_snapshots_pkey" PRIMARY KEY ("id")
 );
@@ -70,18 +64,8 @@ CREATE TABLE "comment_snapshots" (
     "comment_id" UUID NOT NULL,
     "body" TEXT NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
-    "deleted_at" TIMESTAMPTZ,
 
     CONSTRAINT "comment_snapshots_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "comment_snapshot_attachments" (
-    "id" UUID NOT NULL,
-    "snapshot_id" UUID NOT NULL,
-    "attachment_id" UUID NOT NULL,
-
-    CONSTRAINT "comment_snapshot_attachments_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -102,6 +86,7 @@ CREATE TABLE "authentications" (
 CREATE TABLE "users" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
+    "image_url" TEXT,
     "introduction" TEXT NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
     "updated_at" TIMESTAMPTZ NOT NULL,
@@ -133,12 +118,6 @@ ALTER TABLE "comments" ADD CONSTRAINT "comments_parent_id_fkey" FOREIGN KEY ("pa
 
 -- AddForeignKey
 ALTER TABLE "comment_snapshots" ADD CONSTRAINT "comment_snapshots_comment_id_fkey" FOREIGN KEY ("comment_id") REFERENCES "comments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "comment_snapshot_attachments" ADD CONSTRAINT "comment_snapshot_attachments_snapshot_id_fkey" FOREIGN KEY ("snapshot_id") REFERENCES "comment_snapshots"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "comment_snapshot_attachments" ADD CONSTRAINT "comment_snapshot_attachments_attachment_id_fkey" FOREIGN KEY ("attachment_id") REFERENCES "attachments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "authentications" ADD CONSTRAINT "authentications_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;

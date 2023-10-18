@@ -37,6 +37,10 @@ Table.create({
     Table.addColumn("string")("name", {
         comments: Description.lines("displayed name of user"),
     }),
+    Table.addColumn("string")("image_url", {
+        optional: true,
+        comments: Description.lines("url of user profile image"),
+    }),
     Table.addColumn("string")("introduction", {
         comments: Description.lines("user introduction"),
     }),

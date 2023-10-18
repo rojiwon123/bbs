@@ -1,4 +1,4 @@
-import { ArticleBodyFormat, ArticleStatus } from "../enums";
+import { ArticleBodyFormat } from "../enums";
 import { Description } from "../util/description";
 import { Table } from "../util/table";
 
@@ -10,14 +10,13 @@ Table.create({
 })(
     Table.addId(),
     Table.addRelationalString("author")("users"),
-    Table.addColumn("enum")("status", ArticleStatus, {
-        comments: Description.lines("one of `pending`, `active`, `deleted`"),
-    }),
     Table.setCreatable,
+    /**
     Table.addTimestamptz("posted_at", {
         optional: true,
         comments: Description.lines("posting time of article"),
     }),
+    */
     Table.setDeletable,
     Table.addRelation({
         tableName: "article_snapshots",
@@ -51,7 +50,6 @@ Table.create({
         comments: Description.lines("one of `html`, `md`, `txt`"),
     }),
     Table.setCreatable,
-    Table.setDeletable,
     Table.addRelation({
         tableName: "article_snapshot_attachments",
         fieldName: "attachment_relations",
@@ -99,11 +97,6 @@ Table.create({
         fieldName: "article_snapshot_relations",
         options: { list: true },
     }),
-    Table.addRelation({
-        tableName: "comment_snapshot_attachments",
-        fieldName: "comment_snapshot_relations",
-        options: { list: true },
-    }),
 );
 
 Table.create({
@@ -141,24 +134,4 @@ Table.create({
     Table.addRelationalString("comment")("comments"),
     Table.addColumn("string")("body"),
     Table.setCreatable,
-    Table.setDeletable,
-    Table.addRelation({
-        tableName: "comment_snapshot_attachments",
-        fieldName: "attachment_relations",
-        options: { list: true },
-    }),
-);
-
-Table.create({
-    tableName: "comment_snapshot_attachments",
-    comments: Description.lines(
-        "Relation Attachment with Comment Snapshot",
-        `an \`comment_snapshot_attachments\` entity connects an \`comment_snapshots\` record with an \`attachments\` record.`,
-        `If author add attachment to an comment, a new record of \`comment_snapshot_attachments\` is created.`,
-        ...tags,
-    ),
-})(
-    Table.addId(),
-    Table.addRelationalString("snapshot")("comment_snapshots"),
-    Table.addRelationalString("attachment")("attachments"),
 );
