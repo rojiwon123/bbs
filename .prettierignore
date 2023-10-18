@@ -1,9 +1,0 @@
-node_modules
-dist
-build
-tbuild
-
-lib
-
-db
-!src/infrastructure/DB
