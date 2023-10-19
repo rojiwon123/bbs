@@ -9,6 +9,5 @@ export const test_health_check = (connection: IConnection) =>
         Util.assertResposne({
             status: HttpStatus.OK,
             success: true,
-            assertBody: () => undefined,
         }),
     );

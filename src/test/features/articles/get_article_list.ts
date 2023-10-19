@@ -12,12 +12,14 @@ export const test_get_article_list_successfully = async (
     connection: IConnection,
 ) => {
     const response = await fetch(connection, {
-        skip: 0,
-        limit: 10,
+        skip: 5,
     });
     Util.assertResposne({
         status: HttpStatus.OK,
         success: true,
-        assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
+        assertBody: (input) => {
+            const body = typia.assertEquals<IArticle.IPaginatedResponse>(input);
+            if (body.data.length === 0) throw Error("article list is empty!");
+        },
     })(response);
 };

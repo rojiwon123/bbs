@@ -15,6 +15,7 @@ import { IConnection } from "@nestia/fetcher";
 import { Backend } from "@APP/application";
 import { Configuration } from "@APP/infrastructure/config";
 
+import { Seed } from "./internal/seed";
 import { Util } from "./internal/utils";
 
 const test = async (connection: IConnection): Promise<boolean> => {
@@ -79,10 +80,11 @@ export const run = async () => {
     const connection: IConnection = {
         host: `http://localhost:${Configuration.PORT}`,
     };
-
+    await Seed.run();
     const state = await Util.log(() => test(connection))(
         __dirname + "/../../test_log.md",
     );
     await Backend.end(app);
+    await Seed.truncate();
     process.exit(state ? 0 : -1);
 };

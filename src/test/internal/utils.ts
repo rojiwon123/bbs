@@ -108,7 +108,7 @@ export namespace Util {
         <T, H extends Record<string, string | string[]>>(options: {
             status: IPropagation.Status;
             success: boolean;
-            assertBody: (body: unknown) => T;
+            assertBody?: (body: unknown) => T;
             assertHeader?: (header: unknown) => H;
         }) =>
         (response: IPropagation.IBranch<boolean, unknown, any>) => {
@@ -124,7 +124,7 @@ export namespace Util {
                 throw error;
             }
 
-            options.assertBody(response.data);
+            if (options.assertBody) options.assertBody(response.data);
             if (options.assertHeader) options.assertHeader(response.headers);
         };
 }
