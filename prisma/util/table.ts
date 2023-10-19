@@ -91,6 +91,7 @@ export namespace Table {
     });
 
     export const setUpdatable = addTimestamptz("updated_at", {
+        optional: true,
         comments: Description.lines("revision time of record"),
     });
 

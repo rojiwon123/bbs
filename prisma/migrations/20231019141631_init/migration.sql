@@ -76,7 +76,7 @@ CREATE TABLE "authentications" (
     "oauth_sub" TEXT NOT NULL,
     "email" TEXT,
     "created_at" TIMESTAMPTZ NOT NULL,
-    "updated_at" TIMESTAMPTZ NOT NULL,
+    "updated_at" TIMESTAMPTZ,
     "deleted_at" TIMESTAMPTZ,
 
     CONSTRAINT "authentications_pkey" PRIMARY KEY ("id")
@@ -89,7 +89,7 @@ CREATE TABLE "users" (
     "image_url" TEXT,
     "introduction" TEXT NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
-    "updated_at" TIMESTAMPTZ NOT NULL,
+    "updated_at" TIMESTAMPTZ,
     "deleted_at" TIMESTAMPTZ,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")

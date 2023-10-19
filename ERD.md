@@ -55,7 +55,7 @@ users {
     String image_url "nullable"
     String introduction
     DateTime created_at
-    DateTime updated_at
+    DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
 articles }|--|| users : author
@@ -229,7 +229,7 @@ authentications {
     String oauth_sub
     String email "nullable"
     DateTime created_at
-    DateTime updated_at
+    DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
 users {
@@ -238,7 +238,7 @@ users {
     String image_url "nullable"
     String introduction
     DateTime created_at
-    DateTime updated_at
+    DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
 authentications }o--|| users : user
