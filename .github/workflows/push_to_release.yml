@@ -4,7 +4,7 @@ name: Release 🔖
 
 on:
     push:
-        branches: [release, feat/api-design]
+        branches: [release]
 
 permissions:
     id-token: write
@@ -120,9 +120,8 @@ jobs:
               id: read-version
               run: echo VERSION=$(node -p "require('./package.json').version") >> $GITHUB_OUTPUT
 
-            - name: Read Commit Message
-              id: commit_message
-              run: echo MESSAGE=$(git log -1 --pretty=%b) >> $GITHUB_OUTPUT
+            - name: Generate Release Note
+              run: git log -1 --pretty=format:"%b" > release_note.md
 
             - name: create tag
               env:
@@ -131,7 +130,6 @@ jobs:
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
                   version="v${{ steps.read-version.outputs.VERSION }}"
-                  message="${{ steps.commit_message.outputs.MESSAGE }}"
                   git tag -a "$version" -m "$version"
                   git push origin "$version"
-                  gh release create "$version" -t "$version" --target "$(git rev-parse release)" -n "$message"
+                  gh release create "$version" -t "$version" --target "${{ github.sha }}" -F release_note.md
