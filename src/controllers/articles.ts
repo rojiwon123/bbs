@@ -1,8 +1,10 @@
 import core from "@nestia/core";
 import * as nest from "@nestjs/common";
 
+import { Article } from "@APP/app/article";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
+import { Result } from "@APP/utils/result";
 
 @nest.Controller("articles")
 export class ArticlesController {
@@ -15,11 +17,11 @@ export class ArticlesController {
      * @return paginated article list
      */
     @core.TypedRoute.Get()
-    getList(
+    async getList(
         @core.TypedQuery() query: IArticle.ISearch,
     ): Promise<IArticle.IPaginatedResponse> {
-        query;
-        throw Error();
+        const result = await Article.getList(query);
+        return Result.Ok.flatten(result);
     }
 
     /**
