@@ -1,4 +1,5 @@
 import { randomInt, randomUUID } from "crypto";
+import typia from "typia";
 
 export namespace Random {
     export const uuid = () => randomUUID();
@@ -13,4 +14,8 @@ export namespace Random {
             chars.charAt(int({ max: chars.length })),
         ).join("");
     };
+
+    export const iso = typia.createRandom<
+        string & typia.tags.Format<"date-time">
+    >();
 }

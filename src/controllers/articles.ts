@@ -1,9 +1,11 @@
 import core from "@nestia/core";
 import * as nest from "@nestjs/common";
+import typia from "typia";
 
 import { Article } from "@APP/app/article";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
+import { Failure } from "@APP/utils/failure";
 import { Result } from "@APP/utils/result";
 
 @nest.Controller("articles")
@@ -53,10 +55,17 @@ export class ArticleController {
     @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Get()
     async get(
-        @core.TypedParam("article_id") article_id: string,
+        @core.TypedParam("article_id")
+        article_id: string & typia.tags.Format<"uuid">,
     ): Promise<IArticle> {
-        article_id;
-        throw Error("");
+        const result = await Article.get()({ article_id });
+        if (Result.Error.is(result))
+            throw Failure.Http.fromInternal(
+                Result.Error.flatten(result),
+                nest.HttpStatus.NOT_FOUND,
+            );
+
+        return Result.Ok.flatten(result);
     }
 
     /**
@@ -77,7 +86,8 @@ export class ArticleController {
     @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Put()
     async update(
-        @core.TypedParam("article_id") article_id: string,
+        @core.TypedParam("article_id")
+        article_id: string & typia.tags.Format<"uuid">,
         @core.TypedBody() body: IArticle.ICreate,
     ): Promise<IArticle> {
         article_id;
@@ -102,7 +112,8 @@ export class ArticleController {
     @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Delete()
     async remove(
-        @core.TypedParam("article_id") article_id: string,
+        @core.TypedParam("article_id")
+        article_id: string & typia.tags.Format<"uuid">,
     ): Promise<void> {
         article_id;
         throw Error("");
@@ -122,7 +133,8 @@ export class ArticleController {
     @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Get("snapshots")
     getList(
-        @core.TypedParam("article_id") article_id: string,
+        @core.TypedParam("article_id")
+        article_id: string & typia.tags.Format<"uuid">,
     ): Promise<IArticle.ISnapshot[]> {
         article_id;
         throw Error("");

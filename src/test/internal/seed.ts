@@ -5,26 +5,32 @@ import { DateMapper } from "@APP/utils/date";
 import { Random } from "@APP/utils/random";
 
 export namespace Seed {
-    export const createArticle = async (author_id: string) =>
-        prisma.articles.create({
+    export const createArticle = async (author_id: string) => {
+        const created_at = Random.iso();
+        return prisma.articles.create({
             data: {
                 id: Random.uuid(),
                 author_id,
-                created_at: DateMapper.toISO(),
+                created_at,
                 snapshots: {
                     create: {
                         id: Random.uuid(),
                         title: Random.string(10),
                         body_format: "html",
                         body_url: "http://localhost:6060",
-                        created_at: DateMapper.toISO(),
+                        created_at,
                     },
                 },
             },
         });
+    };
 
-    const createSnapshot = (article_id: string, idx: number) => {
-        const now = new Date();
+    const createSnapshot = (
+        article_id: string,
+        posted_at: Date,
+        idx: number,
+    ) => {
+        const now = new Date(posted_at);
         now.setHours(now.getHours() + idx);
         return {
             id: Random.uuid(),
@@ -39,27 +45,28 @@ export namespace Seed {
         const article = await createArticle(author_id);
 
         return prisma.article_snapshots.createMany({
-            data: toArray(range(3)).map((idx) =>
-                createSnapshot(article.id, idx),
+            data: toArray(range(1, 4)).map((idx) =>
+                createSnapshot(article.id, article.created_at, idx),
             ),
         });
     };
     export const createDeletedArticle = async (author_id: string) => {
-        const now = new Date();
-        now.setDate(now.getDate() + 1);
+        const now = Random.iso();
+        const deleted_at = new Date(now);
+        deleted_at.setHours(deleted_at.getHours() + 3);
         return prisma.articles.create({
             data: {
                 id: Random.uuid(),
                 author_id,
-                created_at: DateMapper.toISO(),
-                deleted_at: DateMapper.toISO(now),
+                created_at: now,
+                deleted_at: DateMapper.toISO(deleted_at),
                 snapshots: {
                     create: {
                         id: Random.uuid(),
                         title: Random.string(10),
                         body_format: "html",
                         body_url: "http://localhost:6060",
-                        created_at: DateMapper.toISO(),
+                        created_at: now,
                     },
                 },
             },

@@ -1,5 +1,6 @@
 import core from "@nestia/core";
 import * as nest from "@nestjs/common";
+import typia from "typia";
 
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IComment } from "@APP/types/IComment";
@@ -17,7 +18,8 @@ export class CommentsController {
      */
     @core.TypedRoute.Get()
     getList(
-        @core.TypedParam("article_id") article_id: string,
+        @core.TypedParam("article_id")
+        article_id: string & typia.tags.Format<"uuid">,
         @core.TypedQuery() query: IComment.ISearch,
     ): Promise<IComment.IPaginatedResponse> {
         article_id;
@@ -37,7 +39,8 @@ export class CommentsController {
      */
     @core.TypedRoute.Post()
     create(
-        @core.TypedParam("article_id") article_id: string,
+        @core.TypedParam("article_id")
+        article_id: string & typia.tags.Format<"uuid">,
         @core.TypedBody() body: IComment.ICreate,
     ): Promise<IComment> {
         article_id;
@@ -83,7 +86,8 @@ export class CommentController {
     @core.TypedException<ErrorCode.Comment.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Put()
     async update(
-        @core.TypedParam("comment_id") comment_id: string,
+        @core.TypedParam("comment_id")
+        comment_id: string & typia.tags.Format<"uuid">,
         @core.TypedBody() body: IComment.ICreate,
     ): Promise<IComment> {
         comment_id;
@@ -108,7 +112,8 @@ export class CommentController {
     @core.TypedException<ErrorCode.Comment.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Delete()
     async remove(
-        @core.TypedParam("comment_id") comment_id: string,
+        @core.TypedParam("comment_id")
+        comment_id: string & typia.tags.Format<"uuid">,
     ): Promise<void> {
         comment_id;
         throw Error("");
