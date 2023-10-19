@@ -1,8 +1,8 @@
 import typia from "typia";
 
 import { ArticleBodyFormat } from "../../db/edge";
+import { IPage } from "./IPage";
 import { IUser } from "./IUser";
-import { IPage } from "./Page";
 
 export interface IArticle {
     id: string & typia.tags.Format<"uuid">;
@@ -15,7 +15,6 @@ export namespace IArticle {
     export interface ICreate extends ISnapshot.ICreate {}
     export interface IAuthor extends Pick<IUser, "id" | "image_url" | "name"> {}
     export interface ISnapshot {
-        id: string & typia.tags.Format<"uuid">;
         title: string;
         body_url: string;
         body_format: ArticleBodyFormat;
@@ -34,6 +33,7 @@ export namespace IArticle {
     }
 
     export interface ISearch extends IPage.ISearch {
+        /** @default desc */
         posted_at?: IPage.SortType;
     }
     export interface IPaginatedResponse extends IPage.IResponse<ISummary> {}

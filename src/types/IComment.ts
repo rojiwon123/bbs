@@ -1,7 +1,7 @@
 import typia from "typia";
 
+import { IPage } from "./IPage";
 import { IUser } from "./IUser";
-import { IPage } from "./Page";
 
 export interface IComment {
     id: string & typia.tags.Format<"uuid">;
