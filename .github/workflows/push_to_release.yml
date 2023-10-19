@@ -4,7 +4,7 @@ name: Release 🔖
 
 on:
     push:
-        branches: [release, feat/api-design]
+        branches: [release]
 
 permissions:
     id-token: write
@@ -52,7 +52,6 @@ jobs:
     update_swagger:
         runs-on: ubuntu-latest
         needs: test
-        if: false
         steps:
             - name: Checkout 🛎️
               uses: actions/checkout@main
