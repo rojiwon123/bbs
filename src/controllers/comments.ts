@@ -16,7 +16,7 @@ export class CommentsController {
      * @return paginated comment list
      */
     @core.TypedRoute.Get()
-    findMany(
+    getList(
         @core.TypedParam("article_id") article_id: string,
         @core.TypedQuery() query: IComment.ISearch,
     ): Promise<IComment.IPaginatedResponse> {

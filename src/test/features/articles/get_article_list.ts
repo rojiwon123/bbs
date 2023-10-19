@@ -6,12 +6,10 @@ import typia from "typia";
 import { Util } from "@APP/test/internal/utils";
 import { IArticle } from "@APP/types/IArticle";
 
-const fetch = api.functional.articles.getList;
-
 export const test_get_article_list_successfully = async (
     connection: IConnection,
 ) => {
-    const response = await fetch(connection, {
+    const response = await api.functional.articles.getList(connection, {
         skip: 5,
     });
     Util.assertResposne({

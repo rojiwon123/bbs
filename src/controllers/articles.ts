@@ -52,7 +52,7 @@ export class ArticleController {
      */
     @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Get()
-    async getOne(
+    async get(
         @core.TypedParam("article_id") article_id: string,
     ): Promise<IArticle> {
         article_id;

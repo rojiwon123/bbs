@@ -44,6 +44,27 @@ export namespace Seed {
             ),
         });
     };
+    export const createDeletedArticle = async (author_id: string) => {
+        const now = new Date();
+        now.setDate(now.getDate() + 1);
+        return prisma.articles.create({
+            data: {
+                id: Random.uuid(),
+                author_id,
+                created_at: DateMapper.toISO(),
+                deleted_at: DateMapper.toISO(now),
+                snapshots: {
+                    create: {
+                        id: Random.uuid(),
+                        title: Random.string(10),
+                        body_format: "html",
+                        body_url: "http://localhost:6060",
+                        created_at: DateMapper.toISO(),
+                    },
+                },
+            },
+        });
+    };
     export const createArticles = async () => {
         const author = await prisma.users.create({
             data: {
@@ -58,6 +79,7 @@ export namespace Seed {
 
         await Promise.all([
             ...toArray(range(3)).map(() => createArticle(author.id)),
+            ...toArray(range(3)).map(() => createDeletedArticle(author.id)),
             ...toArray(range(4)).map(() => createUpdatedArticle(author.id)),
             ...toArray(range(3)).map(() => createArticle(author.id)),
         ]);
