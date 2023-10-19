@@ -17,12 +17,9 @@ jobs:
         steps:
             - name: Check Commit Title
               run: |
-                  if [[ "$(git log -1 --pretty=format:'%s')" == release/* ]]; then
-                    echo "Commit title starts with 'release/'. Performing the action."
-                    # Add your action steps here
-                  else
-                    echo "Commit title does not start with 'release/'. Stopping the workflow."
-                    exit 78
+                  if [[ "$(git log -1 --pretty=format:'%s')" != "🔖 "* ]]; then
+                    echo "Commit title does not start with '🔖'. Stopping the workflow."
+                    exit 0
                   fi
 
     test:
