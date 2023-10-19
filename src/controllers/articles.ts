@@ -7,15 +7,15 @@ import { IArticle } from "@APP/types/IArticle";
 @nest.Controller("articles")
 export class ArticlesController {
     /**
-     * find articles by filtering and sorting options.
+     * get article list by filtering and sorting options.
      *
-     * @summary search articles
+     * @summary get article list
      * @tag articles
-     * @param query search options
+     * @param query filtering and sorting options
      * @return paginated article list
      */
     @core.TypedRoute.Get()
-    findMany(
+    getList(
         @core.TypedQuery() query: IArticle.ISearch,
     ): Promise<IArticle.IPaginatedResponse> {
         query;
@@ -41,16 +41,16 @@ export class ArticlesController {
 @nest.Controller("articles/:article_id")
 export class ArticleController {
     /**
-     * find a specific article by article id
+     * get a specific article by article id
      *
-     * @summary find a article
+     * @summary get a article
      * @tag articles
      * @param article_id identity of article
      * @return found article
      */
     @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Get()
-    async findOne(
+    async getOne(
         @core.TypedParam("article_id") article_id: string,
     ): Promise<IArticle> {
         article_id;
@@ -107,11 +107,11 @@ export class ArticleController {
     }
 
     /**
-     * find snapshots of specific article found by article id
+     * get snapshot list of specific article found by article id
      *
      * only the author can find snapshots
      *
-     * @summary find snapshots
+     * @summary find snapshot list
      * @tag articles
      * @security bearer
      * @param article_id identity of article
@@ -119,7 +119,7 @@ export class ArticleController {
      */
     @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Get("snapshots")
-    findMany(
+    getList(
         @core.TypedParam("article_id") article_id: string,
     ): Promise<IArticle.ISnapshot[]> {
         article_id;

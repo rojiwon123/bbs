@@ -7,12 +7,12 @@ import { IComment } from "@APP/types/IComment";
 @nest.Controller("articles/:article_id/comments")
 export class CommentsController {
     /**
-     * find comments by filtering and sorting options.
+     * get comment list by filtering and sorting options.
      *
-     * @summary find comments
+     * @summary get comment list
      * @tag articles
      * @tag comments
-     * @param query find options
+     * @param query filtering and sorting options
      * @return paginated comment list
      */
     @core.TypedRoute.Get()
@@ -49,7 +49,7 @@ export class CommentsController {
 @nest.Controller("comments/:comment_id")
 export class CommentController {
     /**
-     * find a specific comment by comment id
+     * get a specific comment by comment id
      *
      * @summary find a comment
      * @tag comments
@@ -57,7 +57,7 @@ export class CommentController {
      * @return found comment
     @core.TypedException<ErrorCode.Comment.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Get()
-    async findOne(
+    async getOne(
         @core.TypedParam("comment_id") comment_id: string,
         ): Promise<IComment> {
             comment_id;
