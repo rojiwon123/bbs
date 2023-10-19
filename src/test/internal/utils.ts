@@ -2,8 +2,6 @@ import { IConnection, IPropagation } from "@nestia/fetcher";
 import fs from "fs";
 import stripAnsi from "strip-ansi";
 
-import { IToken } from "@APP/types/IToken";
-
 export namespace Util {
     export namespace md {
         export const header =
@@ -103,8 +101,8 @@ export namespace Util {
             },
         });
 
-    export const addToken = (type: IToken.Type) => (token: string) =>
-        addHeaders({ Authorization: `${type} ${token}` });
+    export const addToken = () => (token: string) =>
+        addHeaders({ authorization: `bearer ${token}` });
 
     export const assertResposne =
         <T, H extends Record<string, string | string[]>>(options: {

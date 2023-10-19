@@ -20,9 +20,8 @@ article_snapshots {
     String article_id FK
     String title
     String body_url
-    ArticleBodyFormatType body_format
+    ArticleBodyFormat body_format
     DateTime created_at
-    DateTime deleted_at "nullable"
 }
 article_snapshot_attachments {
     String id PK
@@ -49,18 +48,12 @@ comment_snapshots {
     String comment_id FK
     String body
     DateTime created_at
-    DateTime deleted_at "nullable"
-}
-comment_snapshot_attachments {
-    String id PK
-    String snapshot_id FK
-    String attachment_id FK
 }
 users {
     String id PK
-    String authentication_id FK
-    String nickname
     String name
+    String image_url "nullable"
+    String introduction
     DateTime created_at
     DateTime updated_at
     DateTime deleted_at "nullable"
@@ -73,8 +66,6 @@ comments }|--|| users : author
 comments }|--|| articles : article
 comments }o--o| comments : parent
 comment_snapshots }|--|| comments : comment
-comment_snapshot_attachments }|--|| comment_snapshots : snapshot
-comment_snapshot_attachments }|--|| attachments : attachment
 ```
 
 ### `articles`
@@ -119,10 +110,6 @@ When a user edit an article, a new snapshot record is created, and readers will 
 -   `body_url`: URL path of article body resource
 -   `body_format`: one of `html`, `md`, `txt`
 -   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
 
 ### `article_snapshot_attachments`
 
@@ -210,33 +197,6 @@ Snapshot of Comment
     > `uuid` type
 -   `body`:
 -   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `comment_snapshot_attachments`
-
-Relation Attachment with Comment Snapshot
-
-an `comment_snapshot_attachments` entity connects an `comment_snapshots` record with an `attachments` record.
-
-If author add attachment to an comment, a new record of `comment_snapshot_attachments` is created.
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `snapshot_id`
-    > referenced in `comment_snapshots`
-    >
-    > `uuid` type
--   `attachment_id`
-    > referenced in `attachments`
-    >
-    > `uuid` type
 
 ### `users`
 
@@ -248,12 +208,9 @@ Root Entity of User Profile
     > record identity
     >
     > `uuid` type
--   `authentication_id`
-    > referenced in `authentications`
-    >
-    > `uuid` type
--   `nickname`: displayed name of user
--   `name`: real name of user
+-   `name`: displayed name of user
+-   `image_url`: url of user profile image
+-   `introduction`: user introduction
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
 -   `deleted_at`
@@ -267,24 +224,24 @@ Root Entity of User Profile
 erDiagram
 authentications {
     String id PK
+    String user_id FK "nullable"
     OauthType oauth_type
     String oauth_sub
     String email "nullable"
-    String phone "nullable"
     DateTime created_at
     DateTime updated_at
     DateTime deleted_at "nullable"
 }
 users {
     String id PK
-    String authentication_id FK
-    String nickname
     String name
+    String image_url "nullable"
+    String introduction
     DateTime created_at
     DateTime updated_at
     DateTime deleted_at "nullable"
 }
-users |o--|| authentications : authentication
+authentications }o--|| users : user
 ```
 
 ### `authentications`
@@ -297,10 +254,13 @@ Authentication Entity of User
     > record identity
     >
     > `uuid` type
+-   `user_id`
+    > referenced in `users`
+    >
+    > `uuid` type
 -   `oauth_type`: one of `github`, `kakao`
 -   `oauth_sub`: oauth server user id
--   `email`: verified information
--   `phone`: verified information
+-   `email`: verified email
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
 -   `deleted_at`
@@ -318,12 +278,9 @@ Root Entity of User Profile
     > record identity
     >
     > `uuid` type
--   `authentication_id`
-    > referenced in `authentications`
-    >
-    > `uuid` type
--   `nickname`: displayed name of user
--   `name`: real name of user
+-   `name`: displayed name of user
+-   `image_url`: url of user profile image
+-   `introduction`: user introduction
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
 -   `deleted_at`

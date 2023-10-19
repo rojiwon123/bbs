@@ -1,7 +1,9 @@
 import typia from "typia";
 
+import { OauthType } from "../../db/edge";
+
 export namespace IOauth {
-    export type Type = "kakao" | "github";
+    export type Type = OauthType;
     /**
      * 외부 서비스로부터 얻은 사용자 프로필 정보
      *
@@ -12,7 +14,5 @@ export namespace IOauth {
         name: string;
         /** 인증된 이메일 */
         email: (string & typia.tags.Format<"email">) | null;
-        /** 프로필 이미지 */
-        image_url: (string & typia.tags.Format<"url">) | null;
     }
 }

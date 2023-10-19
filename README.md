@@ -5,7 +5,7 @@
 ![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
 
-[![Test Status](https://github.com/industriously/bbs/actions/workflows/pr_check.yml/badge.svg?branch=develop)](https://github.com/industriously/bbs/actions/workflows/pr_check.yml)
+[![Release 🔖](https://github.com/industriously/bbs/actions/workflows/push_to_release.yml/badge.svg)](https://github.com/industriously/bbs/actions/workflows/push_to_release.yml)
 
 </div>
 
@@ -16,6 +16,7 @@
     <li><a href="#api-문서화">API 문서화 방식</a></li>
     <li><a href="#요구사항">요구사항</a></li>
     <li><a href="./ERD.md">ERD 문서</a></li>
+    <li><a href="https://industriously.github.io/bbs/">Swagger UI</a></li>
     <li><a href="#커밋-컨벤션">커밋 컨벤션</a></li>
   </ol>
 </details>
@@ -57,6 +58,7 @@ npm run swagger
 
 -   권한 관리(비공개 게시판)
 -   소셜 간편가입 추가 프로세스
+-   임시 게시글 저장
 
 ## 커밋 컨벤션
 

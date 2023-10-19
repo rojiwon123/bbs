@@ -19,7 +19,7 @@ enum OauthType {
   kakao
 }
 
-enum ArticleBodyFormatType {
+enum ArticleBodyFormat {
   html
   md
   txt
@@ -85,15 +85,10 @@ model article_snapshots {
   body_url             String
   /// one of `html`, `md`, `txt`
   /// 
-  body_format          ArticleBodyFormatType
+  body_format          ArticleBodyFormat
   /// creation time of record
   /// 
   created_at           DateTime                       @database.Timestamptz
-  /// deletion time of record
-  /// 
-  /// if null, a record is soft-deleted
-  /// 
-  deleted_at           DateTime?                      @database.Timestamptz
   attachment_relations article_snapshot_attachments[]
 }
 
@@ -154,7 +149,6 @@ model attachments {
   /// 
   created_at                 DateTime                       @database.Timestamptz
   article_snapshot_relations article_snapshot_attachments[]
-  comment_snapshot_relations comment_snapshot_attachments[]
 }
 
 /// Root Entity of Comment
@@ -212,53 +206,17 @@ model comment_snapshots {
   /// 
   /// `uuid` type
   /// 
-  id                   String                         @id @database.Uuid
+  id         String   @id @database.Uuid
   /// referenced in `comments`
   /// 
   /// `uuid` type
   /// 
-  comment_id           String                         @database.Uuid
-  comment              comments                       @relation(fields: [comment_id], references: [id])
-  body                 String
+  comment_id String   @database.Uuid
+  comment    comments @relation(fields: [comment_id], references: [id])
+  body       String
   /// creation time of record
   /// 
-  created_at           DateTime                       @database.Timestamptz
-  /// deletion time of record
-  /// 
-  /// if null, a record is soft-deleted
-  /// 
-  deleted_at           DateTime?                      @database.Timestamptz
-  attachment_relations comment_snapshot_attachments[]
-}
-
-/// Relation Attachment with Comment Snapshot
-/// 
-/// an `comment_snapshot_attachments` entity connects an `comment_snapshots` record with an `attachments` record.
-/// 
-/// If author add attachment to an comment, a new record of `comment_snapshot_attachments` is created.
-/// 
-/// @namespace BBS
-/// 
-/// @author industriously
-/// 
-model comment_snapshot_attachments {
-  /// record identity
-  /// 
-  /// `uuid` type
-  /// 
-  id            String            @id @database.Uuid
-  /// referenced in `comment_snapshots`
-  /// 
-  /// `uuid` type
-  /// 
-  snapshot_id   String            @database.Uuid
-  snapshot      comment_snapshots @relation(fields: [snapshot_id], references: [id])
-  /// referenced in `attachments`
-  /// 
-  /// `uuid` type
-  /// 
-  attachment_id String            @database.Uuid
-  attachment    attachments       @relation(fields: [attachment_id], references: [id])
+  created_at DateTime @database.Timestamptz
 }
 
 /// Authentication Entity of User
@@ -273,18 +231,21 @@ model authentications {
   /// `uuid` type
   /// 
   id         String    @id @database.Uuid
+  /// referenced in `users`
+  /// 
+  /// `uuid` type
+  /// 
+  user_id    String?   @database.Uuid
+  user       users?    @relation(fields: [user_id], references: [id])
   /// one of `github`, `kakao`
   /// 
   oauth_type OauthType
   /// oauth server user id
   /// 
   oauth_sub  String
-  /// verified information
+  /// verified email
   /// 
   email      String?
-  /// verified information
-  /// 
-  phone      String?
   /// creation time of record
   /// 
   created_at DateTime  @database.Timestamptz
@@ -296,7 +257,6 @@ model authentications {
   /// if null, a record is soft-deleted
   /// 
   deleted_at DateTime? @database.Timestamptz
-  user       users?
 }
 
 /// Root Entity of User Profile
@@ -312,30 +272,28 @@ model users {
   /// 
   /// `uuid` type
   /// 
-  id                String          @id @database.Uuid
-  /// referenced in `authentications`
-  /// 
-  /// `uuid` type
-  /// 
-  authentication_id String          @unique @database.Uuid
-  authentication    authentications @relation(fields: [authentication_id], references: [id])
+  id              String            @id @database.Uuid
   /// displayed name of user
   /// 
-  nickname          String
-  /// real name of user
+  name            String
+  /// url of user profile image
   /// 
-  name              String
+  image_url       String?
+  /// user introduction
+  /// 
+  introduction    String
   /// creation time of record
   /// 
-  created_at        DateTime        @database.Timestamptz
+  created_at      DateTime          @database.Timestamptz
   /// revision time of record
   /// 
-  updated_at        DateTime        @database.Timestamptz
+  updated_at      DateTime          @database.Timestamptz
   /// deletion time of record
   /// 
   /// if null, a record is soft-deleted
   /// 
-  deleted_at        DateTime?       @database.Timestamptz
-  articles          articles[]
-  comments          comments[]
+  deleted_at      DateTime?         @database.Timestamptz
+  authentications authentications[]
+  articles        articles[]
+  comments        comments[]
 }
