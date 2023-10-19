@@ -1,6 +1,6 @@
 # https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
 
-name: Release Project 🔖
+name: Release 🔖
 
 on:
     push:
@@ -66,14 +66,16 @@ jobs:
 
             - name: Copy swagger.json to gh-pages
               run: |
-                  mv ./packages/api/swagger/swagger.json ./swagger.json
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
                   git fetch origin gh-pages:gh-pages
+                  git add .
+                  git commit -m "temp commit"
                   git switch gh-pages
+                  mv ./packages/api/swagger/swagger.json ./swagger.json
                   git add ./swagger.json
                   git commit -m "Update swagger.json"
-                  git push
+                  git push --set-upstream origin gh-pages
 
     build_and_push_image:
         runs-on: ubuntu-latest
@@ -116,5 +118,20 @@ jobs:
 
             - name: Read Release Version 🔖
               id: read-version
+              run: echo VERSION=$(node -p "require('./package.json').version") >> $GITHUB_OUTPUT
+
+            - name: Read Commit Message
+              id: commit_message
+              run: echo MESSAGE=$(git log -1 --pretty=%b) >> $GITHUB_OUTPUT
+
+            - name: create tag
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  echo VERSION=$(node -p "require('./package.json').version") >> $GITHUB_OUTPUT
+                  git config --global user.email "github-actions@github.com"
+                  git config --global user.name "GitHub Actions"
+                  version="v${{ steps.read-version.outputs.VERSION }}"
+                  message="${{ steps.commit_message.outputs.MESSAGE }}"
+                  git tag -a "$version" -m "$version"
+                  git push origin "$version"
+                  gh release create "$version" -t "$version" --target "$(git rev-parse release)" -n "$message"
