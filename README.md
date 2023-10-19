@@ -16,6 +16,7 @@
     <li><a href="#api-문서화">API 문서화 방식</a></li>
     <li><a href="#요구사항">요구사항</a></li>
     <li><a href="./ERD.md">ERD 문서</a></li>
+    <li><a href="https://industriously.github.io/bbs/">Swagger UI</a></li>
     <li><a href="#커밋-컨벤션">커밋 컨벤션</a></li>
   </ol>
 </details>
