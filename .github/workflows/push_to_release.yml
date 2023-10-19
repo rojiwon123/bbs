@@ -121,9 +121,8 @@ jobs:
               id: read-version
               run: echo VERSION=$(node -p "require('./package.json').version") >> $GITHUB_OUTPUT
 
-            - name: Read Commit Message
-              id: commit_message
-              run: echo MESSAGE=$(git log -1 --pretty=format:"%b") >> $GITHUB_OUTPUT
+            - name: Generate Release Note
+              run: git log -1 --pretty=format:"%b" > release_note.md
 
             - name: create tag
               env:
@@ -132,7 +131,6 @@ jobs:
                   git config --global user.email "github-actions@github.com"
                   git config --global user.name "GitHub Actions"
                   version="v${{ steps.read-version.outputs.VERSION }}"
-                  message="${{ steps.commit_message.outputs.MESSAGE }}"
                   git tag -a "$version" -m "$version"
                   git push origin "$version"
-                  gh release create "$version" -t "$version" --target "${{ github.sha }}" -n "$message"
+                  gh release create "$version" -t "$version" --target "${{ github.sha }}" -F release_note.md
