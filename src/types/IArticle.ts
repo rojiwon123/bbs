@@ -13,6 +13,9 @@ export interface IArticle {
 
 export namespace IArticle {
     export interface ICreate extends ISnapshot.ICreate {}
+    export interface Identity {
+        article_id: string & typia.tags.Format<"uuid">;
+    }
     export interface IAuthor extends Pick<IUser, "id" | "image_url" | "name"> {}
     export interface ISnapshot {
         title: string;

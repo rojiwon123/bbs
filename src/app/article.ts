@@ -6,17 +6,38 @@ import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
 import { DateMapper } from "@APP/utils/date";
 import { Failure } from "@APP/utils/failure";
-import { compare } from "@APP/utils/fx";
+import { assertModule, compare } from "@APP/utils/fx";
+import { Random } from "@APP/utils/random";
 import { Result } from "@APP/utils/result";
 
 import { Prisma, users } from "../../db/edge";
 
+export interface Article {
+    readonly getList: (
+        input: IArticle.ISearch,
+    ) => Promise<Result.Ok<IArticle.IPaginatedResponse>>;
+
+    readonly get: (
+        tx?: Prisma.TransactionClient,
+    ) => (
+        input: IArticle.Identity,
+    ) => Promise<
+        Result<IArticle, Failure.Internal<ErrorCode.Article.NotFound>>
+    >;
+
+    readonly create: (
+        tx?: Prisma.TransactionClient,
+    ) => (
+        author_id: string & typia.tags.Format<"uuid">,
+    ) => (input: IArticle.ICreate) => Promise<Result.Ok<IArticle.Identity>>;
+}
+
 export namespace Article {
-    export const getList = ({
+    export const getList: Article["getList"] = ({
         skip = 0,
         limit = 10,
         posted_at = "desc",
-    }: IArticle.ISearch): Promise<Result.Ok<IArticle.IPaginatedResponse>> =>
+    }) =>
         pipe(
             ArticleEntity.Summary.select(),
             async (select) =>
@@ -32,15 +53,9 @@ export namespace Article {
             Result.Ok.map,
         );
 
-    export const get =
-        (tx: Prisma.TransactionClient = prisma) =>
-        ({
-            article_id,
-        }: {
-            article_id: string & typia.tags.Format<"uuid">;
-        }): Promise<
-            Result<IArticle, Failure.Internal<ErrorCode.Article.NotFound>>
-        > =>
+    export const get: Article["get"] =
+        (tx = prisma) =>
+        ({ article_id }) =>
             pipe(
                 article_id,
 
@@ -60,16 +75,32 @@ export namespace Article {
                         : Result.Ok.map(ArticleEntity.map(article)),
             );
 
-    export const create =
-        (tx: Prisma.TransactionClient = prisma) =>
-        (author_id: string & typia.tags.Format<"uuid">) =>
-        (input: IArticle.ICreate): Promise<Result.Ok<IArticle>> => {
-            tx;
-            author_id;
-            input;
-            throw Error();
+    export const create: Article["create"] =
+        (tx = prisma) =>
+        (author_id) =>
+        async (input) => {
+            const created_at = DateMapper.toISO();
+            const article = await tx.articles.create({
+                data: {
+                    id: Random.uuid(),
+                    author_id,
+                    created_at,
+                    snapshots: {
+                        create: {
+                            id: Random.uuid(),
+                            title: input.title,
+                            body_url: input.body_url,
+                            body_format: input.body_format,
+                            created_at,
+                        },
+                    },
+                },
+            });
+            return Result.Ok.map({ article_id: article.id });
         };
 }
+
+assertModule<Article>(Article);
 
 export namespace ArticleEntity {
     export const mapAuthor = (

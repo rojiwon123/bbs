@@ -2,10 +2,18 @@ import { randomInt, randomUUID } from "crypto";
 import typia from "typia";
 
 export namespace Random {
-    export const uuid = () => randomUUID();
-    export const int = ({ min = 0, max }: { min?: number; max: number }) =>
-        randomInt(min, max);
-    export const decimal = (max: number) => Math.random() * max;
+    export const uuid = (): string & typia.tags.Format<"uuid"> => randomUUID();
+    export const int = ({
+        min = 0,
+        max,
+    }: {
+        min?: number;
+        max: number;
+    }): number & typia.tags.Type<"int64"> => randomInt(min, max);
+    export const decimal = (
+        max: number,
+    ): number & typia.tags.Type<"double"> & typia.tags.Minimum<0> =>
+        Math.random() * max;
     export const string = (length: number) => {
         const chars =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

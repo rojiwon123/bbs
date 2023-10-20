@@ -122,6 +122,14 @@ export namespace Seed {
         ]);
     };
 
+    export const deleteArticle = async (article_id: string) => {
+        await prisma.article_snapshot_attachments.deleteMany({
+            where: { snapshot: { article_id } },
+        });
+        await prisma.article_snapshots.deleteMany({ where: { article_id } });
+        await prisma.articles.delete({ where: { id: article_id } });
+    };
+
     export const run = async () => {
         await createUser("testuser1");
         await createArticles();

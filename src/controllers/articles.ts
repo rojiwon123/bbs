@@ -45,7 +45,7 @@ export class ArticlesController {
     async create(
         @Security.HttpBearer() security: Security,
         @core.TypedBody() body: IArticle.ICreate,
-    ): Promise<IArticle> {
+    ): Promise<IArticle.Identity> {
         const token = Security.required(security);
         const user_id = Security.verify(token);
         const result = await Article.create()(user_id)(body);
@@ -102,7 +102,7 @@ export class ArticleController {
         @core.TypedParam("article_id")
         article_id: string & typia.tags.Format<"uuid">,
         @core.TypedBody() body: IArticle.ICreate,
-    ): Promise<IArticle> {
+    ): Promise<void> {
         article_id;
         body;
         throw Error("");

@@ -14,5 +14,7 @@ export namespace IOauth {
         name: string;
         /** 인증된 이메일 */
         email: (string & typia.tags.Format<"email">) | null;
+        /** profile image url */
+        image_url: (string & typia.tags.Format<"url">) | null;
     }
 }
