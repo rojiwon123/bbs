@@ -80,7 +80,7 @@ export class CommentController {
      * @param body update content of comment
      * @return updated comment
      */
-    @core.TypedException<ErrorCode.InsufficientPermissions>(
+    @core.TypedException<ErrorCode.Permission.Insufficient>(
         nest.HttpStatus.FORBIDDEN,
     )
     @core.TypedException<ErrorCode.Comment.NotFound>(nest.HttpStatus.NOT_FOUND)
@@ -106,7 +106,7 @@ export class CommentController {
      * @param comment_id identity of comment
      * @return none
      */
-    @core.TypedException<ErrorCode.InsufficientPermissions>(
+    @core.TypedException<ErrorCode.Permission.Insufficient>(
         nest.HttpStatus.FORBIDDEN,
     )
     @core.TypedException<ErrorCode.Comment.NotFound>(nest.HttpStatus.NOT_FOUND)

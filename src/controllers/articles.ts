@@ -3,6 +3,7 @@ import * as nest from "@nestjs/common";
 import typia from "typia";
 
 import { Article } from "@APP/app/article";
+import { Security } from "@APP/app/security";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
 import { Failure } from "@APP/utils/failure";
@@ -35,10 +36,20 @@ export class ArticlesController {
      * @param body article content
      * @return created article
      */
+    @core.TypedException<
+        | ErrorCode.Permission.Required
+        | ErrorCode.Permission.Expired
+        | ErrorCode.Permission.Invalid
+    >(nest.HttpStatus.UNAUTHORIZED, "PERMISSION DENIED")
     @core.TypedRoute.Post()
-    create(@core.TypedBody() body: IArticle.ICreate): Promise<IArticle> {
-        body;
-        throw Error("");
+    async create(
+        @Security.HttpBearer() security: Security,
+        @core.TypedBody() body: IArticle.ICreate,
+    ): Promise<IArticle> {
+        const token = Security.required(security);
+        const user_id = Security.verify(token);
+        const result = await Article.create()(user_id)(body);
+        return Result.Ok.flatten(result);
     }
 }
 
@@ -59,13 +70,15 @@ export class ArticleController {
         article_id: string & typia.tags.Format<"uuid">,
     ): Promise<IArticle> {
         const result = await Article.get()({ article_id });
-        if (Result.Error.is(result))
-            throw Failure.Http.fromInternal(
-                Result.Error.flatten(result),
-                nest.HttpStatus.NOT_FOUND,
-            );
-
-        return Result.Ok.flatten(result);
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        switch (error.message) {
+            case "NOT_FOUND_ARTICLE":
+                throw Failure.Http.fromInternal(
+                    error,
+                    nest.HttpStatus.NOT_FOUND,
+                );
+        }
     }
 
     /**
@@ -80,7 +93,7 @@ export class ArticleController {
      * @param body update content of article
      * @return updated article
      */
-    @core.TypedException<ErrorCode.InsufficientPermissions>(
+    @core.TypedException<ErrorCode.Permission.Insufficient>(
         nest.HttpStatus.FORBIDDEN,
     )
     @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
@@ -106,7 +119,7 @@ export class ArticleController {
      * @param article_id identity of article
      * @return none
      */
-    @core.TypedException<ErrorCode.InsufficientPermissions>(
+    @core.TypedException<ErrorCode.Permission.Insufficient>(
         nest.HttpStatus.FORBIDDEN,
     )
     @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
@@ -115,27 +128,6 @@ export class ArticleController {
         @core.TypedParam("article_id")
         article_id: string & typia.tags.Format<"uuid">,
     ): Promise<void> {
-        article_id;
-        throw Error("");
-    }
-
-    /**
-     * get snapshot list of specific article found by article id
-     *
-     * only the author can find snapshots
-     *
-     * @summary find snapshot list
-     * @tag articles
-     * @security bearer
-     * @param article_id identity of article
-     * @return snapshot list of article
-     */
-    @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
-    @core.TypedRoute.Get("snapshots")
-    getList(
-        @core.TypedParam("article_id")
-        article_id: string & typia.tags.Format<"uuid">,
-    ): Promise<IArticle.ISnapshot[]> {
         article_id;
         throw Error("");
     }

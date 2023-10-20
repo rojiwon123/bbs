@@ -16,7 +16,7 @@ export namespace IArticle {
     export interface IAuthor extends Pick<IUser, "id" | "image_url" | "name"> {}
     export interface ISnapshot {
         title: string;
-        body_url: string;
+        body_url: string & typia.tags.Format<"url">;
         body_format: ArticleBodyFormat;
         created_at: string & typia.tags.Format<"date-time">;
     }

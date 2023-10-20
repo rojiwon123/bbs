@@ -2,7 +2,6 @@ import { isNull, pipe, unless } from "@fxts/core";
 import typia from "typia";
 
 import { Configuration } from "@APP/infrastructure/config";
-import { ErrorCode } from "@APP/types/ErrorCode";
 import { IToken } from "@APP/types/IToken";
 import { Crypto } from "@APP/utils/crypto";
 import { DateMapper } from "@APP/utils/date";
@@ -18,7 +17,8 @@ export interface Token {
         token: string,
     ) => Result<
         IToken.IPayload,
-        Failure.Internal<ErrorCode.Token> | Failure.External<"Crypto.decrypt">
+        | Failure.Internal<"EXPIRED" | "INVALID">
+        | Failure.External<"Crypto.decrypt">
     >;
 }
 
@@ -35,10 +35,10 @@ export namespace Token {
         const expired_at = DateMapper.toISO(new Date(Date.now() + duration));
         return pipe(
             input,
-            ({ auth_id }) =>
+            ({ user_id }) =>
                 typia.json.stringify<IToken.IPayload>({
                     type: "access",
-                    auth_id,
+                    user_id,
                     expired_at,
                 }),
             (plain) =>
@@ -56,33 +56,26 @@ export namespace Token {
         );
     };
 
-    export const verify: Token["verify"] = (token) =>
-        pipe(
-            Crypto.decrypt({ token, key: Configuration.ACCESS_TOKEN_KEY }),
+    export const verify: Token["verify"] = (token) => {
+        const now = new Date();
+        const decrypted = Crypto.decrypt({
+            token,
+            key: Configuration.ACCESS_TOKEN_KEY,
+        });
+        if (Result.Error.is(decrypted)) return decrypted;
+        const plain = Result.Ok.flatten(decrypted);
+        const payload = typia.json.isParse<IToken.IPayload>(plain);
 
-            unless(Result.Error.is, (ok) =>
-                pipe(
-                    Result.Ok.flatten(ok),
+        // If Invalid
+        if (isNull(payload))
+            return Result.Error.map(new Failure.Internal("INVALID"));
 
-                    typia.json.createIsParse<IToken.IPayload>(),
+        // If Expired
+        if (now > new Date(payload.expired_at))
+            Result.Error.map(new Failure.Internal("EXPIRED"));
 
-                    (payload) =>
-                        isNull(payload)
-                            ? Result.Error.map(
-                                  new Failure.Internal<ErrorCode.Token.Invalid>(
-                                      "INVALID_TOKEN",
-                                  ),
-                              )
-                            : new Date() > new Date(payload.expired_at)
-                            ? Result.Error.map(
-                                  new Failure.Internal<ErrorCode.Token.Expired>(
-                                      "EXPIRED_TOKEN",
-                                  ),
-                              )
-                            : Result.Ok.map(payload),
-                ),
-            ),
-        );
+        return Result.Ok.map(payload);
+    };
 }
 
 assertModule<Token>(Token);

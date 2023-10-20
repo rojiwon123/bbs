@@ -59,6 +59,16 @@ export namespace Article {
                           )
                         : Result.Ok.map(ArticleEntity.map(article)),
             );
+
+    export const create =
+        (tx: Prisma.TransactionClient = prisma) =>
+        (author_id: string & typia.tags.Format<"uuid">) =>
+        (input: IArticle.ICreate): Promise<Result.Ok<IArticle>> => {
+            tx;
+            author_id;
+            input;
+            throw Error();
+        };
 }
 
 export namespace ArticleEntity {
