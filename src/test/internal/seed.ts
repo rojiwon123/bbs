@@ -5,6 +5,37 @@ import { DateMapper } from "@APP/utils/date";
 import { Random } from "@APP/utils/random";
 
 export namespace Seed {
+    export const createUser = async (name: string) => {
+        const user = await prisma.users.create({
+            data: {
+                id: Random.uuid(),
+                name,
+                image_url:
+                    "https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg?w=1800&t=st=1697730676~exp=1697731276~hmac=1eadeaab4aaebf576d323a3c35216c2f28f4c776a65871d0f18918edb141d183",
+                introduction: "hello world",
+                created_at: DateMapper.toISO(),
+            },
+        });
+        await prisma.authentications.create({
+            data: {
+                id: Random.uuid(),
+                oauth_sub: name,
+                oauth_type: "github",
+                created_at: DateMapper.toISO(),
+                user_id: user.id,
+            },
+        });
+        await prisma.authentications.create({
+            data: {
+                id: Random.uuid(),
+                oauth_sub: name,
+                oauth_type: "kakao",
+                created_at: DateMapper.toISO(),
+                user_id: user.id,
+            },
+        });
+        return user;
+    };
     export const createArticle = async (author_id: string) => {
         const created_at = Random.iso();
         return prisma.articles.create({
@@ -83,7 +114,6 @@ export namespace Seed {
                 created_at: DateMapper.toISO(),
             },
         });
-
         await Promise.all([
             ...toArray(range(3)).map(() => createArticle(author.id)),
             ...toArray(range(3)).map(() => createDeletedArticle(author.id)),
@@ -93,6 +123,7 @@ export namespace Seed {
     };
 
     export const run = async () => {
+        await createUser("testuser1");
         await createArticles();
     };
 
