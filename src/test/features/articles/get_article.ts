@@ -10,7 +10,7 @@ import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
 import { Random } from "@APP/utils/random";
 
-const test = Util.assertResposne(api.functional.articles.get);
+const test = api.functional.articles.get;
 
 export const test_get_article_successfully = async (
     connection: IConnection,
@@ -19,11 +19,10 @@ export const test_get_article_successfully = async (
         where: { deleted_at: null },
     });
     if (isNull(article)) throw Error("can't find any article");
-    return test(
-        connection,
-        article.id,
+    return Util.assertResponse(
+        test(connection, article.id),
+        HttpStatus.OK,
     )({
-        status: HttpStatus.OK,
         success: true,
         assertBody: typia.createAssertEquals<IArticle>(),
     });
@@ -36,24 +35,22 @@ export const test_get_article_when_article_is_deleted = async (
         where: { deleted_at: { not: null } },
     });
     if (isNull(article)) throw Error("can't find deleted article");
-    return test(
-        connection,
-        article.id,
+    return Util.assertResponse(
+        test(connection, article.id),
+        HttpStatus.NOT_FOUND,
     )({
-        status: HttpStatus.NOT_FOUND,
         success: false,
         assertBody: typia.createAssertEquals<ErrorCode.Article.NotFound>(),
     });
 };
 
-export const test_get_article_when_article_does_not_exist = async (
+export const test_get_article_when_article_does_not_exist = (
     connection: IConnection,
 ) =>
-    test(
-        connection,
-        Random.uuid(),
+    Util.assertResponse(
+        test(connection, Random.uuid()),
+        HttpStatus.NOT_FOUND,
     )({
-        status: HttpStatus.NOT_FOUND,
         success: false,
         assertBody: typia.createAssertEquals<ErrorCode.Article.NotFound>(),
     });

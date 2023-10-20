@@ -104,34 +104,48 @@ export namespace Util {
     export const addToken = (token: string) =>
         addHeaders({ authorization: `bearer ${token}` });
 
-    export const assertResposne =
-        <P extends unknown[]>(
-            api: (
-                ...args: P
-            ) => Promise<IPropagation.IBranch<boolean, unknown, any>>,
+    type Success<
+        P extends IPropagation.IBranch<boolean, unknown, any>,
+        Status,
+    > = P extends IPropagation.IBranch<boolean, Status, any>
+        ? P["success"]
+        : never;
+
+    type Body<
+        P extends IPropagation.IBranch<boolean, unknown, any>,
+        Status extends IPropagation.Status,
+    > = P extends IPropagation.IBranch<boolean, Status, any>
+        ? P["data"]
+        : never;
+
+    export const assertResponse =
+        <
+            P extends IPropagation.IBranch<boolean, unknown, any>,
+            S extends IPropagation.Status,
+        >(
+            response: Promise<P>,
+            expected_status: S,
         ) =>
-        (...args: P) =>
-        async <T, H extends Record<string, string | string[]>>(options: {
-            status: IPropagation.Status;
-            success: boolean;
-            assertBody?: (body: unknown) => T;
-            assertHeader?: (header: unknown) => H;
-        }): Promise<T> => {
-            const response = await api(...args);
+        async (expected: {
+            success: Success<P, S>;
+            assertBody?: (input: unknown) => Body<P, S>;
+            assertHeaders?: <Headers extends Record<string, string | string[]>>(
+                input: unknown,
+            ) => Headers;
+        }): Promise<Body<P, S>> => {
+            const result = await response;
             if (
-                options.success !== response.success ||
-                options.status !== response.status
+                expected_status !== result.status ||
+                expected.success !== result.success
             ) {
                 const error = new Error(
-                    `The API response does not match the expected result\nExpected: status: ${options.status} success: ${options.success}\nActual: status: ${response.status} success: ${response.success}`,
+                    `The API response does not match the expected result\nExpected: status: ${expected_status} success: ${expected.success}\nActual: status: ${result.status} success: ${result.success}`,
                 );
-
                 error.name = "AssertResponse";
                 throw error;
             }
-
-            if (options.assertBody) options.assertBody(response.data);
-            if (options.assertHeader) options.assertHeader(response.headers);
-            return response.data;
+            if (expected.assertBody) expected.assertBody(result.data);
+            if (expected.assertHeaders) expected.assertHeaders(result.headers);
+            return result.data;
         };
 }

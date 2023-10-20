@@ -12,7 +12,7 @@ import { IArticle } from "@APP/types/IArticle";
 import { IAuthentication } from "@APP/types/IAuthentication";
 import { DateMapper } from "@APP/utils/date";
 
-const test = Util.assertResposne(api.functional.articles.remove);
+const test = api.functional.articles.remove;
 
 const createBody = typia.createRandom<IArticle.ICreate>();
 
@@ -20,49 +20,46 @@ export const test_remove_article_successfully = async (
     connection: IConnection,
 ) => {
     // sign-in
-    const auth = await Util.assertResposne(api.functional.auth.oauth.authorize)(
-        connection,
-        {
+    const {
+        access_token: { token },
+    } = await Util.assertResponse(
+        api.functional.auth.oauth.authorize(connection, {
             oauth_type: "github",
             code: "testuser1",
-        },
+        }),
+        HttpStatus.OK,
     )({
-        status: HttpStatus.OK,
         success: true,
         assertBody: typia.createAssertEquals<IAuthentication>(),
     });
 
-    const permission = Util.addToken(auth.access_token.token)(connection);
+    const permission = Util.addToken(token)(connection);
 
     // create article
-    const { article_id } = await Util.assertResposne(
-        api.functional.articles.create,
-    )(
-        permission,
-        createBody(),
+    const { article_id } = await Util.assertResponse(
+        api.functional.articles.create(permission, createBody()),
+        HttpStatus.CREATED,
     )({
-        status: HttpStatus.CREATED,
         success: true,
         assertBody: typia.createAssertEquals<IArticle.Identity>(),
     });
 
     // remove article
-    await test(
-        permission,
-        article_id,
+    await Util.assertResponse(
+        test(permission, article_id),
+        HttpStatus.OK,
     )({
-        status: HttpStatus.OK,
         success: true,
         assertBody: typia.createAssertEquals<IArticle.Identity>(),
     });
 
     // check really removed
-    await Util.assertResposne(api.functional.articles.get)(
-        connection,
-        article_id,
+    await Util.assertResponse(
+        api.functional.articles.get(connection, article_id),
+        HttpStatus.NOT_FOUND,
     )({
-        status: HttpStatus.NOT_FOUND,
         success: false,
+        assertBody: typia.createAssertEquals<ErrorCode.Article.NotFound>(),
     });
 
     await Seed.deleteArticle(article_id);
@@ -72,25 +69,25 @@ export const test_remove_article_when_user_is_not_author = async (
     connection: IConnection,
 ) => {
     // sign-in
-    const auth = await Util.assertResposne(api.functional.auth.oauth.authorize)(
-        connection,
-        {
+    const {
+        access_token: { token },
+    } = await Util.assertResponse(
+        api.functional.auth.oauth.authorize(connection, {
             oauth_type: "github",
             code: "testuser1",
-        },
+        }),
+        HttpStatus.OK,
     )({
-        status: HttpStatus.OK,
         success: true,
         assertBody: typia.createAssertEquals<IAuthentication>(),
     });
 
-    const permission = Util.addToken(auth.access_token.token)(connection);
+    const permission = Util.addToken(token)(connection);
 
-    const { data } = await Util.assertResposne(api.functional.articles.getList)(
-        connection,
-        {},
+    const { data } = await Util.assertResponse(
+        api.functional.articles.getList(connection, {}),
+        HttpStatus.OK,
     )({
-        status: HttpStatus.OK,
         success: true,
         assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
     });
@@ -98,11 +95,10 @@ export const test_remove_article_when_user_is_not_author = async (
     const article = data[0]!;
 
     // remove article
-    await test(
-        permission,
-        article.id,
+    await Util.assertResponse(
+        test(permission, article.id),
+        HttpStatus.FORBIDDEN,
     )({
-        status: HttpStatus.FORBIDDEN,
         success: false,
         assertBody:
             typia.createAssertEquals<ErrorCode.Permission.Insufficient>(),
@@ -112,11 +108,10 @@ export const test_remove_article_when_user_is_not_author = async (
 export const test_remove_article_when_token_is_missing = async (
     connection: IConnection,
 ) => {
-    const { data } = await Util.assertResposne(api.functional.articles.getList)(
-        connection,
-        {},
+    const { data } = await Util.assertResponse(
+        api.functional.articles.getList(connection, {}),
+        HttpStatus.OK,
     )({
-        status: HttpStatus.OK,
         success: true,
         assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
     });
@@ -124,11 +119,10 @@ export const test_remove_article_when_token_is_missing = async (
     const article = data[0]!;
 
     // remove article
-    await test(
-        connection,
-        article.id,
+    await Util.assertResponse(
+        test(connection, article.id),
+        HttpStatus.UNAUTHORIZED,
     )({
-        status: HttpStatus.UNAUTHORIZED,
         success: false,
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Required>(),
     });
@@ -144,27 +138,27 @@ export const test_remove_article_when_token_is_expired = async (
     });
 
     // sign-in
-    const auth = await Util.assertResposne(api.functional.auth.oauth.authorize)(
-        connection,
-        {
+    const {
+        access_token: { token },
+    } = await Util.assertResponse(
+        api.functional.auth.oauth.authorize(connection, {
             oauth_type: "github",
             code: "testuser1",
-        },
+        }),
+        HttpStatus.OK,
     )({
-        status: HttpStatus.OK,
         success: true,
         assertBody: typia.createAssertEquals<IAuthentication>(),
     });
 
     Mock.restore(DateMapper, "toISO");
 
-    const permission = Util.addToken(auth.access_token.token)(connection);
+    const permission = Util.addToken(token)(connection);
 
-    const { data } = await Util.assertResposne(api.functional.articles.getList)(
-        connection,
-        {},
+    const { data } = await Util.assertResponse(
+        api.functional.articles.getList(connection, {}),
+        HttpStatus.OK,
     )({
-        status: HttpStatus.OK,
         success: true,
         assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
     });
@@ -172,11 +166,10 @@ export const test_remove_article_when_token_is_expired = async (
     const article = data[0]!;
 
     // remove article
-    await test(
-        permission,
-        article.id,
+    await Util.assertResponse(
+        test(permission, article.id),
+        HttpStatus.UNAUTHORIZED,
     )({
-        status: HttpStatus.UNAUTHORIZED,
         success: false,
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Expired>(),
     });
@@ -187,11 +180,10 @@ export const test_remove_article_when_token_is_invalid = async (
 ) => {
     const permission = Util.addToken("gmdfkgmdpk")(connection);
 
-    const { data } = await Util.assertResposne(api.functional.articles.getList)(
-        connection,
-        {},
+    const { data } = await Util.assertResponse(
+        api.functional.articles.getList(connection, {}),
+        HttpStatus.OK,
     )({
-        status: HttpStatus.OK,
         success: true,
         assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
     });
@@ -199,11 +191,10 @@ export const test_remove_article_when_token_is_invalid = async (
     const article = data[0]!;
 
     // remove article
-    await test(
-        permission,
-        article.id,
+    await Util.assertResponse(
+        test(permission, article.id),
+        HttpStatus.UNAUTHORIZED,
     )({
-        status: HttpStatus.UNAUTHORIZED,
         success: false,
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Invalid>(),
     });
@@ -213,25 +204,25 @@ export const test_remove_article_when_user_id_is_invalid = async (
     connection: IConnection,
 ) => {
     // sign-in
-    const auth = await Util.assertResposne(api.functional.auth.oauth.authorize)(
-        connection,
-        {
+    const {
+        access_token: { token },
+    } = await Util.assertResponse(
+        api.functional.auth.oauth.authorize(connection, {
             oauth_type: "github",
             code: "testuser1",
-        },
+        }),
+        HttpStatus.OK,
     )({
-        status: HttpStatus.OK,
         success: true,
         assertBody: typia.createAssertEquals<IAuthentication>(),
     });
 
-    const permission = Util.addToken(auth.access_token.token)(connection);
+    const permission = Util.addToken(token)(connection);
 
-    const { data } = await Util.assertResposne(api.functional.articles.getList)(
-        connection,
-        {},
+    const { data } = await Util.assertResponse(
+        api.functional.articles.getList(connection, {}),
+        HttpStatus.OK,
     )({
-        status: HttpStatus.OK,
         success: true,
         assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
     });
@@ -244,11 +235,10 @@ export const test_remove_article_when_user_id_is_invalid = async (
     });
 
     // remove article
-    await test(
-        permission,
-        article.id,
+    await Util.assertResponse(
+        test(permission, article.id),
+        HttpStatus.UNAUTHORIZED,
     )({
-        status: HttpStatus.UNAUTHORIZED,
         success: false,
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Invalid>(),
     });

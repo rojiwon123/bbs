@@ -13,7 +13,7 @@ import { IAuthentication } from "@APP/types/IAuthentication";
 import { DateMapper } from "@APP/utils/date";
 
 const test = (connection: IConnection) =>
-    Util.assertResposne(api.functional.articles.create)(
+    api.functional.articles.create(
         connection,
         typia.random<IArticle.ICreate>(),
     );
@@ -22,36 +22,33 @@ export const test_create_article_successfully = async (
     connection: IConnection,
 ) => {
     // sign-in
-    const auth = await Util.assertResposne(api.functional.auth.oauth.authorize)(
-        connection,
-        {
+    const {
+        access_token: { token },
+    } = await Util.assertResponse(
+        api.functional.auth.oauth.authorize(connection, {
             oauth_type: "github",
             code: "testuser1",
-        },
+        }),
+        HttpStatus.OK,
     )({
-        status: HttpStatus.OK,
         success: true,
         assertBody: typia.createAssertEquals<IAuthentication>(),
     });
 
     // create article
-    const { article_id } = await test(
-        Util.addToken(auth.access_token.token)(connection),
+    const { article_id } = await Util.assertResponse(
+        test(Util.addToken(token)(connection)),
+        HttpStatus.CREATED,
     )({
-        status: HttpStatus.CREATED,
         success: true,
         assertBody: typia.createAssertEquals<IArticle.Identity>(),
     });
 
     // check really created
-    await Util.assertResposne(api.functional.articles.get)(
-        connection,
-        article_id,
-    )({
-        status: HttpStatus.OK,
-        success: true,
-        assertBody: typia.createAssertEquals<IArticle>(),
-    });
+    await Util.assertResponse(
+        api.functional.articles.get(connection, article_id),
+        HttpStatus.OK,
+    )({ success: true, assertBody: typia.createAssertEquals<IArticle>() });
 
     // delete article
     await Seed.deleteArticle(article_id);
@@ -60,8 +57,10 @@ export const test_create_article_successfully = async (
 export const test_create_article_when_token_is_missing = (
     connection: IConnection,
 ) =>
-    test(connection)({
-        status: HttpStatus.UNAUTHORIZED,
+    Util.assertResponse(
+        test(connection),
+        HttpStatus.UNAUTHORIZED,
+    )({
         success: false,
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Required>(),
     });
@@ -77,22 +76,26 @@ export const test_create_article_when_token_is_expired = async (
     });
 
     // sign-in
-    const auth = await Util.assertResposne(api.functional.auth.oauth.authorize)(
-        connection,
-        {
+    const {
+        access_token: { token },
+    } = await Util.assertResponse(
+        api.functional.auth.oauth.authorize(connection, {
             oauth_type: "github",
             code: "testuser1",
-        },
+        }),
+        HttpStatus.OK,
     )({
-        status: HttpStatus.OK,
         success: true,
         assertBody: typia.createAssertEquals<IAuthentication>(),
     });
 
     Mock.restore(DateMapper, "toISO");
 
-    await test(Util.addToken(auth.access_token.token)(connection))({
-        status: HttpStatus.UNAUTHORIZED,
+    // create article
+    await Util.assertResponse(
+        test(Util.addToken(token)(connection)),
+        HttpStatus.UNAUTHORIZED,
+    )({
         success: false,
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Expired>(),
     });
@@ -101,8 +104,10 @@ export const test_create_article_when_token_is_expired = async (
 export const test_create_article_when_token_is_invalid = (
     connection: IConnection,
 ) =>
-    test(Util.addToken("invalid1teown")(connection))({
-        status: HttpStatus.UNAUTHORIZED,
+    Util.assertResponse(
+        test(Util.addToken("invalid1teown")(connection)),
+        HttpStatus.UNAUTHORIZED,
+    )({
         success: false,
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Invalid>(),
     });
@@ -111,14 +116,15 @@ export const test_create_article_when_user_id_is_invalid = async (
     connection: IConnection,
 ) => {
     // sign-in
-    const auth = await Util.assertResposne(api.functional.auth.oauth.authorize)(
-        connection,
-        {
+    const {
+        access_token: { token },
+    } = await Util.assertResponse(
+        api.functional.auth.oauth.authorize(connection, {
             oauth_type: "github",
             code: "testuser1",
-        },
+        }),
+        HttpStatus.OK,
     )({
-        status: HttpStatus.OK,
         success: true,
         assertBody: typia.createAssertEquals<IAuthentication>(),
     });
@@ -128,8 +134,10 @@ export const test_create_article_when_user_id_is_invalid = async (
         data: { deleted_at: DateMapper.toISO() },
     });
 
-    await test(Util.addToken(auth.access_token.token)(connection))({
-        status: HttpStatus.UNAUTHORIZED,
+    await Util.assertResponse(
+        test(Util.addToken(token)(connection)),
+        HttpStatus.UNAUTHORIZED,
+    )({
         success: false,
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Invalid>(),
     });
