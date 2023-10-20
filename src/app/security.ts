@@ -1,7 +1,6 @@
 import { isNull } from "@fxts/core";
 import {
     ExecutionContext,
-    HttpException,
     HttpStatus,
     createParamDecorator,
 } from "@nestjs/common";
@@ -51,7 +50,7 @@ export namespace Security {
     export const required = (security: Security): string => {
         const token = security.token;
         if (isNull(token))
-            throw new HttpException(
+            throw new Failure.Http(
                 "REQUIRED_PERMISSION" satisfies ErrorCode.Permission.Required,
                 HttpStatus.UNAUTHORIZED,
             );
@@ -79,6 +78,7 @@ export namespace Security {
                 }
             throw Failure.Http.fromExternal(error);
         }
+
         return Result.Ok.flatten(payload).user_id;
     };
 }

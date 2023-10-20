@@ -1,3 +1,4 @@
+import { mock } from "node:test";
 import typia from "typia";
 
 import { Oauth } from "@APP/externals/oauth";
@@ -6,25 +7,41 @@ import { Failure } from "@APP/utils/failure";
 import { Result } from "@APP/utils/result";
 
 export namespace Mock {
-    const method =
-        <T extends object, M extends keyof T>(module: T, methodName: M) =>
-        (fn: T[M]): void => {
-            module[methodName] = fn;
-        };
+    type MethodNames<T extends object> = {
+        [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
+    }[keyof T];
+    export const implement = <T extends object, M extends MethodNames<T>>(
+        module: T,
+        methodName: M,
+        fn: T[M],
+        times = Infinity,
+    ): void => {
+        restore(module, methodName);
+        mock.method(module, methodName, fn as any, { times });
+    };
+    export const restore = <T extends object, M extends MethodNames<T>>(
+        module: T,
+        methodName: M,
+    ) => {
+        const mocker = (module[methodName] as any)["mock"];
+        if (mocker == undefined) return;
+        mocker["restore"]();
+    };
 
     export const run = () => {
-        method(
+        implement(
             Oauth.Kakao,
             "getUrlForLogin",
-        )(() => "http://localhost:4000/login");
-        method(
+            () => "http://localhost:4000/login",
+        );
+
+        implement(
             Oauth.Github,
             "getUrlForLogin",
-        )(() => "http://localhost:4000/login");
-        method(
-            Oauth.Github,
-            "getProfile",
-        )(async (code) => {
+            () => "http://localhost:4000/login",
+        );
+
+        implement(Oauth.Github, "getProfile", async (code) => {
             if (code === "test_fail")
                 return Result.Error.map(
                     new Failure.Internal("Fail To Get Data"),
@@ -34,10 +51,8 @@ export namespace Mock {
                 profile: typia.random<IOauth.IProfile>(),
             });
         });
-        method(
-            Oauth.Kakao,
-            "getProfile",
-        )(async (code) => {
+
+        implement(Oauth.Kakao, "getProfile", async (code) => {
             if (code === "test_fail")
                 return Result.Error.map(
                     new Failure.Internal("Fail To Get Data"),

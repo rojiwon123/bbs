@@ -136,6 +136,8 @@ export namespace Seed {
     };
 
     export const truncate = async () => {
+        console.log("user count", await prisma.users.count());
+        console.log("article count", await prisma.articles.count());
         await prisma.article_snapshot_attachments.deleteMany();
         await prisma.article_snapshots.deleteMany();
         await prisma.articles.deleteMany();

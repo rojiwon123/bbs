@@ -1,4 +1,4 @@
-import { isNull, pipe } from "@fxts/core";
+import { isNull, negate, pipe } from "@fxts/core";
 import typia from "typia";
 
 import { prisma } from "@APP/infrastructure/DB";
@@ -30,9 +30,84 @@ export interface Article {
     ) => (
         author_id: string & typia.tags.Format<"uuid">,
     ) => (input: IArticle.ICreate) => Promise<Result.Ok<IArticle.Identity>>;
+
+    readonly update: (
+        tx?: Prisma.TransactionClient,
+    ) => (
+        author_id: string & typia.tags.Format<"uuid">,
+    ) => (
+        identity: IArticle.Identity,
+    ) => (
+        input: IArticle.ICreate,
+    ) => Promise<
+        Result<
+            IArticle.Identity,
+            Failure.Internal<
+                ErrorCode.Article.NotFound | ErrorCode.Permission.Insufficient
+            >
+        >
+    >;
+
+    readonly remove: (
+        tx?: Prisma.TransactionClient,
+    ) => (
+        author_id: string & typia.tags.Format<"uuid">,
+    ) => (
+        identity: IArticle.Identity,
+    ) => Promise<
+        Result<
+            IArticle.Identity,
+            Failure.Internal<
+                ErrorCode.Article.NotFound | ErrorCode.Permission.Insufficient
+            >
+        >
+    >;
 }
 
 export namespace Article {
+    export const access =
+        (tx: Prisma.TransactionClient = prisma) =>
+        async ({
+            permission,
+            user_id,
+            article_id,
+        }: {
+            permission: "read" | "write";
+            user_id: string & typia.tags.Format<"uuid">;
+            article_id: string & typia.tags.Format<"uuid">;
+        }): Promise<
+            Result<
+                true,
+                Failure.Internal<
+                    | ErrorCode.Permission.Insufficient
+                    | ErrorCode.Article.NotFound
+                >
+            >
+        > => {
+            const article = await tx.articles.findFirst({
+                where: { id: article_id },
+                select: { id: true, author_id: true, deleted_at: true },
+            });
+            if (isNull(article))
+                return Result.Error.map(
+                    new Failure.Internal<ErrorCode.Article.NotFound>(
+                        "NOT_FOUND_ARTICLE",
+                    ),
+                );
+            if (negate(isNull)(article.deleted_at))
+                return Result.Error.map(
+                    new Failure.Internal<ErrorCode.Article.NotFound>(
+                        "NOT_FOUND_ARTICLE",
+                    ),
+                );
+            if (permission === "write" && article.author_id !== user_id)
+                return Result.Error.map(
+                    new Failure.Internal<ErrorCode.Permission.Insufficient>(
+                        "INSUFFICIENT_PERMISSION",
+                    ),
+                );
+            return Result.Ok.map(true);
+        };
     export const getList: Article["getList"] = ({
         skip = 0,
         limit = 10,
@@ -79,12 +154,12 @@ export namespace Article {
         (tx = prisma) =>
         (author_id) =>
         async (input) => {
+            const article_id = Random.uuid();
             const created_at = DateMapper.toISO();
-            const article = await tx.articles.create({
+            await tx.articles.create({
                 data: {
-                    id: Random.uuid(),
-                    author_id,
-                    created_at,
+                    id: article_id,
+                    author_id: author_id,
                     snapshots: {
                         create: {
                             id: Random.uuid(),
@@ -94,13 +169,53 @@ export namespace Article {
                             created_at,
                         },
                     },
+                    created_at,
                 },
             });
-            return Result.Ok.map({ article_id: article.id });
+            return Result.Ok.map({ article_id });
+        };
+
+    export const update: Article["update"] =
+        (tx = prisma) =>
+        (author_id) =>
+        ({ article_id }) =>
+        async (input) => {
+            const permission = await access(tx)({
+                permission: "write",
+                user_id: author_id,
+                article_id,
+            });
+            if (Result.Error.is(permission)) return permission;
+            await tx.article_snapshots.create({
+                data: {
+                    id: Random.uuid(),
+                    article_id: article_id,
+                    title: input.title,
+                    body_url: input.body_url,
+                    body_format: input.body_format,
+                    created_at: DateMapper.toISO(),
+                },
+            });
+            return Result.Ok.map({ article_id });
+        };
+
+    export const remove: Article["remove"] =
+        (tx = prisma) =>
+        (author_id) =>
+        async ({ article_id }) => {
+            const permission = await access(tx)({
+                permission: "write",
+                user_id: author_id,
+                article_id,
+            });
+            if (Result.Error.is(permission)) return permission;
+            await tx.articles.updateMany({
+                where: { id: article_id },
+                data: { deleted_at: DateMapper.toISO() },
+            });
+            return Result.Ok.map({ article_id });
         };
 }
-
-assertModule<Article>(Article);
 
 export namespace ArticleEntity {
     export const mapAuthor = (
@@ -217,3 +332,5 @@ export namespace ArticleEntity {
         posted_at: DateMapper.toISO(input.created_at),
     });
 }
+
+assertModule<Article>(Article);

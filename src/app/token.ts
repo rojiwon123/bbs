@@ -72,7 +72,7 @@ export namespace Token {
 
         // If Expired
         if (now > new Date(payload.expired_at))
-            Result.Error.map(new Failure.Internal("EXPIRED"));
+            return Result.Error.map(new Failure.Internal("EXPIRED"));
 
         return Result.Ok.map(payload);
     };

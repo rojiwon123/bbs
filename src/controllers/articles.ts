@@ -4,6 +4,7 @@ import typia from "typia";
 
 import { Article } from "@APP/app/article";
 import { Security } from "@APP/app/security";
+import { User } from "@APP/app/user";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
 import { Failure } from "@APP/utils/failure";
@@ -48,6 +49,12 @@ export class ArticlesController {
     ): Promise<IArticle.Identity> {
         const token = Security.required(security);
         const user_id = Security.verify(token);
+        const permission = await User.access()(user_id);
+        if (Result.Error.is(permission))
+            throw new Failure.Http(
+                "INVALID_PERMISSION" satisfies ErrorCode.Permission.Invalid,
+                nest.HttpStatus.UNAUTHORIZED,
+            );
         const result = await Article.create()(user_id)(body);
         return Result.Ok.flatten(result);
     }
@@ -93,19 +100,46 @@ export class ArticleController {
      * @param body update content of article
      * @return updated article
      */
+    @core.TypedException<
+        | ErrorCode.Permission.Required
+        | ErrorCode.Permission.Expired
+        | ErrorCode.Permission.Invalid
+    >(nest.HttpStatus.UNAUTHORIZED, "PERMISSION DENIED")
     @core.TypedException<ErrorCode.Permission.Insufficient>(
         nest.HttpStatus.FORBIDDEN,
     )
     @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
+    @nest.HttpCode(nest.HttpStatus.CREATED)
     @core.TypedRoute.Put()
     async update(
+        @Security.HttpBearer() security: Security,
         @core.TypedParam("article_id")
         article_id: string & typia.tags.Format<"uuid">,
         @core.TypedBody() body: IArticle.ICreate,
-    ): Promise<void> {
-        article_id;
-        body;
-        throw Error("");
+    ): Promise<IArticle.Identity> {
+        const token = Security.required(security);
+        const user_id = Security.verify(token);
+        const permission = await User.access()(user_id);
+        if (Result.Error.is(permission))
+            throw new Failure.Http(
+                "INVALID_PERMISSION" satisfies ErrorCode.Permission.Invalid,
+                nest.HttpStatus.UNAUTHORIZED,
+            );
+        const result = await Article.update()(user_id)({ article_id })(body);
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        switch (error.message) {
+            case "NOT_FOUND_ARTICLE":
+                throw Failure.Http.fromInternal(
+                    error,
+                    nest.HttpStatus.NOT_FOUND,
+                );
+            case "INSUFFICIENT_PERMISSION":
+                throw Failure.Http.fromInternal(
+                    error,
+                    nest.HttpStatus.FORBIDDEN,
+                );
+        }
     }
 
     /**
@@ -119,16 +153,43 @@ export class ArticleController {
      * @param article_id identity of article
      * @return none
      */
+    @core.TypedException<
+        | ErrorCode.Permission.Required
+        | ErrorCode.Permission.Expired
+        | ErrorCode.Permission.Invalid
+    >(nest.HttpStatus.UNAUTHORIZED, "PERMISSION DENIED")
     @core.TypedException<ErrorCode.Permission.Insufficient>(
         nest.HttpStatus.FORBIDDEN,
     )
     @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Delete()
     async remove(
+        @Security.HttpBearer() security: Security,
         @core.TypedParam("article_id")
         article_id: string & typia.tags.Format<"uuid">,
-    ): Promise<void> {
-        article_id;
-        throw Error("");
+    ): Promise<IArticle.Identity> {
+        const token = Security.required(security);
+        const user_id = Security.verify(token);
+        const permission = await User.access()(user_id);
+        if (Result.Error.is(permission))
+            throw new Failure.Http(
+                "INVALID_PERMISSION" satisfies ErrorCode.Permission.Invalid,
+                nest.HttpStatus.UNAUTHORIZED,
+            );
+        const result = await Article.remove()(user_id)({ article_id });
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        switch (error.message) {
+            case "NOT_FOUND_ARTICLE":
+                throw Failure.Http.fromInternal(
+                    error,
+                    nest.HttpStatus.NOT_FOUND,
+                );
+            case "INSUFFICIENT_PERMISSION":
+                throw Failure.Http.fromInternal(
+                    error,
+                    nest.HttpStatus.FORBIDDEN,
+                );
+        }
     }
 }

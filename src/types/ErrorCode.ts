@@ -20,6 +20,7 @@ export namespace ErrorCode {
     export namespace User {
         export type NotFound = "NOT_FOUND_USER";
         export type AlreadyExist = "ALREADY_EXIST_USER";
+        export type Invalid = "INVALID_USER";
     }
 
     export namespace Article {

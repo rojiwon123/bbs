@@ -29,7 +29,7 @@ export const test_get_article_successfully = async (
     });
 };
 
-export const test_get_article_but_article_is_deleted = async (
+export const test_get_article_when_article_is_deleted = async (
     connection: IConnection,
 ) => {
     const article = await prisma.articles.findFirst({
@@ -46,7 +46,9 @@ export const test_get_article_but_article_is_deleted = async (
     });
 };
 
-export const test_get_article_but_not_exist = async (connection: IConnection) =>
+export const test_get_article_when_article_does_not_exist = async (
+    connection: IConnection,
+) =>
     test(
         connection,
         Random.uuid(),
