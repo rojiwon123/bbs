@@ -101,17 +101,23 @@ export namespace Util {
             },
         });
 
-    export const addToken = () => (token: string) =>
+    export const addToken = (token: string) =>
         addHeaders({ authorization: `bearer ${token}` });
 
     export const assertResposne =
-        <T, H extends Record<string, string | string[]>>(options: {
+        <P extends unknown[]>(
+            api: (
+                ...args: P
+            ) => Promise<IPropagation.IBranch<boolean, unknown, any>>,
+        ) =>
+        (...args: P) =>
+        async <T, H extends Record<string, string | string[]>>(options: {
             status: IPropagation.Status;
             success: boolean;
             assertBody?: (body: unknown) => T;
             assertHeader?: (header: unknown) => H;
-        }) =>
-        (response: IPropagation.IBranch<boolean, unknown, any>) => {
+        }): Promise<T> => {
+            const response = await api(...args);
             if (
                 options.success !== response.success ||
                 options.status !== response.status
@@ -126,5 +132,6 @@ export namespace Util {
 
             if (options.assertBody) options.assertBody(response.data);
             if (options.assertHeader) options.assertHeader(response.headers);
+            return response.data;
         };
 }

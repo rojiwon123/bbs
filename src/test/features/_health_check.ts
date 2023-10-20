@@ -5,9 +5,7 @@ import api from "@project/api";
 import { Util } from "../internal/utils";
 
 export const test_health_check = (connection: IConnection) =>
-    api.functional.health.check(connection).then(
-        Util.assertResposne({
-            status: HttpStatus.OK,
-            success: true,
-        }),
-    );
+    Util.assertResposne(api.functional.health.check)(connection)({
+        status: HttpStatus.OK,
+        success: true,
+    });
