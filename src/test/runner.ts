@@ -25,13 +25,13 @@ export const runTest = async (connection: IConnection): Promise<0 | -1> => {
     const result = Report.analyze(report);
     if (result.result === 0) {
         console.log(Report.color("Green")("✅ Passed"));
-        console.log("Total Cases       ", Report.color("Cyan")(result.count));
+        console.log("Total Test        ", Report.color("Cyan")(result.count));
         console.log("Total Elapsed time", result.count, "ms");
     } else {
         console.log(Report.color("Red")("❌ Failed"));
-        console.log("Total Cases ", Report.color("Cyan")(result.total_count));
+        console.log("Total Test ", Report.color("Cyan")(result.total_count));
         console.log(
-            "Failed Cases",
+            "Failed Test",
             Report.color("LightRed")(result.failed_count),
         );
     }

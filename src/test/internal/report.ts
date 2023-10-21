@@ -142,7 +142,7 @@ export namespace Report {
         if (result.result === 0) {
             write("| Result | ✅ |");
             write("| :---: | :---: |");
-            write(`| Total Case | ${result.count} |`);
+            write(`| Total Test | ${result.count} |`);
             write(`| Elapsed Time | ${result.time} ms |`);
             write();
             write("## Detail");
@@ -160,8 +160,8 @@ export namespace Report {
         } else {
             write("| Result | ❌ |");
             write("| :---: | :---: |");
-            write(`| Total Case | ${result.total_count} |`);
-            write(`| Failed Case | ${result.failed_count} |`);
+            write(`| Total Test | ${result.total_count} |`);
+            write(`| Failed Test | ${result.failed_count} |`);
             write();
             write("## Detail");
             write();

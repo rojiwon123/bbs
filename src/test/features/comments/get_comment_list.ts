@@ -5,7 +5,9 @@ import typia from "typia";
 
 import { prisma } from "@APP/infrastructure/DB";
 import { Util } from "@APP/test/internal/utils";
+import { ErrorCode } from "@APP/types/ErrorCode";
 import { IComment } from "@APP/types/IComment";
+import { Random } from "@APP/utils/random";
 
 const test = api.functional.articles.comments.getList;
 
@@ -29,4 +31,13 @@ export const test_get_comment_list_successfully = async (
     });
 };
 
-export const test_get_comment_list_when_article_does_not_exist = async () => {};
+export const test_get_comment_list_when_article_does_not_exist = (
+    connection: IConnection,
+) =>
+    Util.assertResponse(
+        test(connection, Random.uuid(), {}),
+        HttpStatus.NOT_FOUND,
+    )({
+        success: false,
+        assertBody: typia.createAssertEquals<ErrorCode.Article.NotFound>(),
+    });
