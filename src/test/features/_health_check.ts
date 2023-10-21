@@ -5,7 +5,7 @@ import typia from "typia";
 
 import { Util } from "../internal/utils";
 
-export const test_health_check = (connection: IConnection) =>
+export const health_check = (connection: IConnection) =>
     Util.assertResponse(
         api.functional.health.check(connection),
         HttpStatus.OK,

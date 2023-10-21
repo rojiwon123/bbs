@@ -16,9 +16,7 @@ const test = api.functional.articles.update;
 
 const createBody = typia.createRandom<IArticle.ICreate>();
 
-export const test_update_article_successfully = async (
-    connection: IConnection,
-) => {
+export const update_article_successfully = async (connection: IConnection) => {
     // sign-in
     const {
         access_token: { token },
@@ -56,7 +54,7 @@ export const test_update_article_successfully = async (
     await Seed.deleteArticle(article_id);
 };
 
-export const test_update_article_when_user_is_not_author = async (
+export const update_article_when_user_is_not_author = async (
     connection: IConnection,
 ) => {
     // sign-in
@@ -96,7 +94,7 @@ export const test_update_article_when_user_is_not_author = async (
     });
 };
 
-export const test_update_article_when_token_is_missing = async (
+export const update_article_when_token_is_missing = async (
     connection: IConnection,
 ) => {
     const { data } = await Util.assertResponse(
@@ -119,7 +117,7 @@ export const test_update_article_when_token_is_missing = async (
     });
 };
 
-export const test_update_article_when_token_is_expired = async (
+export const update_article_when_token_is_expired = async (
     connection: IConnection,
 ) => {
     // mocking for generating expired token
@@ -167,7 +165,7 @@ export const test_update_article_when_token_is_expired = async (
     });
 };
 
-export const test_update_article_when_token_is_invalid = async (
+export const update_article_when_token_is_invalid = async (
     connection: IConnection,
 ) => {
     const { data } = await Util.assertResponse(
@@ -190,7 +188,7 @@ export const test_update_article_when_token_is_invalid = async (
     });
 };
 
-export const test_update_article_when_user_id_is_invalid = async (
+export const update_article_when_user_id_is_invalid = async (
     connection: IConnection,
 ) => {
     // sign-in

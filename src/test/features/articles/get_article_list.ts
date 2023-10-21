@@ -8,7 +8,7 @@ import { IArticle } from "@APP/types/IArticle";
 
 const test = api.functional.articles.getList;
 
-export const test_get_article_list_successfully = (connection: IConnection) =>
+export const get_article_list_successfully = (connection: IConnection) =>
     Util.assertResponse(
         test(connection, { skip: 5 }),
         HttpStatus.OK,

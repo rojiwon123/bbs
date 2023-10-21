@@ -132,17 +132,16 @@ export namespace Report {
 
     export const log = (result: IAnalyze): void => {
         const report_path = path.resolve(process.cwd(), "./test_log.md");
-        console.log(report_path);
         const stream = fs.createWriteStream(report_path, { flags: "w" });
         const write = _write(stream);
-        write("# Test Report");
-        write();
-        write("## Summary");
-        write();
         if (result.result === 0) {
-            write("| Result | ✅ |");
+            write("# Test Report ✅");
+            write();
+            write("## Summary");
+            write();
+            write("| State | Count |");
             write("| :---: | :---: |");
-            write(`| Total Test | ${result.count} |`);
+            write(`| Total | ${result.count} |`);
             write(`| Elapsed Time | ${result.time} ms |`);
             write();
             write("## Detail");
@@ -158,10 +157,14 @@ export namespace Report {
                 write("</details>");
             });
         } else {
-            write("| Result | ❌ |");
+            write("# Test Report ❌");
+            write();
+            write("## Summary");
+            write();
+            write("| State | Count |");
             write("| :---: | :---: |");
-            write(`| Total Test | ${result.total_count} |`);
-            write(`| Failed Test | ${result.failed_count} |`);
+            write(`| Failed | ${result.failed_count} |`);
+            write(`| Total | ${result.total_count} |`);
             write();
             write("## Detail");
             write();

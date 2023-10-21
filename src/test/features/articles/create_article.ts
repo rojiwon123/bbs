@@ -18,9 +18,7 @@ const test = (connection: IConnection) =>
         typia.random<IArticle.ICreate>(),
     );
 
-export const test_create_article_successfully = async (
-    connection: IConnection,
-) => {
+export const create_article_successfully = async (connection: IConnection) => {
     // sign-in
     const {
         access_token: { token },
@@ -54,9 +52,7 @@ export const test_create_article_successfully = async (
     await Seed.deleteArticle(article_id);
 };
 
-export const test_create_article_when_token_is_missing = (
-    connection: IConnection,
-) =>
+export const create_article_when_token_is_missing = (connection: IConnection) =>
     Util.assertResponse(
         test(connection),
         HttpStatus.UNAUTHORIZED,
@@ -65,7 +61,7 @@ export const test_create_article_when_token_is_missing = (
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Required>(),
     });
 
-export const test_create_article_when_token_is_expired = async (
+export const create_article_when_token_is_expired = async (
     connection: IConnection,
 ) => {
     // mocking for generating expired token
@@ -101,9 +97,7 @@ export const test_create_article_when_token_is_expired = async (
     });
 };
 
-export const test_create_article_when_token_is_invalid = (
-    connection: IConnection,
-) =>
+export const create_article_when_token_is_invalid = (connection: IConnection) =>
     Util.assertResponse(
         test(Util.addToken("invalid1teown")(connection)),
         HttpStatus.UNAUTHORIZED,
@@ -112,7 +106,7 @@ export const test_create_article_when_token_is_invalid = (
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Invalid>(),
     });
 
-export const test_create_article_when_user_id_is_invalid = async (
+export const create_article_when_user_id_is_invalid = async (
     connection: IConnection,
 ) => {
     // sign-in

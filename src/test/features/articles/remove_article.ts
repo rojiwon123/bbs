@@ -16,9 +16,7 @@ const test = api.functional.articles.remove;
 
 const createBody = typia.createRandom<IArticle.ICreate>();
 
-export const test_remove_article_successfully = async (
-    connection: IConnection,
-) => {
+export const remove_article_successfully = async (connection: IConnection) => {
     // sign-in
     const {
         access_token: { token },
@@ -65,7 +63,7 @@ export const test_remove_article_successfully = async (
     await Seed.deleteArticle(article_id);
 };
 
-export const test_remove_article_when_user_is_not_author = async (
+export const remove_article_when_user_is_not_author = async (
     connection: IConnection,
 ) => {
     // sign-in
@@ -105,7 +103,7 @@ export const test_remove_article_when_user_is_not_author = async (
     });
 };
 
-export const test_remove_article_when_token_is_missing = async (
+export const remove_article_when_token_is_missing = async (
     connection: IConnection,
 ) => {
     const { data } = await Util.assertResponse(
@@ -128,7 +126,7 @@ export const test_remove_article_when_token_is_missing = async (
     });
 };
 
-export const test_remove_article_when_token_is_expired = async (
+export const remove_article_when_token_is_expired = async (
     connection: IConnection,
 ) => {
     Mock.implement(DateMapper, "toISO", () => {
@@ -175,7 +173,7 @@ export const test_remove_article_when_token_is_expired = async (
     });
 };
 
-export const test_remove_article_when_token_is_invalid = async (
+export const remove_article_when_token_is_invalid = async (
     connection: IConnection,
 ) => {
     const permission = Util.addToken("gmdfkgmdpk")(connection);
@@ -200,7 +198,7 @@ export const test_remove_article_when_token_is_invalid = async (
     });
 };
 
-export const test_remove_article_when_user_id_is_invalid = async (
+export const remove_article_when_user_id_is_invalid = async (
     connection: IConnection,
 ) => {
     // sign-in

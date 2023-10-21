@@ -11,7 +11,7 @@ import { Random } from "@APP/utils/random";
 
 const test = api.functional.articles.comments.getList;
 
-export const test_get_comment_list_successfully = async (
+export const get_comment_list_successfully = async (
     connection: IConnection,
 ) => {
     const comment = (await prisma.comments.findFirst({
@@ -31,7 +31,7 @@ export const test_get_comment_list_successfully = async (
     });
 };
 
-export const test_get_comment_list_when_article_does_not_exist = (
+export const get_comment_list_when_article_does_not_exist = (
     connection: IConnection,
 ) =>
     Util.assertResponse(

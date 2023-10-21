@@ -6,7 +6,7 @@ import typia from "typia";
 import { Util } from "@APP/test/internal/utils";
 import { IAuthentication } from "@APP/types/IAuthentication";
 
-export const test_authorize_successfully = (connection: IConnection) =>
+export const authorize_successfully = (connection: IConnection) =>
     Util.assertResponse(
         api.functional.auth.oauth.authorize(connection, {
             oauth_type: "github",

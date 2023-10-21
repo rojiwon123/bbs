@@ -12,9 +12,7 @@ import { Random } from "@APP/utils/random";
 
 const test = api.functional.articles.get;
 
-export const test_get_article_successfully = async (
-    connection: IConnection,
-) => {
+export const get_article_successfully = async (connection: IConnection) => {
     const article = await prisma.articles.findFirst({
         where: { deleted_at: null },
     });
@@ -28,7 +26,7 @@ export const test_get_article_successfully = async (
     });
 };
 
-export const test_get_article_when_article_is_deleted = async (
+export const get_article_when_article_is_deleted = async (
     connection: IConnection,
 ) => {
     const article = await prisma.articles.findFirst({
@@ -44,7 +42,7 @@ export const test_get_article_when_article_is_deleted = async (
     });
 };
 
-export const test_get_article_when_article_does_not_exist = (
+export const get_article_when_article_does_not_exist = (
     connection: IConnection,
 ) =>
     Util.assertResponse(
