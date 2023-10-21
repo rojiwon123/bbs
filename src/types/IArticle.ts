@@ -2,25 +2,27 @@ import typia from "typia";
 
 import { ArticleBodyFormat } from "../../db/edge";
 import { IPage } from "./IPage";
+import "./IUser";
 import { IUser } from "./IUser";
 
 export interface IArticle {
     id: string & typia.tags.Format<"uuid">;
-    author: IArticle.IAuthor;
+    author: IUser.IAuthor;
     snapshots: IArticle.ISnapshot[] & typia.tags.MinItems<1>;
     posted_at: string & typia.tags.Format<"date-time">;
 }
 
 export namespace IArticle {
+    export type BodyFormat = ArticleBodyFormat;
     export interface ICreate extends ISnapshot.ICreate {}
     export interface Identity {
         article_id: string & typia.tags.Format<"uuid">;
     }
-    export interface IAuthor extends Pick<IUser, "id" | "image_url" | "name"> {}
+
     export interface ISnapshot {
         title: string;
         body_url: string & typia.tags.Format<"url">;
-        body_format: ArticleBodyFormat;
+        body_format: BodyFormat;
         created_at: string & typia.tags.Format<"date-time">;
     }
 

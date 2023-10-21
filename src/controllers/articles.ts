@@ -4,7 +4,6 @@ import typia from "typia";
 
 import { Article } from "@APP/app/article";
 import { Security } from "@APP/app/security";
-import { User } from "@APP/app/user";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
 import { Failure } from "@APP/utils/failure";
@@ -24,7 +23,7 @@ export class ArticlesController {
     async getList(
         @core.TypedQuery() query: IArticle.ISearch,
     ): Promise<IArticle.IPaginatedResponse> {
-        const result = await Article.getList(query);
+        const result = await Article.getList()(query);
         return Result.Ok.flatten(result);
     }
 
@@ -48,14 +47,8 @@ export class ArticlesController {
         @core.TypedBody() body: IArticle.ICreate,
     ): Promise<IArticle.Identity> {
         const token = Security.required(security);
-        const user_id = Security.verify(token);
-        const permission = await User.access()(user_id);
-        if (Result.Error.is(permission))
-            throw new Failure.Http(
-                "INVALID_PERMISSION" satisfies ErrorCode.Permission.Invalid,
-                nest.HttpStatus.UNAUTHORIZED,
-            );
-        const result = await Article.create()(user_id)(body);
+        const identity = await Security.verify()(token);
+        const result = await Article.create()(identity)(body);
         return Result.Ok.flatten(result);
     }
 }
@@ -78,6 +71,7 @@ export class ArticleController {
     ): Promise<IArticle> {
         const result = await Article.get()({ article_id });
         if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+
         const error = Result.Error.flatten(result);
         switch (error.message) {
             case "NOT_FOUND_ARTICLE":
@@ -118,26 +112,23 @@ export class ArticleController {
         @core.TypedBody() body: IArticle.ICreate,
     ): Promise<IArticle.Identity> {
         const token = Security.required(security);
-        const user_id = Security.verify(token);
-        const permission = await User.access()(user_id);
-        if (Result.Error.is(permission))
-            throw new Failure.Http(
-                "INVALID_PERMISSION" satisfies ErrorCode.Permission.Invalid,
-                nest.HttpStatus.UNAUTHORIZED,
-            );
-        const result = await Article.update()(user_id)({ article_id })(body);
+        const identity = await Security.verify()(token);
+        const result = await Article.update()(identity)({
+            article_id,
+        })(body);
         if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+
         const error = Result.Error.flatten(result);
         switch (error.message) {
-            case "NOT_FOUND_ARTICLE":
-                throw Failure.Http.fromInternal(
-                    error,
-                    nest.HttpStatus.NOT_FOUND,
-                );
             case "INSUFFICIENT_PERMISSION":
                 throw Failure.Http.fromInternal(
                     error,
                     nest.HttpStatus.FORBIDDEN,
+                );
+            case "NOT_FOUND_ARTICLE":
+                throw Failure.Http.fromInternal(
+                    error,
+                    nest.HttpStatus.NOT_FOUND,
                 );
         }
     }
@@ -169,15 +160,12 @@ export class ArticleController {
         article_id: string & typia.tags.Format<"uuid">,
     ): Promise<IArticle.Identity> {
         const token = Security.required(security);
-        const user_id = Security.verify(token);
-        const permission = await User.access()(user_id);
-        if (Result.Error.is(permission))
-            throw new Failure.Http(
-                "INVALID_PERMISSION" satisfies ErrorCode.Permission.Invalid,
-                nest.HttpStatus.UNAUTHORIZED,
-            );
-        const result = await Article.remove()(user_id)({ article_id });
+        const identity = await Security.verify()(token);
+        const result = await Article.remove()(identity)({
+            article_id,
+        });
         if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+
         const error = Result.Error.flatten(result);
         switch (error.message) {
             case "NOT_FOUND_ARTICLE":

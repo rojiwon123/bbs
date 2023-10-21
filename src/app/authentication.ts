@@ -15,6 +15,7 @@ import { Prisma } from "../../db/edge";
 import { Token } from "./token";
 
 export interface Authentication {
+    readonly getUrls: () => Promise<Result.Ok<IAuthentication.IOauthUrls>>;
     readonly authorize: (
         tx?: Prisma.TransactionClient,
     ) => (
@@ -44,6 +45,13 @@ export namespace Authentication {
         return Result.Ok.map({
             status: "active",
             access_token: Result.Ok.flatten(result),
+        });
+    };
+
+    export const getUrls: Authentication["getUrls"] = async () => {
+        return Result.Ok.map({
+            github: Oauth.Github.getUrlForLogin(),
+            kakao: Oauth.Kakao.getUrlForLogin(),
         });
     };
     export const authorize: Authentication["authorize"] =

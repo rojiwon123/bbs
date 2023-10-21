@@ -128,7 +128,7 @@ export namespace Util {
         ) =>
         async (expected: {
             success: Success<P, S>;
-            assertBody?: (input: unknown) => Body<P, S>;
+            assertBody: (input: unknown) => Body<P, S>;
             assertHeaders?: <Headers extends Record<string, string | string[]>>(
                 input: unknown,
             ) => Headers;

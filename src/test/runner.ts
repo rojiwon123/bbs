@@ -26,6 +26,8 @@ const test = async (connection: IConnection): Promise<boolean> => {
         parameters: () => [connection],
     })(__dirname + "/features");
 
+    report.executions.forEach((value) => console.log(value));
+
     const executions = pipe(
         report.executions,
 

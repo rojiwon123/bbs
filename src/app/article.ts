@@ -1,26 +1,46 @@
-import { isNull, negate, pipe } from "@fxts/core";
-import typia from "typia";
+import { isNull, map, negate, pipe, toArray } from "@fxts/core";
 
 import { prisma } from "@APP/infrastructure/DB";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
+import "@APP/types/IUser";
+import { IUser } from "@APP/types/IUser";
+import { PrismaReturn } from "@APP/types/internal";
 import { DateMapper } from "@APP/utils/date";
 import { Failure } from "@APP/utils/failure";
 import { assertModule, compare } from "@APP/utils/fx";
 import { Random } from "@APP/utils/random";
 import { Result } from "@APP/utils/result";
 
-import { Prisma, users } from "../../db/edge";
+import { Prisma } from "../../db/edge";
+import { UserEntity } from "./user";
 
 export interface Article {
+    readonly checkUpdatePermission: (
+        tx?: Prisma.TransactionClient,
+    ) => (
+        requestor: IUser.Identity,
+    ) => (
+        identity: IArticle.Identity,
+    ) => Promise<
+        Result<
+            null,
+            Failure.Internal<
+                ErrorCode.Permission.Insufficient | ErrorCode.Article.NotFound
+            >
+        >
+    >;
+
     readonly getList: (
+        tx?: Prisma.TransactionClient,
+    ) => (
         input: IArticle.ISearch,
     ) => Promise<Result.Ok<IArticle.IPaginatedResponse>>;
 
     readonly get: (
         tx?: Prisma.TransactionClient,
     ) => (
-        input: IArticle.Identity,
+        identity: IArticle.Identity,
     ) => Promise<
         Result<IArticle, Failure.Internal<ErrorCode.Article.NotFound>>
     >;
@@ -28,13 +48,13 @@ export interface Article {
     readonly create: (
         tx?: Prisma.TransactionClient,
     ) => (
-        author_id: string & typia.tags.Format<"uuid">,
+        requestor: IUser.Identity,
     ) => (input: IArticle.ICreate) => Promise<Result.Ok<IArticle.Identity>>;
 
     readonly update: (
         tx?: Prisma.TransactionClient,
     ) => (
-        author_id: string & typia.tags.Format<"uuid">,
+        requestor: IUser.Identity,
     ) => (
         identity: IArticle.Identity,
     ) => (
@@ -43,7 +63,7 @@ export interface Article {
         Result<
             IArticle.Identity,
             Failure.Internal<
-                ErrorCode.Article.NotFound | ErrorCode.Permission.Insufficient
+                ErrorCode.Permission.Insufficient | ErrorCode.Article.NotFound
             >
         >
     >;
@@ -51,82 +71,61 @@ export interface Article {
     readonly remove: (
         tx?: Prisma.TransactionClient,
     ) => (
-        author_id: string & typia.tags.Format<"uuid">,
+        requestor: IUser.Identity,
     ) => (
         identity: IArticle.Identity,
     ) => Promise<
         Result<
             IArticle.Identity,
             Failure.Internal<
-                ErrorCode.Article.NotFound | ErrorCode.Permission.Insufficient
+                ErrorCode.Permission.Insufficient | ErrorCode.Article.NotFound
             >
         >
     >;
 }
 
 export namespace Article {
-    export const access =
-        (tx: Prisma.TransactionClient = prisma) =>
-        async ({
-            permission,
-            user_id,
-            article_id,
-        }: {
-            permission: "read" | "write";
-            user_id: string & typia.tags.Format<"uuid">;
-            article_id: string & typia.tags.Format<"uuid">;
-        }): Promise<
-            Result<
-                true,
-                Failure.Internal<
-                    | ErrorCode.Permission.Insufficient
-                    | ErrorCode.Article.NotFound
-                >
-            >
-        > => {
+    export const checkUpdatePermission: Article["checkUpdatePermission"] =
+        (tx = prisma) =>
+        ({ user_id: author_id }) =>
+        async ({ article_id }) => {
             const article = await tx.articles.findFirst({
                 where: { id: article_id },
                 select: { id: true, author_id: true, deleted_at: true },
             });
-            if (isNull(article))
+            if (isNull(article) || negate(isNull)(article.deleted_at))
                 return Result.Error.map(
                     new Failure.Internal<ErrorCode.Article.NotFound>(
                         "NOT_FOUND_ARTICLE",
                     ),
                 );
-            if (negate(isNull)(article.deleted_at))
-                return Result.Error.map(
-                    new Failure.Internal<ErrorCode.Article.NotFound>(
-                        "NOT_FOUND_ARTICLE",
-                    ),
-                );
-            if (permission === "write" && article.author_id !== user_id)
+            if (article.author_id !== author_id)
                 return Result.Error.map(
                     new Failure.Internal<ErrorCode.Permission.Insufficient>(
                         "INSUFFICIENT_PERMISSION",
                     ),
                 );
-            return Result.Ok.map(true);
+            return Result.Ok.map(null);
         };
-    export const getList: Article["getList"] = ({
-        skip = 0,
-        limit = 10,
-        posted_at = "desc",
-    }) =>
-        pipe(
-            ArticleEntity.Summary.select(),
-            async (select) =>
-                prisma.articles.findMany({
-                    select,
-                    where: { deleted_at: null },
-                    skip,
-                    take: limit,
-                    orderBy: { created_at: posted_at },
-                }),
-            ArticleEntity.Summary.map,
-            (data): IArticle.IPaginatedResponse => ({ skip, limit, data }),
-            Result.Ok.map,
-        );
+
+    export const getList: Article["getList"] =
+        (tx = prisma) =>
+        ({ skip = 0, limit = 10, posted_at = "desc" }) =>
+            pipe(
+                ArticleEntity.Summary.select(),
+                async (select) =>
+                    tx.articles.findMany({
+                        select,
+                        where: { deleted_at: null },
+                        skip,
+                        take: limit,
+                        orderBy: { created_at: posted_at },
+                    }),
+                map(ArticleEntity.Summary.map),
+                toArray,
+                (data): IArticle.IPaginatedResponse => ({ skip, limit, data }),
+                Result.Ok.map,
+            );
 
     export const get: Article["get"] =
         (tx = prisma) =>
@@ -152,14 +151,14 @@ export namespace Article {
 
     export const create: Article["create"] =
         (tx = prisma) =>
-        (author_id) =>
+        ({ user_id: author_id }) =>
         async (input) => {
             const article_id = Random.uuid();
             const created_at = DateMapper.toISO();
             await tx.articles.create({
                 data: {
                     id: article_id,
-                    author_id: author_id,
+                    author_id,
                     snapshots: {
                         create: {
                             id: Random.uuid(),
@@ -177,12 +176,10 @@ export namespace Article {
 
     export const update: Article["update"] =
         (tx = prisma) =>
-        (author_id) =>
+        ({ user_id }) =>
         ({ article_id }) =>
         async (input) => {
-            const permission = await access(tx)({
-                permission: "write",
-                user_id: author_id,
+            const permission = await checkUpdatePermission(tx)({ user_id })({
                 article_id,
             });
             if (Result.Error.is(permission)) return permission;
@@ -201,11 +198,9 @@ export namespace Article {
 
     export const remove: Article["remove"] =
         (tx = prisma) =>
-        (author_id) =>
+        ({ user_id }) =>
         async ({ article_id }) => {
-            const permission = await access(tx)({
-                permission: "write",
-                user_id: author_id,
+            const permission = await checkUpdatePermission(tx)({ user_id })({
                 article_id,
             });
             if (Result.Error.is(permission)) return permission;
@@ -218,22 +213,6 @@ export namespace Article {
 }
 
 export namespace ArticleEntity {
-    export const mapAuthor = (
-        author: Pick<users, "id" | "name" | "image_url" | "deleted_at">,
-    ): IArticle.IAuthor => {
-        return isNull(author.deleted_at)
-            ? {
-                  id: author.id,
-                  name: author.name,
-                  image_url: author.image_url,
-              }
-            : {
-                  id: author.id,
-                  name: "deleted user",
-                  image_url: null,
-              };
-    };
-
     export namespace Summary {
         export const select = () =>
             ({
@@ -256,35 +235,34 @@ export namespace ArticleEntity {
             }) satisfies Prisma.articlesSelect;
 
         export const map = (
-            list: Awaited<
-                ReturnType<
-                    typeof prisma.articles.findMany<{
-                        select: ReturnType<typeof select>;
-                    }>
-                >
+            value: PrismaReturn<
+                typeof prisma.articles.findFirst<{
+                    select: ReturnType<typeof select>;
+                }>
             >,
-        ): IArticle.ISummary[] =>
-            list.map((value) => {
-                const isEdited = value.snapshots.length > 1;
-                const snapshots = value.snapshots.sort(
-                    compare("desc")((a) => a.created_at.getTime()),
-                );
+        ): IArticle.ISummary => {
+            const isEdited = value.snapshots.length > 1;
+            const snapshots = value.snapshots.sort(
+                compare("desc")((a) => a.created_at.getTime()),
+            );
 
-                const last_snapshot = {
-                    title: snapshots.at(0)?.title ?? "",
-                    created_at: DateMapper.toISO(
-                        snapshots.at(0)?.created_at ?? value.created_at,
-                    ),
-                };
+            const last_snapshot = {
+                title: snapshots.at(0)?.title ?? "",
+                created_at: DateMapper.toISO(
+                    snapshots.at(0)?.created_at ?? value.created_at,
+                ),
+            };
 
-                return {
-                    id: value.id,
-                    author: mapAuthor(value.author),
-                    title: last_snapshot.title,
-                    posted_at: DateMapper.toISO(value.created_at),
-                    updated_at: isEdited ? last_snapshot.created_at : null,
-                };
-            });
+            return {
+                id: value.id,
+                author: isNull(value.author.deleted_at)
+                    ? { status: "deleted" }
+                    : UserEntity.mapAuthor(value.author),
+                title: last_snapshot.title,
+                posted_at: DateMapper.toISO(value.created_at),
+                updated_at: isEdited ? last_snapshot.created_at : null,
+            };
+        };
     }
 
     export const select = () =>
@@ -311,18 +289,16 @@ export namespace ArticleEntity {
         }) satisfies Prisma.articlesSelect;
 
     export const map = (
-        input: NonNullable<
-            Awaited<
-                ReturnType<
-                    typeof prisma.articles.findFirst<{
-                        select: ReturnType<typeof select>;
-                    }>
-                >
-            >
+        input: PrismaReturn<
+            typeof prisma.articles.findFirst<{
+                select: ReturnType<typeof select>;
+            }>
         >,
     ): IArticle => ({
         id: input.id,
-        author: mapAuthor(input.author),
+        author: isNull(input.author.deleted_at)
+            ? { status: "deleted" }
+            : UserEntity.mapAuthor(input.author),
         snapshots: input.snapshots
             .sort(compare("desc")((a) => a.created_at.getTime()))
             .map((snapshot) => ({

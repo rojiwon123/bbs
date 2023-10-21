@@ -1,6 +1,7 @@
 import { IConnection } from "@nestia/fetcher";
 import { HttpStatus } from "@nestjs/common";
 import api from "@project/api";
+import typia from "typia";
 
 import { Util } from "../internal/utils";
 
@@ -10,4 +11,5 @@ export const test_health_check = (connection: IConnection) =>
         HttpStatus.OK,
     )({
         success: true,
+        assertBody: typia.createAssertEquals<"hello world">(),
     });

@@ -1,16 +1,18 @@
-import { isNull } from "@fxts/core";
+import { isNull, negate } from "@fxts/core";
 import {
     ExecutionContext,
     HttpStatus,
     createParamDecorator,
 } from "@nestjs/common";
 import { Request } from "express";
-import typia from "typia";
 
+import { prisma } from "@APP/infrastructure/DB";
 import { ErrorCode } from "@APP/types/ErrorCode";
+import { IUser } from "@APP/types/IUser";
 import { Failure } from "@APP/utils/failure";
 import { Result } from "@APP/utils/result";
 
+import { Prisma } from "../../db/edge";
 import { Token } from "./token";
 
 export type Security<T = string> = { token: T | null };
@@ -57,28 +59,38 @@ export namespace Security {
         return token;
     };
 
-    export const verify = (
-        token: string,
-    ): string & typia.tags.Format<"uuid"> => {
-        const payload = Token.verify(token);
-        if (Result.Error.is(payload)) {
-            const error = Result.Error.flatten(payload);
-            if (error instanceof Failure.Internal)
-                switch (error.message) {
-                    case "EXPIRED":
-                        throw new Failure.Http(
-                            "EXPIRED_PERMISSION" satisfies ErrorCode.Permission.Expired,
-                            HttpStatus.UNAUTHORIZED,
-                        );
-                    case "INVALID":
-                        throw new Failure.Http(
-                            "INVALID_PERMISSION" satisfies ErrorCode.Permission.Invalid,
-                            HttpStatus.UNAUTHORIZED,
-                        );
-                }
-            throw Failure.Http.fromExternal(error);
-        }
+    export const verify =
+        (tx: Prisma.TransactionClient = prisma) =>
+        async (token: string): Promise<IUser.Identity> => {
+            const payload = Token.verify(token);
+            if (Result.Error.is(payload)) {
+                const error = Result.Error.flatten(payload);
+                if (error instanceof Failure.Internal)
+                    switch (error.message) {
+                        case "EXPIRED":
+                            throw new Failure.Http(
+                                "EXPIRED_PERMISSION" satisfies ErrorCode.Permission.Expired,
+                                HttpStatus.UNAUTHORIZED,
+                            );
+                        case "INVALID":
+                            throw new Failure.Http(
+                                "INVALID_PERMISSION" satisfies ErrorCode.Permission.Invalid,
+                                HttpStatus.UNAUTHORIZED,
+                            );
+                    }
+                throw Failure.Http.fromExternal(error);
+            }
+            const user_id = Result.Ok.flatten(payload).user_id;
+            const user = await tx.users.findFirst({
+                where: { id: user_id },
+                select: { deleted_at: true },
+            });
+            if (isNull(user) || negate(isNull)(user.deleted_at))
+                throw new Failure.Http(
+                    "INVALID_PERMISSION" satisfies ErrorCode.Permission.Invalid,
+                    HttpStatus.UNAUTHORIZED,
+                );
 
-        return Result.Ok.flatten(payload).user_id;
-    };
+            return { user_id };
+        };
 }

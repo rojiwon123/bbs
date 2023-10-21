@@ -18,10 +18,8 @@ export class OAuthController {
      */
     @core.TypedRoute.Get("urls")
     async getUrls(): Promise<IAuthentication.IOauthUrls> {
-        return {
-            kakao: "",
-            github: "",
-        };
+        const result = await Authentication.getUrls();
+        return Result.Ok.flatten(result);
     }
 
     /**
