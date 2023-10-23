@@ -110,6 +110,7 @@ export namespace Comment {
                         "INSUFFICIENT_PERMISSION",
                     ),
                 );
+
             return Result.Ok.map(null);
         };
 

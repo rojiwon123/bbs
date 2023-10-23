@@ -58,7 +58,7 @@ export const remove_comment_successfully = async (connection: IConnection) => {
         assertBody: typia.createAssertEquals<IComment.Identity>(),
     });
 
-    // remove article
+    // remove comment
     await Util.assertResponse(
         test(permission, article_id, comment_id),
         HttpStatus.OK,
@@ -69,7 +69,7 @@ export const remove_comment_successfully = async (connection: IConnection) => {
 
     // then
     const count = await prisma.comments.count({
-        where: { id: comment_id, deleted_at: { not: null } },
+        where: { id: comment_id, deleted_at: null },
     });
 
     if (count > 0) throw Error("comment does not removed");
@@ -120,8 +120,8 @@ export const remove_comment_when_user_is_not_author = async (
 
     const { access_token } = await Util.assertResponse(
         api.functional.auth.oauth.authorize(connection, {
-            oauth_type: "github",
-            code: "author1",
+            oauth_type: "kakao",
+            code: "testuser1",
         }),
         HttpStatus.OK,
     )({
@@ -129,7 +129,7 @@ export const remove_comment_when_user_is_not_author = async (
         assertBody: typia.createAssertEquals<IAuthentication>(),
     });
 
-    // remove article
+    // remove comment
     await Util.assertResponse(
         test(
             Util.addToken(access_token.token)(connection),
@@ -142,6 +142,8 @@ export const remove_comment_when_user_is_not_author = async (
         assertBody:
             typia.createAssertEquals<ErrorCode.Permission.Insufficient>(),
     });
+
+    await Seed.deleteComment(comment_id);
 };
 
 export const remove_comment_when_token_is_missing = async (
@@ -204,7 +206,7 @@ export const remove_comment_when_token_is_expired = async (
 
     const article_id = RandomGenerator.pick(data).id;
 
-    // remove article
+    // remove comment
     await Util.assertResponse(
         test(permission, article_id, Random.uuid()),
         HttpStatus.UNAUTHORIZED,
@@ -229,7 +231,7 @@ export const remove_comment_when_token_is_invalid = async (
 
     const article_id = RandomGenerator.pick(data).id;
 
-    // remove article
+    // remove comment
     await Util.assertResponse(
         test(permission, article_id, Random.uuid()),
         HttpStatus.UNAUTHORIZED,
@@ -273,7 +275,7 @@ export const remove_comment_when_user_id_is_invalid = async (
         data: { deleted_at: DateMapper.toISO() },
     });
 
-    // remove article
+    // remove comment
     await Util.assertResponse(
         test(permission, article_id, Random.uuid()),
         HttpStatus.UNAUTHORIZED,

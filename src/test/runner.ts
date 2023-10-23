@@ -29,7 +29,7 @@ export const runTest = async (connection: IConnection): Promise<0 | -1> => {
             Report.color("Cyan")(result.count),
             Report.color("Green")("Tests Passed"),
         );
-        console.log("Total Elapsed time", result.count, "ms");
+        console.log("Total Elapsed time", result.time, "ms");
     } else {
         console.log(
             "❌",
