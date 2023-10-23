@@ -13,8 +13,7 @@ const NESTIA_CONFIG: nestia.INestiaConfig = {
         output: "packages/api/swagger/swagger.json",
         info: {
             title: "BBS Server",
-            description: "RESTFul API Server for Bulletin Board System",
-            version: "0.0.1",
+            description: "API DOC For Bulletin Board System API Server",
         },
         servers: [
             { url: "http://localhost:4000", description: "Local Server" },
