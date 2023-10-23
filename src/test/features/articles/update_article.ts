@@ -1,3 +1,4 @@
+import { RandomGenerator } from "@nestia/e2e";
 import { IConnection } from "@nestia/fetcher";
 import { HttpStatus } from "@nestjs/common";
 import api from "@project/api";
@@ -97,7 +98,7 @@ export const update_article_when_user_is_not_author = async (
         assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
     });
 
-    const article = data[0]!;
+    const article = RandomGenerator.pick(data);
 
     // update article
     await Util.assertResponse(
@@ -121,7 +122,7 @@ export const update_article_when_token_is_missing = async (
         assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
     });
 
-    const article = data[0]!;
+    const article = RandomGenerator.pick(data);
 
     // update article
     await Util.assertResponse(
@@ -169,7 +170,7 @@ export const update_article_when_token_is_expired = async (
         assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
     });
 
-    const article = data[0]!;
+    const article = RandomGenerator.pick(data);
 
     // update article
     await Util.assertResponse(
@@ -192,7 +193,7 @@ export const update_article_when_token_is_invalid = async (
         assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
     });
 
-    const article = data[0]!;
+    const article = RandomGenerator.pick(data);
 
     // update article
     await Util.assertResponse(

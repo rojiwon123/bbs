@@ -87,15 +87,13 @@ export const update_article_when_user_is_not_author = async (
     } = await Util.assertResponse(
         api.functional.auth.oauth.authorize(connection, {
             oauth_type: "github",
-            code: "testuser1",
+            code: "author1",
         }),
         HttpStatus.OK,
     )({
         success: true,
         assertBody: typia.createAssertEquals<IAuthentication>(),
     });
-
-    const permission = Util.addToken(token)(connection);
 
     const { data } = await Util.assertResponse(
         api.functional.articles.getList(connection, {}),
@@ -110,7 +108,7 @@ export const update_article_when_user_is_not_author = async (
     // create comment
     const { comment_id } = await Util.assertResponse(
         api.functional.articles.comments.create(
-            permission,
+            Util.addToken(token)(connection),
             article_id,
             createBody(),
         ),
@@ -120,15 +118,33 @@ export const update_article_when_user_is_not_author = async (
         assertBody: typia.createAssertEquals<IComment.Identity>(),
     });
 
+    const { access_token } = await Util.assertResponse(
+        api.functional.auth.oauth.authorize(connection, {
+            oauth_type: "github",
+            code: "testuser1",
+        }),
+        HttpStatus.OK,
+    )({
+        success: true,
+        assertBody: typia.createAssertEquals<IAuthentication>(),
+    });
+
     // update article
     await Util.assertResponse(
-        test(permission, article_id, comment_id, createBody()),
+        test(
+            Util.addToken(access_token.token)(connection),
+            article_id,
+            comment_id,
+            createBody(),
+        ),
         HttpStatus.FORBIDDEN,
     )({
         success: false,
         assertBody:
             typia.createAssertEquals<ErrorCode.Permission.Insufficient>(),
     });
+
+    await Seed.deletedComment(comment_id);
 };
 
 export const update_article_when_token_is_missing = async (

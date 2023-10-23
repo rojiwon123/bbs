@@ -24,7 +24,7 @@ export interface Comment {
         identity: IArticle.Identity & IComment.Identity,
     ) => Promise<
         Result<
-            true,
+            null,
             Failure.Internal<
                 ErrorCode.Permission.Insufficient | ErrorCode.Comment.NotFound
             >
@@ -90,11 +90,27 @@ export namespace Comment {
     export const checkUpdatePermission: Comment["checkUpdatePermission"] =
         (tx = prisma) =>
         ({ user_id }) =>
-        async (identity) => {
-            tx;
-            user_id;
-            identity;
-            throw Error("");
+        async ({ article_id, comment_id }) => {
+            const comment = await tx.comments.findFirst({
+                where: {
+                    id: comment_id,
+                    article_id,
+                },
+                select: { author_id: true, deleted_at: true },
+            });
+            if (isNull(comment) || negate(isNull)(comment.deleted_at))
+                return Result.Error.map(
+                    new Failure.Internal<ErrorCode.Comment.NotFound>(
+                        "NOT_FOUND_COMMENT",
+                    ),
+                );
+            if (comment.author_id !== user_id)
+                return Result.Error.map(
+                    new Failure.Internal<ErrorCode.Permission.Insufficient>(
+                        "INSUFFICIENT_PERMISSION",
+                    ),
+                );
+            return Result.Ok.map(null);
         };
 
     export const getList: Comment["getList"] =
@@ -156,9 +172,24 @@ export namespace Comment {
             });
             return Result.Ok.map({ comment_id });
         };
-    export const update: Comment["update"] = () => {
-        throw Error("");
-    };
+    export const update: Comment["update"] =
+        (tx = prisma) =>
+        (requestor) =>
+        (identity) =>
+        async (input) => {
+            const permission =
+                await checkUpdatePermission(tx)(requestor)(identity);
+            if (Result.Error.is(permission)) return permission;
+            await tx.comment_snapshots.create({
+                data: {
+                    id: Random.uuid(),
+                    body: input.body,
+                    comment_id: identity.comment_id,
+                    created_at: DateMapper.toISO(),
+                },
+            });
+            return Result.Ok.map({ comment_id: identity.comment_id });
+        };
     export const remove: Comment["remove"] = () => {
         throw Error("");
     };
