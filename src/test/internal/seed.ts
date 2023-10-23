@@ -112,14 +112,6 @@ export namespace Seed {
         ]);
     };
 
-    export const deleteArticle = async (article_id: string) => {
-        await prisma.article_snapshot_attachments.deleteMany({
-            where: { snapshot: { article_id } },
-        });
-        await prisma.article_snapshots.deleteMany({ where: { article_id } });
-        await prisma.articles.delete({ where: { id: article_id } });
-    };
-
     export const createComment = async (
         article_id: string,
         author_id: string,
@@ -191,12 +183,6 @@ export namespace Seed {
             },
         });
     };
-    export const deleteComment = async (comment_id: string) => {
-        await prisma.comment_snapshots.deleteMany({
-            where: { comment_id },
-        });
-        await prisma.comments.delete({ where: { id: comment_id } });
-    };
     export const createComments = async (
         article_id: string,
         author_id: string,
@@ -221,6 +207,7 @@ export namespace Seed {
         const author1 = await createUser("author1");
         const author2 = await createUser("author2");
         await createUser("testuser1");
+        await createUser("testuser2");
         await createArticles(author1.id);
         const article = await createArticle(author1.id);
         await createComments(article.id, author2.id);
@@ -237,7 +224,7 @@ export namespace Seed {
     };
 
     export const truncate = async () => {
-        await seed_size_analyze("user", 3, prisma.users.count());
+        await seed_size_analyze("user", 4, prisma.users.count());
         await seed_size_analyze("article", 13, prisma.articles.count());
         await seed_size_analyze("comment", 13, prisma.comments.count());
 

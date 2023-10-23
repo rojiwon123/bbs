@@ -8,15 +8,13 @@ import { IArticle } from "@APP/types/IArticle";
 
 const test = api.functional.articles.getList;
 
-export const get_article_list_successfully = (connection: IConnection) =>
+export const test_get_article_list_successfully = (connection: IConnection) =>
     Util.assertResponse(
         test(connection, { skip: 5 }),
         HttpStatus.OK,
     )({
         success: true,
-        assertBody: (input) => {
-            const body = typia.assertEquals<IArticle.IPaginatedResponse>(input);
-            if (body.data.length === 0) throw Error("article list is empty!");
-            return body;
-        },
+        assertBody: Util.assertNotEmptyPaginatedResponse(
+            typia.createAssertEquals<IArticle.IPaginatedResponse>(),
+        ),
     });

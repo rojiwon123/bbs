@@ -5,7 +5,7 @@ import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
 import { IComment } from "@APP/types/IComment";
 import { IUser } from "@APP/types/IUser";
-import { PrismaReturn } from "@APP/types/internal";
+import { PrismaReturn } from "@APP/types/global";
 import { DateMapper } from "@APP/utils/date";
 import { Failure } from "@APP/utils/failure";
 import { assertModule, compare } from "@APP/utils/fx";
@@ -130,7 +130,7 @@ export namespace Comment {
                     ),
                 );
             const comments = await tx.comments.findMany({
-                where: { article_id },
+                where: { article_id, deleted_at: null },
                 select: CommentEntity.select(),
                 skip,
                 take: limit,
