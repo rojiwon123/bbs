@@ -7,7 +7,7 @@ import {
 } from "schemix/dist/typings/prisma-type-options";
 import { handleRelationalOptions } from "schemix/dist/util/options";
 
-import { Omit } from "@APP/types/internal";
+import { Omit } from "@APP/types/global";
 
 import { Description } from "./description";
 import { Raw } from "./raw";

@@ -1,5 +1,7 @@
 import { IConnection, IPropagation } from "@nestia/fetcher";
 
+import { IPage } from "@APP/types/IPage";
+
 export namespace Util {
     export const addHeaders =
         (headers: Record<string, string>) =>
@@ -63,5 +65,15 @@ export namespace Util {
             if (expected.assertBody) expected.assertBody(data);
             if (expected.assertHeaders) expected.assertHeaders(headers);
             return data;
+        };
+
+    export const assertNotEmptyPaginatedResponse =
+        <T extends IPage.IResponse<R>, R>(
+            assertEquals: (input: unknown) => T,
+        ) =>
+        (input: unknown): T => {
+            const body = assertEquals(input);
+            if (body.data.length === 0) throw Error("list is empty");
+            return body;
         };
 }

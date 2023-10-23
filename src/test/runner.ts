@@ -6,7 +6,7 @@ import { Report } from "./internal/report";
 export const runTest = async (connection: IConnection): Promise<0 | -1> => {
     const only_option = process.argv.find((exe) => exe.startsWith("--only="));
     const report = await DynamicExecutor.validate({
-        prefix: "",
+        prefix: "test_",
         parameters: () => [connection],
         wrapper: async (_, closure) => {
             try {
