@@ -48,6 +48,7 @@ export namespace Report {
         result: -1;
         total_count: number;
         failed_count: number;
+        time: number;
         failed: { name: string; cases: { name: string; error: Error }[] }[];
     }
     export const analyze = (report: DynamicExecutor.IReport): IAnalyze => {
@@ -107,6 +108,7 @@ export namespace Report {
 
         return {
             result: -1,
+            time: report.time,
             total_count: report.executions.length,
             failed_count: failed.length,
             failed,
@@ -139,10 +141,11 @@ export namespace Report {
             write();
             write("## Summary");
             write();
-            write("| State | Count |");
-            write("| :---: | :---: |");
-            write(`| Total | ${result.count} |`);
-            write(`| Elapsed Time | ${result.time} ms |`);
+            write("| Total | Passed | Failed | Elapsed Time |");
+            write("| :---: | :---: | :---: | :---: |");
+            write(
+                `| ${result.count} | ${result.count} | 0 | ${result.time} ms |`,
+            );
             write();
             write("## Detail");
             write();
@@ -161,10 +164,13 @@ export namespace Report {
             write();
             write("## Summary");
             write();
-            write("| State | Count |");
-            write("| :---: | :---: |");
-            write(`| Failed | ${result.failed_count} |`);
-            write(`| Total | ${result.total_count} |`);
+            write("| Total | Passed | Failed | Elapsed Time |");
+            write("| :---: | :---: | :---: | :---: |");
+            write(
+                `| ${result.total_count} | ${
+                    result.total_count - result.failed_count
+                } | ${result.failed_count} | ${result.time} ms |`,
+            );
             write();
             write("## Detail");
             write();
