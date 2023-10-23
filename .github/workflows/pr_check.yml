@@ -46,7 +46,7 @@ jobs:
               run: npm run db:deploy
 
             - name: Test 🧪
-              run: npm run test
+              run: npm run test -- --report
 
             - name: Create or Update PR Comment 💬
               if: matrix.node-version == '18.x'

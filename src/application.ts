@@ -4,8 +4,6 @@ import { NestFactory } from "@nestjs/core";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 
-import { DateMapper } from "@APP/utils/date";
-
 import { prisma } from "./infrastructure/DB";
 import { Configuration } from "./infrastructure/config";
 import { InfraModule } from "./infrastructure/infra.module";
@@ -33,13 +31,23 @@ export namespace Backend {
             await end(app);
             process.exit(0);
         });
-        Logger.info(`Server start ${DateMapper.toISO()}`);
+
+        Logger.info(
+            `Server start ${new Date().toLocaleString(undefined, {
+                timeZoneName: "longGeneric",
+            })}`,
+        );
+
         return app;
     };
 
     export const end = async (app: INestApplication) => {
         await app.close();
         await prisma.$disconnect();
-        Logger.info(`Server end ${DateMapper.toISO()}`);
+        Logger.info(
+            `Server end ${new Date().toLocaleString(undefined, {
+                timeZoneName: "longGeneric",
+            })}`,
+        );
     };
 }

@@ -1,8 +1,11 @@
 import core from "@nestia/core";
 import * as nest from "@nestjs/common";
 
+import { Authentication } from "@APP/app/authentication";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IAuthentication } from "@APP/types/IAuthentication";
+import { Failure } from "@APP/utils/failure";
+import { Result } from "@APP/utils/result";
 
 @nest.Controller("auth/oauth")
 export class OAuthController {
@@ -15,10 +18,8 @@ export class OAuthController {
      */
     @core.TypedRoute.Get("urls")
     async getUrls(): Promise<IAuthentication.IOauthUrls> {
-        return {
-            kakao: "",
-            github: "",
-        };
+        const result = await Authentication.getUrls();
+        return Result.Ok.flatten(result);
     }
 
     /**
@@ -38,7 +39,17 @@ export class OAuthController {
     async authorize(
         @core.TypedBody() body: IAuthentication.IOauthInput,
     ): Promise<IAuthentication> {
-        body;
-        throw Error("");
+        const result = await Authentication.authorize()(body);
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        if (error instanceof Failure.Internal)
+            switch (error.message) {
+                case "AUTHENTICATION_FAIL":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.UNAUTHORIZED,
+                    );
+            }
+        throw Failure.Http.fromExternal(error);
     }
 }

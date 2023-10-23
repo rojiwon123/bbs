@@ -1,8 +1,6 @@
 import { isUndefined } from "@fxts/core";
 import crypto from "crypto";
 
-import { ErrorCode } from "@APP/types/ErrorCode";
-
 import { Failure } from "./failure";
 import { Result } from "./result";
 
@@ -61,13 +59,12 @@ export namespace Crypto {
         key: string;
     }): Result<
         string,
-        | Failure.External<"Crypto.decrypt">
-        | Failure.Internal<ErrorCode.Token.Invalid>
+        Failure.External<"Crypto.decrypt"> | Failure.Internal<"INVALID">
     > => {
         try {
             const [iv, tag, encrypted] = token.split(".");
             if (isUndefined(iv) || isUndefined(tag) || isUndefined(encrypted))
-                return Result.Error.map(new Failure.Internal("INVALID_TOKEN"));
+                return Result.Error.map(new Failure.Internal("INVALID"));
 
             const decipher = crypto
                 .createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "base64"))

@@ -251,7 +251,7 @@ model authentications {
   created_at DateTime  @database.Timestamptz
   /// revision time of record
   /// 
-  updated_at DateTime  @database.Timestamptz
+  updated_at DateTime? @database.Timestamptz
   /// deletion time of record
   /// 
   /// if null, a record is soft-deleted
@@ -287,7 +287,7 @@ model users {
   created_at      DateTime          @database.Timestamptz
   /// revision time of record
   /// 
-  updated_at      DateTime          @database.Timestamptz
+  updated_at      DateTime?         @database.Timestamptz
   /// deletion time of record
   /// 
   /// if null, a record is soft-deleted
