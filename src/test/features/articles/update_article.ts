@@ -42,6 +42,8 @@ export const update_article_successfully = async (connection: IConnection) => {
         assertBody: typia.createAssertEquals<IArticle.Identity>(),
     });
 
+    const now = new Date();
+
     // update article
     await Util.assertResponse(
         test(permission, article_id, createBody()),
@@ -50,6 +52,20 @@ export const update_article_successfully = async (connection: IConnection) => {
         success: true,
         assertBody: typia.createAssertEquals<IArticle.Identity>(),
     });
+
+    // then
+
+    const article = await Util.assertResponse(
+        api.functional.articles.get(connection, article_id),
+        HttpStatus.OK,
+    )({
+        success: true,
+        assertBody: typia.createAssertEquals<IArticle>(),
+    });
+
+    const last_snapshot = article.snapshots.at(0)!;
+    if (now >= new Date(last_snapshot.created_at))
+        throw Error("article snapshot does not created");
 
     await Seed.deleteArticle(article_id);
 };
