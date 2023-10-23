@@ -42,7 +42,11 @@ export namespace Report {
         result: 0;
         count: number;
         time: number;
-        passed: { name: string; cases: { name: string; time: number }[] }[];
+        passed: {
+            name: string;
+            time: number;
+            cases: { name: string; time: number }[];
+        }[];
     }
     interface Failed {
         result: -1;
@@ -72,6 +76,7 @@ export namespace Report {
                 if (isUndefined(group))
                     passed.push({
                         name: group_name,
+                        time: exe.time,
                         cases: [
                             {
                                 name: exe.name,
@@ -79,7 +84,10 @@ export namespace Report {
                             },
                         ],
                     });
-                else group.cases.push({ name: exe.name, time: exe.time });
+                else {
+                    group.time += exe.time;
+                    group.cases.push({ name: exe.name, time: exe.time });
+                }
             });
             return {
                 result: 0,
@@ -151,7 +159,7 @@ export namespace Report {
             write();
             result.passed.forEach((group) => {
                 write("<details>");
-                write(`<summary>${group.name}</summary>`);
+                write(`<summary>${group.name}: ${group.time} ms</summary>`);
                 write();
                 group.cases.forEach((exe) => {
                     write(`-   ${exe.name}: ${exe.time} ms`);
