@@ -67,7 +67,7 @@ export const create_comment_successfully = async (connection: IConnection) => {
     });
     if (check !== 1) throw Error("comment does not created");
     // delete comment
-    await Seed.deletedComment(comment_id);
+    await Seed.deleteComment(comment_id);
 };
 
 export const create_comment_when_article_does_not_exist = async (

@@ -75,10 +75,10 @@ export const update_comment_successfully = async (connection: IConnection) => {
     });
     if (count !== 2) throw Error("snapshot does now created");
 
-    await Seed.deletedComment(comment_id);
+    await Seed.deleteComment(comment_id);
 };
 
-export const update_article_when_user_is_not_author = async (
+export const update_comment_when_user_is_not_author = async (
     connection: IConnection,
 ) => {
     // sign-in
@@ -144,10 +144,10 @@ export const update_article_when_user_is_not_author = async (
             typia.createAssertEquals<ErrorCode.Permission.Insufficient>(),
     });
 
-    await Seed.deletedComment(comment_id);
+    await Seed.deleteComment(comment_id);
 };
 
-export const update_article_when_token_is_missing = async (
+export const update_comment_when_token_is_missing = async (
     connection: IConnection,
 ) => {
     const { data } = await Util.assertResponse(
@@ -170,7 +170,7 @@ export const update_article_when_token_is_missing = async (
     });
 };
 
-export const update_article_when_token_is_expired = async (
+export const update_comment_when_token_is_expired = async (
     connection: IConnection,
 ) => {
     // mocking for generating expired token
@@ -218,7 +218,7 @@ export const update_article_when_token_is_expired = async (
     });
 };
 
-export const update_article_when_token_is_invalid = async (
+export const update_comment_when_token_is_invalid = async (
     connection: IConnection,
 ) => {
     const { data } = await Util.assertResponse(
@@ -246,7 +246,7 @@ export const update_article_when_token_is_invalid = async (
     });
 };
 
-export const update_article_when_user_id_is_invalid = async (
+export const update_comment_when_user_id_is_invalid = async (
     connection: IConnection,
 ) => {
     // sign-in

@@ -191,7 +191,7 @@ export namespace Seed {
             },
         });
     };
-    export const deletedComment = async (comment_id: string) => {
+    export const deleteComment = async (comment_id: string) => {
         await prisma.comment_snapshots.deleteMany({
             where: { comment_id },
         });

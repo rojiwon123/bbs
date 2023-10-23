@@ -190,9 +190,19 @@ export namespace Comment {
             });
             return Result.Ok.map({ comment_id: identity.comment_id });
         };
-    export const remove: Comment["remove"] = () => {
-        throw Error("");
-    };
+    export const remove: Comment["remove"] =
+        (tx = prisma) =>
+        (requestor) =>
+        async (identity) => {
+            const permission =
+                await checkUpdatePermission(tx)(requestor)(identity);
+            if (Result.Error.is(permission)) return permission;
+            await tx.comments.updateMany({
+                where: { id: identity.comment_id },
+                data: { deleted_at: DateMapper.toISO() },
+            });
+            return Result.Ok.map({ comment_id: identity.comment_id });
+        };
 }
 
 export namespace CommentEntity {
