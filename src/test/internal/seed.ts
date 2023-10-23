@@ -193,7 +193,7 @@ export namespace Seed {
     };
     export const deletedComment = async (comment_id: string) => {
         await prisma.comment_snapshots.deleteMany({
-            where: { id: comment_id },
+            where: { comment_id },
         });
         await prisma.comments.delete({ where: { id: comment_id } });
     };

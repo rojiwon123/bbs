@@ -9,6 +9,7 @@ import { PrismaReturn } from "@APP/types/internal";
 import { DateMapper } from "@APP/utils/date";
 import { Failure } from "@APP/utils/failure";
 import { assertModule, compare } from "@APP/utils/fx";
+import { Random } from "@APP/utils/random";
 import { Result } from "@APP/utils/result";
 
 import { Prisma } from "../../db/edge";
@@ -121,9 +122,40 @@ export namespace Comment {
             const data = comments.map(CommentEntity.map);
             return Result.Ok.map({ data, skip, limit });
         };
-    export const create: Comment["create"] = () => {
-        throw Error();
-    };
+    export const create: Comment["create"] =
+        (tx = prisma) =>
+        ({ user_id }) =>
+        ({ article_id }) =>
+        async (input) => {
+            const article = await tx.articles.findFirst({
+                where: { id: article_id },
+                select: { deleted_at: true },
+            });
+            if (isNull(article) || negate(isNull)(article.deleted_at))
+                return Result.Error.map(
+                    new Failure.Internal<ErrorCode.Article.NotFound>(
+                        "NOT_FOUND_ARTICLE",
+                    ),
+                );
+            const now = DateMapper.toISO();
+            const comment_id = Random.uuid();
+            await tx.comments.create({
+                data: {
+                    id: comment_id,
+                    author_id: user_id,
+                    article_id,
+                    created_at: now,
+                    snapshots: {
+                        create: {
+                            id: Random.uuid(),
+                            body: input.body,
+                            created_at: now,
+                        },
+                    },
+                },
+            });
+            return Result.Ok.map({ comment_id });
+        };
     export const update: Comment["update"] = () => {
         throw Error("");
     };
