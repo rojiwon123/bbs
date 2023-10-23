@@ -10,10 +10,10 @@ import {
     check_permission_expired,
     check_permission_invalid,
     check_permission_required,
-    delete_user,
     get_expired_token,
     get_token,
-    restore_delete_user,
+    remove_user,
+    restore_remove_user,
 } from "../auth/_fragment";
 import {
     create_article,
@@ -68,9 +68,9 @@ export const test_create_article_when_user_id_is_invalid = async (
 ) => {
     const username = "testuser1";
     const token = await get_token(connection, username);
-    const { user_id } = await delete_user(username);
+    const { user_id } = await remove_user(username);
 
     await check_permission_invalid(test(Util.addToken(token)(connection)));
 
-    await restore_delete_user(user_id);
+    await restore_remove_user(user_id);
 };

@@ -11,10 +11,10 @@ import {
     check_permission_insufficient,
     check_permission_invalid,
     check_permission_required,
-    delete_user,
     get_expired_token,
     get_token,
-    restore_delete_user,
+    remove_user,
+    restore_remove_user,
 } from "../auth/_fragment";
 import {
     check_article_not_found,
@@ -32,7 +32,6 @@ export const test_remove_article_successfully = async (
     const permission = Util.addToken(token)(connection);
     const { article_id } = await create_article(permission);
 
-    // remove article
     await Util.assertResponse(
         test(permission, article_id),
         HttpStatus.OK,
@@ -41,7 +40,6 @@ export const test_remove_article_successfully = async (
         assertBody: typia.createAssertEquals<IArticle.Identity>(),
     });
 
-    // check really removed
     await check_article_not_found(test(permission, article_id));
     await restore_create_article(article_id);
 };
@@ -67,7 +65,7 @@ export const test_remove_article_when_token_is_missing = async (
     await check_permission_required(test(connection, article_id));
 };
 
-export const remove_article_when_token_is_expired = async (
+export const test_remove_article_when_token_is_expired = async (
     connection: IConnection,
 ) => {
     const token = await get_expired_token(connection, "testuser1");
@@ -97,9 +95,9 @@ export const test_remove_article_when_user_id_is_invalid = async (
     const permission = Util.addToken(token)(connection);
     const article_id = await get_article_id_random(connection);
 
-    const { user_id } = await delete_user(username);
+    const { user_id } = await remove_user(username);
 
     await check_permission_invalid(test(permission, article_id));
 
-    await restore_delete_user(user_id);
+    await restore_remove_user(user_id);
 };

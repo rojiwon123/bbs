@@ -1,296 +1,154 @@
-import { RandomGenerator } from "@nestia/e2e";
+import { isUndefined } from "@fxts/core";
 import { IConnection } from "@nestia/fetcher";
 import { HttpStatus } from "@nestjs/common";
 import api from "@project/api";
 import typia from "typia";
 
-import { prisma } from "@APP/infrastructure/DB";
-import { Mock } from "@APP/test/internal/mock";
-import { Seed } from "@APP/test/internal/seed";
 import { Util } from "@APP/test/internal/utils";
-import { ErrorCode } from "@APP/types/ErrorCode";
-import { IArticle } from "@APP/types/IArticle";
-import { IAuthentication } from "@APP/types/IAuthentication";
 import { IComment } from "@APP/types/IComment";
-import { DateMapper } from "@APP/utils/date";
 import { Random } from "@APP/utils/random";
 
-const test = api.functional.articles.comments.update;
+import {
+    create_article,
+    get_article_id_random,
+    restore_create_article,
+} from "../articles/_fragment";
+import {
+    check_permission_expired,
+    check_permission_insufficient,
+    check_permission_invalid,
+    check_permission_required,
+    get_expired_token,
+    get_token,
+    remove_user,
+    restore_remove_user,
+} from "../auth/_fragment";
+import {
+    create_comment,
+    get_comment_list,
+    restore_create_comment,
+} from "./_fragment";
 
-const createBody = typia.createRandom<IComment.ICreate>();
+const test = (
+    connection: IConnection,
+    article_id: string & typia.tags.Format<"uuid">,
+    comment_id: string & typia.tags.Format<"uuid">,
+) =>
+    api.functional.articles.comments.update(
+        connection,
+        article_id,
+        comment_id,
+        typia.random<IComment.ICreate>(),
+    );
 
-export const update_comment_successfully = async (connection: IConnection) => {
-    // sign-in
-    const {
-        access_token: { token },
-    } = await Util.assertResponse(
-        api.functional.auth.oauth.authorize(connection, {
-            oauth_type: "github",
-            code: "testuser1",
-        }),
-        HttpStatus.OK,
-    )({
-        success: true,
-        assertBody: typia.createAssertEquals<IAuthentication>(),
-    });
-
-    const permission = Util.addToken(token)(connection);
-
-    const { data } = await Util.assertResponse(
-        api.functional.articles.getList(connection, {}),
-        HttpStatus.OK,
-    )({
-        success: true,
-        assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
-    });
-
-    const article_id = RandomGenerator.pick(data).id;
-
-    // create comment
-    const { comment_id } = await Util.assertResponse(
-        api.functional.articles.comments.create(
-            permission,
-            article_id,
-            createBody(),
-        ),
-        HttpStatus.CREATED,
-    )({
-        success: true,
-        assertBody: typia.createAssertEquals<IComment.Identity>(),
-    });
-
-    // update article
-    await Util.assertResponse(
-        test(permission, article_id, comment_id, createBody()),
-        HttpStatus.CREATED,
-    )({
-        success: true,
-        assertBody: typia.createAssertEquals<IComment.Identity>(),
-    });
-
-    // then
-
-    const count = await prisma.comment_snapshots.count({
-        where: { comment_id },
-    });
-    if (count !== 2) throw Error("snapshot does now created");
-
-    await Seed.deleteComment(comment_id);
-};
-
-export const update_comment_when_user_is_not_author = async (
+export const test_update_comment_successfully = async (
     connection: IConnection,
 ) => {
-    // sign-in
-    const {
-        access_token: { token },
-    } = await Util.assertResponse(
-        api.functional.auth.oauth.authorize(connection, {
-            oauth_type: "github",
-            code: "author1",
-        }),
-        HttpStatus.OK,
-    )({
-        success: true,
-        assertBody: typia.createAssertEquals<IAuthentication>(),
-    });
+    const token = await get_token(connection, "testuser1");
+    const permission = Util.addToken(token)(connection);
+    const { article_id } = await create_article(permission);
+    const { comment_id } = await create_comment(permission, article_id);
+    const now = new Date();
 
-    const { data } = await Util.assertResponse(
-        api.functional.articles.getList(connection, {}),
-        HttpStatus.OK,
-    )({
-        success: true,
-        assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
-    });
-
-    const article_id = RandomGenerator.pick(data).id;
-
-    // create comment
-    const { comment_id } = await Util.assertResponse(
-        api.functional.articles.comments.create(
-            Util.addToken(token)(connection),
-            article_id,
-            createBody(),
-        ),
+    await Util.assertResponse(
+        test(permission, article_id, comment_id),
         HttpStatus.CREATED,
     )({
         success: true,
         assertBody: typia.createAssertEquals<IComment.Identity>(),
     });
 
-    const { access_token } = await Util.assertResponse(
-        api.functional.auth.oauth.authorize(connection, {
-            oauth_type: "github",
-            code: "testuser1",
-        }),
-        HttpStatus.OK,
-    )({
-        success: true,
-        assertBody: typia.createAssertEquals<IAuthentication>(),
-    });
+    const comments = await get_comment_list(connection, article_id);
+    const comment = comments.data.at(0)?.snapshots.at(0);
 
-    // update article
-    await Util.assertResponse(
+    if (isUndefined(comment)) throw Error("comment not found");
+    if (now >= new Date(comment.created_at))
+        throw Error("comment does not updated");
+
+    await restore_create_comment(comment_id);
+    await restore_create_article(article_id);
+};
+
+export const test_update_comment_when_user_is_not_author = async (
+    connection: IConnection,
+) => {
+    const article_id = await get_article_id_random(connection);
+    const { comment_id } = await create_comment(
+        Util.addToken(await get_token(connection, "testuser1"))(connection),
+        article_id,
+    );
+    const token = await get_token(connection, "testuser2");
+    const permission = Util.addToken(token)(connection);
+
+    await check_permission_insufficient(
+        test(permission, article_id, comment_id),
+    );
+
+    await restore_create_comment(comment_id);
+};
+
+export const test_update_comment_when_token_is_missing = async (
+    connection: IConnection,
+) => {
+    const token = await get_token(connection, "testuser1");
+    const permission = Util.addToken(token)(connection);
+    const article_id = await get_article_id_random(connection);
+    const { comment_id } = await create_comment(permission, article_id);
+
+    await check_permission_required(test(connection, article_id, comment_id));
+
+    await restore_create_comment(comment_id);
+};
+
+export const test_update_comment_when_token_is_expired = async (
+    connection: IConnection,
+) => {
+    const token = await get_token(connection, "testuser1");
+    const permission = Util.addToken(token)(connection);
+    const article_id = await get_article_id_random(connection);
+    const { comment_id } = await create_comment(permission, article_id);
+    const expired_permission = Util.addToken(
+        await get_expired_token(connection, "testuser1"),
+    )(connection);
+
+    await check_permission_expired(
+        test(expired_permission, article_id, comment_id),
+    );
+
+    await restore_create_comment(comment_id);
+};
+
+export const test_update_comment_when_token_is_invalid = async (
+    connection: IConnection,
+) => {
+    const token = await get_token(connection, "testuser1");
+    const permission = Util.addToken(token)(connection);
+    const article_id = await get_article_id_random(connection);
+    const { comment_id } = await create_comment(permission, article_id);
+
+    await check_permission_invalid(
         test(
-            Util.addToken(access_token.token)(connection),
+            Util.addToken(Random.string(20))(connection),
             article_id,
             comment_id,
-            createBody(),
         ),
-        HttpStatus.FORBIDDEN,
-    )({
-        success: false,
-        assertBody:
-            typia.createAssertEquals<ErrorCode.Permission.Insufficient>(),
-    });
+    );
 
-    await Seed.deleteComment(comment_id);
+    await restore_create_comment(comment_id);
 };
 
-export const update_comment_when_token_is_missing = async (
+export const test_update_comment_when_user_id_is_invalid = async (
     connection: IConnection,
 ) => {
-    const { data } = await Util.assertResponse(
-        api.functional.articles.getList(connection, {}),
-        HttpStatus.OK,
-    )({
-        success: true,
-        assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
-    });
-
-    const article_id = RandomGenerator.pick(data).id;
-
-    // update article
-    await Util.assertResponse(
-        test(connection, article_id, Random.uuid(), createBody()),
-        HttpStatus.UNAUTHORIZED,
-    )({
-        success: false,
-        assertBody: typia.createAssertEquals<ErrorCode.Permission.Required>(),
-    });
-};
-
-export const update_comment_when_token_is_expired = async (
-    connection: IConnection,
-) => {
-    // mocking for generating expired token
-    Mock.implement(DateMapper, "toISO", () => {
-        const now = new Date();
-        now.setFullYear(now.getFullYear() - 1);
-        return now.toISOString();
-    });
-
-    // sign-in
-    const {
-        access_token: { token },
-    } = await Util.assertResponse(
-        api.functional.auth.oauth.authorize(connection, {
-            oauth_type: "github",
-            code: "testuser1",
-        }),
-        HttpStatus.OK,
-    )({
-        success: true,
-        assertBody: typia.createAssertEquals<IAuthentication>(),
-    });
-
+    const username = "testuser1";
+    const token = await get_token(connection, username);
     const permission = Util.addToken(token)(connection);
+    const article_id = await get_article_id_random(connection);
+    const { comment_id } = await create_comment(permission, article_id);
+    const { user_id } = await remove_user(username);
 
-    Mock.restore(DateMapper, "toISO");
+    await check_permission_required(test(connection, article_id, comment_id));
 
-    const { data } = await Util.assertResponse(
-        api.functional.articles.getList(connection, {}),
-        HttpStatus.OK,
-    )({
-        success: true,
-        assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
-    });
-
-    const article_id = RandomGenerator.pick(data).id;
-
-    // update article
-    await Util.assertResponse(
-        test(permission, article_id, Random.uuid(), createBody()),
-        HttpStatus.UNAUTHORIZED,
-    )({
-        success: false,
-        assertBody: typia.createAssertEquals<ErrorCode.Permission.Expired>(),
-    });
-};
-
-export const update_comment_when_token_is_invalid = async (
-    connection: IConnection,
-) => {
-    const { data } = await Util.assertResponse(
-        api.functional.articles.getList(connection, {}),
-        HttpStatus.OK,
-    )({
-        success: true,
-        assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
-    });
-
-    const article_id = RandomGenerator.pick(data).id;
-
-    // update article
-    await Util.assertResponse(
-        test(
-            Util.addToken("fsoefn")(connection),
-            article_id,
-            Random.uuid(),
-            createBody(),
-        ),
-        HttpStatus.UNAUTHORIZED,
-    )({
-        success: false,
-        assertBody: typia.createAssertEquals<ErrorCode.Permission.Invalid>(),
-    });
-};
-
-export const update_comment_when_user_id_is_invalid = async (
-    connection: IConnection,
-) => {
-    // sign-in
-    const {
-        access_token: { token },
-    } = await Util.assertResponse(
-        api.functional.auth.oauth.authorize(connection, {
-            oauth_type: "github",
-            code: "testuser1",
-        }),
-        HttpStatus.OK,
-    )({
-        success: true,
-        assertBody: typia.createAssertEquals<IAuthentication>(),
-    });
-
-    const permission = Util.addToken(token)(connection);
-
-    const { data } = await Util.assertResponse(
-        api.functional.articles.getList(connection, {}),
-        HttpStatus.OK,
-    )({
-        success: true,
-        assertBody: typia.createAssertEquals<IArticle.IPaginatedResponse>(),
-    });
-
-    const article_id = RandomGenerator.pick(data).id;
-
-    await prisma.users.updateMany({
-        where: { name: "testuser1" },
-        data: { deleted_at: DateMapper.toISO() },
-    });
-
-    // update article
-    await Util.assertResponse(
-        test(permission, article_id, Random.uuid(), createBody()),
-        HttpStatus.UNAUTHORIZED,
-    )({
-        success: false,
-        assertBody: typia.createAssertEquals<ErrorCode.Permission.Invalid>(),
-    });
-
-    await prisma.users.updateMany({
-        where: { name: "testuser1" },
-        data: { deleted_at: null },
-    });
+    await restore_remove_user(user_id);
+    await restore_create_comment(comment_id);
 };

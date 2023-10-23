@@ -101,7 +101,7 @@ export const check_permission_insufficient = (
             typia.createAssertEquals<ErrorCode.Permission.Insufficient>(),
     });
 
-export const delete_user = async (username: string) => {
+export const remove_user = async (username: string) => {
     const user = await prisma.users.findFirst({
         where: { name: username, deleted_at: null },
     });
@@ -113,7 +113,7 @@ export const delete_user = async (username: string) => {
     return { user_id: user.id };
 };
 
-export const restore_delete_user = async (user_id: string) => {
+export const restore_remove_user = async (user_id: string) => {
     await prisma.users.update({
         where: { id: user_id },
         data: { deleted_at: null },

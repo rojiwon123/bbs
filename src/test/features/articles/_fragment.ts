@@ -8,6 +8,7 @@ import { prisma } from "@APP/infrastructure/DB";
 import { Util } from "@APP/test/internal/utils";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
+import { DateMapper } from "@APP/utils/date";
 
 export const create_article = (connection: IConnection) =>
     Util.assertResponse(
@@ -66,3 +67,22 @@ export const check_article_not_found = (
         success: false,
         assertBody: typia.createAssertEquals<ErrorCode.Article.NotFound>(),
     });
+
+export const remove_article = async (
+    article_id: string & typia.tags.Format<"uuid">,
+) => {
+    await prisma.articles.update({
+        where: { id: article_id, deleted_at: null },
+        data: { deleted_at: DateMapper.toISO() },
+    });
+    return { article_id };
+};
+
+export const restore_remove_article = async (
+    article_id: string & typia.tags.Format<"uuid">,
+) => {
+    await prisma.articles.update({
+        where: { id: article_id, deleted_at: { not: null } },
+        data: { deleted_at: null },
+    });
+};

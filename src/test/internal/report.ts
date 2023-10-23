@@ -118,7 +118,7 @@ export namespace Report {
             result: -1,
             time: report.time,
             total_count: report.executions.length,
-            failed_count: failed.length,
+            failed_count: executions.length,
             failed,
         };
     };
@@ -159,7 +159,9 @@ export namespace Report {
             write();
             result.passed.forEach((group) => {
                 write("<details>");
-                write(`<summary>${group.name}: ${group.time} ms</summary>`);
+                write(
+                    `<summary>${group.name}: ${group.cases.length} passed, ${group.time} ms</summary>`,
+                );
                 write();
                 group.cases.forEach((exe) => {
                     write(`-   ${exe.name}: ${exe.time} ms`);

@@ -130,7 +130,7 @@ export namespace Comment {
                     ),
                 );
             const comments = await tx.comments.findMany({
-                where: { article_id },
+                where: { article_id, deleted_at: null },
                 select: CommentEntity.select(),
                 skip,
                 take: limit,
