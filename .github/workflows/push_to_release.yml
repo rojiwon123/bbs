@@ -11,12 +11,13 @@ permissions:
     contents: write
     packages: write
 
+env:
+    DATABASE_URL: postgresql://test:test@localhost:5432/test
+
 jobs:
     test:
         runs-on: ubuntu-latest
         if: startsWith(github.event.head_commit.message, '🔖')
-        env:
-            DATABASE_URL: postgresql://test:test@localhost:5432/test
         services:
             postgres:
                 image: postgres:14
