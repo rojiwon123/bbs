@@ -1,6 +1,6 @@
 {
     "name": "@industriously/bbs",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Bulletin Board System RESTFul API Server",
     "main": "build/main",
     "scripts": {
