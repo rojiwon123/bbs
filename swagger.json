@@ -2,14 +2,14 @@
   "openapi": "3.0.1",
   "servers": [
     {
-      "url": "https://localhost:4000",
+      "url": "http://localhost:4000",
       "description": "Local Server"
     }
   ],
   "info": {
     "title": "BBS Server",
-    "description": "RESTFul API Server for Bulletin Board System",
-    "version": "0.0.1",
+    "description": "API DOC For Bulletin Board System API Server",
+    "version": "0.0.2",
     "license": {
       "name": "UNLICENSED"
     }
@@ -25,13 +25,25 @@
             "name": "posted_at",
             "in": "query",
             "schema": {
+              "x-typia-jsDocTags": [
+                {
+                  "name": "default",
+                  "text": [
+                    {
+                      "text": "desc",
+                      "kind": "text"
+                    }
+                  ]
+                }
+              ],
               "x-typia-required": true,
               "x-typia-optional": true,
               "type": "string",
               "enum": [
                 "asc",
                 "desc"
-              ]
+              ],
+              "default": "desc"
             },
             "required": false
           },
@@ -125,15 +137,15 @@
             "x-nestia-encrypted": false
           }
         },
-        "summary": "search articles",
-        "description": "find articles by filtering and sorting options.",
-        "x-nestia-namespace": "articles.findMany",
+        "summary": "get article list",
+        "description": "get article list by filtering and sorting options.",
+        "x-nestia-namespace": "articles.getList",
         "x-nestia-jsDocTags": [
           {
             "name": "summary",
             "text": [
               {
-                "text": "search articles",
+                "text": "get article list",
                 "kind": "text"
               }
             ]
@@ -159,7 +171,7 @@
                 "kind": "space"
               },
               {
-                "text": "search options",
+                "text": "filtering and sorting options",
                 "kind": "text"
               }
             ]
@@ -199,11 +211,26 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IArticle"
+                  "$ref": "#/components/schemas/IArticle.Identity"
                 }
               }
             },
             "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "PERMISSION DENIED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "REQUIRED_PERMISSION",
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION"
+                  ]
+                }
+              }
+            }
           }
         },
         "summary": "create a new article",
@@ -282,7 +309,21 @@
             "name": "article_id",
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
             },
             "description": "identity of article",
             "required": true
@@ -314,15 +355,15 @@
             }
           }
         },
-        "summary": "find a article",
-        "description": "find a specific article by article id",
-        "x-nestia-namespace": "articles.findOne",
+        "summary": "get a article",
+        "description": "get a specific article by article id",
+        "x-nestia-namespace": "articles.get",
         "x-nestia-jsDocTags": [
           {
             "name": "summary",
             "text": [
               {
-                "text": "find a article",
+                "text": "get a article",
                 "kind": "text"
               }
             ]
@@ -374,7 +415,21 @@
             "name": "article_id",
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
             },
             "description": "identity of article",
             "required": true
@@ -398,11 +453,26 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IArticle"
+                  "$ref": "#/components/schemas/IArticle.Identity"
                 }
               }
             },
             "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "PERMISSION DENIED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "REQUIRED_PERMISSION",
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION"
+                  ]
+                }
+              }
+            }
           },
           "403": {
             "description": "",
@@ -411,7 +481,7 @@
                 "schema": {
                   "type": "string",
                   "enum": [
-                    "INSUFFICIENT_PERMISSIONS"
+                    "INSUFFICIENT_PERMISSION"
                   ]
                 }
               }
@@ -522,7 +592,21 @@
             "name": "article_id",
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
             },
             "description": "identity of article",
             "required": true
@@ -531,7 +615,29 @@
         "responses": {
           "200": {
             "description": "none",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IArticle.Identity"
+                }
+              }
+            },
             "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "PERMISSION DENIED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "REQUIRED_PERMISSION",
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION"
+                  ]
+                }
+              }
+            }
           },
           "403": {
             "description": "",
@@ -540,7 +646,7 @@
                 "schema": {
                   "type": "string",
                   "enum": [
-                    "INSUFFICIENT_PERMISSIONS"
+                    "INSUFFICIENT_PERMISSION"
                   ]
                 }
               }
@@ -624,117 +730,6 @@
           }
         ],
         "x-nestia-method": "DELETE"
-      }
-    },
-    "/articles/{article_id}/snapshots": {
-      "get": {
-        "tags": [
-          "articles"
-        ],
-        "parameters": [
-          {
-            "name": "article_id",
-            "in": "path",
-            "schema": {
-              "type": "string"
-            },
-            "description": "identity of article",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "snapshot list of article",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/IArticle.ISnapshot"
-                  }
-                }
-              }
-            },
-            "x-nestia-encrypted": false
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "NOT_FOUND_ARTICLE"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "summary": "find snapshots",
-        "description": "find snapshots of specific article found by article id\n\nonly the author can find snapshots",
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "x-nestia-namespace": "articles.snapshots.findMany",
-        "x-nestia-jsDocTags": [
-          {
-            "name": "summary",
-            "text": [
-              {
-                "text": "find snapshots",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "tag",
-            "text": [
-              {
-                "text": "articles",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "security",
-            "text": [
-              {
-                "text": "bearer",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "param",
-            "text": [
-              {
-                "text": "article_id",
-                "kind": "parameterName"
-              },
-              {
-                "text": " ",
-                "kind": "space"
-              },
-              {
-                "text": "identity of article",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "return",
-            "text": [
-              {
-                "text": "snapshot list of article",
-                "kind": "text"
-              }
-            ]
-          }
-        ],
-        "x-nestia-method": "GET"
       }
     },
     "/auth/oauth/urls": {
@@ -887,22 +882,12 @@
         "x-nestia-method": "POST"
       }
     },
-    "/articles/{article_id}/comments": {
+    "/comments": {
       "get": {
         "tags": [
-          "articles",
           "comments"
         ],
         "parameters": [
-          {
-            "name": "article_id",
-            "in": "path",
-            "schema": {
-              "type": "string"
-            },
-            "description": "",
-            "required": true
-          },
           {
             "name": "skip",
             "in": "query",
@@ -978,6 +963,30 @@
               "default": 10
             },
             "required": false
+          },
+          {
+            "name": "article_id",
+            "in": "query",
+            "schema": {
+              "x-typia-required": true,
+              "x-typia-optional": false,
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "required": true
           }
         ],
         "responses": {
@@ -991,26 +1000,30 @@
               }
             },
             "x-nestia-encrypted": false
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "NOT_FOUND_ARTICLE"
+                  ]
+                }
+              }
+            }
           }
         },
-        "summary": "find comments",
-        "description": "find comments by filtering and sorting options.",
-        "x-nestia-namespace": "articles.comments.findMany",
+        "summary": "get comment list",
+        "description": "get comment list by filtering and sorting options.",
+        "x-nestia-namespace": "comments.getList",
         "x-nestia-jsDocTags": [
           {
             "name": "summary",
             "text": [
               {
-                "text": "find comments",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "tag",
-            "text": [
-              {
-                "text": "articles",
+                "text": "get comment list",
                 "kind": "text"
               }
             ]
@@ -1036,7 +1049,7 @@
                 "kind": "space"
               },
               {
-                "text": "find options",
+                "text": "filtering and sorting options",
                 "kind": "text"
               }
             ]
@@ -1055,20 +1068,9 @@
       },
       "post": {
         "tags": [
-          "articles",
           "comments"
         ],
-        "parameters": [
-          {
-            "name": "article_id",
-            "in": "path",
-            "schema": {
-              "type": "string"
-            },
-            "description": "",
-            "required": true
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "description": "comment content",
           "content": {
@@ -1087,11 +1089,39 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IComment"
+                  "$ref": "#/components/schemas/IComment.Identity"
                 }
               }
             },
             "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "PERMISSION DENIED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "REQUIRED_PERMISSION",
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "NOT_FOUND_ARTICLE"
+                  ]
+                }
+              }
+            }
           }
         },
         "summary": "create a new comment",
@@ -1101,22 +1131,13 @@
             "bearer": []
           }
         ],
-        "x-nestia-namespace": "articles.comments.create",
+        "x-nestia-namespace": "comments.create",
         "x-nestia-jsDocTags": [
           {
             "name": "summary",
             "text": [
               {
                 "text": "create a new comment",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "tag",
-            "text": [
-              {
-                "text": "articles",
                 "kind": "text"
               }
             ]
@@ -1179,7 +1200,21 @@
             "name": "comment_id",
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
             },
             "description": "identity of comment",
             "required": true
@@ -1190,7 +1225,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/IComment.ICreate"
+                "$ref": "#/components/schemas/IComment.IUpdate"
               }
             }
           },
@@ -1203,11 +1238,26 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IComment"
+                  "$ref": "#/components/schemas/IComment.Identity"
                 }
               }
             },
             "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "PERMISSION DENIED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "REQUIRED_PERMISSION",
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION"
+                  ]
+                }
+              }
+            }
           },
           "403": {
             "description": "",
@@ -1216,7 +1266,7 @@
                 "schema": {
                   "type": "string",
                   "enum": [
-                    "INSUFFICIENT_PERMISSIONS"
+                    "INSUFFICIENT_PERMISSION"
                   ]
                 }
               }
@@ -1327,7 +1377,21 @@
             "name": "comment_id",
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
             },
             "description": "identity of comment",
             "required": true
@@ -1336,7 +1400,29 @@
         "responses": {
           "200": {
             "description": "none",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IComment.Identity"
+                }
+              }
+            },
             "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "PERMISSION DENIED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "REQUIRED_PERMISSION",
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION"
+                  ]
+                }
+              }
+            }
           },
           "403": {
             "description": "",
@@ -1345,7 +1431,7 @@
                 "schema": {
                   "type": "string",
                   "enum": [
-                    "INSUFFICIENT_PERMISSIONS"
+                    "INSUFFICIENT_PERMISSION"
                   ]
                 }
               }
@@ -1439,7 +1525,17 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "",
+            "description": "hello world",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "hello world"
+                  ]
+                }
+              }
+            },
             "x-nestia-encrypted": false
           }
         },
@@ -1464,6 +1560,15 @@
                 "kind": "text"
               }
             ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "hello world",
+                "kind": "text"
+              }
+            ]
           }
         ],
         "x-nestia-method": "GET"
@@ -1476,13 +1581,25 @@
         "type": "object",
         "properties": {
           "posted_at": {
+            "x-typia-jsDocTags": [
+              {
+                "name": "default",
+                "text": [
+                  {
+                    "text": "desc",
+                    "kind": "text"
+                  }
+                ]
+              }
+            ],
             "x-typia-required": true,
             "x-typia-optional": true,
             "type": "string",
             "enum": [
               "asc",
               "desc"
-            ]
+            ],
+            "default": "desc"
           },
           "skip": {
             "x-typia-jsDocTags": [
@@ -1659,7 +1776,7 @@
             ]
           },
           "author": {
-            "$ref": "#/components/schemas/IArticle.IAuthor"
+            "$ref": "#/components/schemas/IUser.IAuthor"
           },
           "posted_at": {
             "x-typia-required": true,
@@ -1696,9 +1813,45 @@
         ],
         "x-typia-jsDocTags": []
       },
-      "IArticle.IAuthor": {
+      "IUser.IAuthor": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/IUser.IDeletedAuthor"
+          },
+          {
+            "$ref": "#/components/schemas/IUser.IActiveAuthor"
+          }
+        ]
+      },
+      "IUser.IDeletedAuthor": {
         "type": "object",
         "properties": {
+          "status": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "enum": [
+              "deleted"
+            ]
+          }
+        },
+        "nullable": false,
+        "required": [
+          "status"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IUser.IActiveAuthor": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "enum": [
+              "active"
+            ]
+          },
           "id": {
             "x-typia-required": true,
             "x-typia-optional": false,
@@ -1717,6 +1870,11 @@
                 ]
               }
             ]
+          },
+          "name": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
           },
           "image_url": {
             "x-typia-required": true,
@@ -1737,18 +1895,14 @@
               }
             ],
             "nullable": true
-          },
-          "name": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string"
           }
         },
         "nullable": false,
         "required": [
+          "status",
           "id",
-          "image_url",
-          "name"
+          "name",
+          "image_url"
         ],
         "x-typia-jsDocTags": []
       },
@@ -1773,7 +1927,21 @@
           "body_url": {
             "x-typia-required": true,
             "x-typia-optional": false,
-            "type": "string"
+            "type": "string",
+            "format": "url",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"url\">",
+                "kind": "format",
+                "value": "url",
+                "validate": "/^[a-zA-Z0-9]+:\\/\\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
           }
         },
         "nullable": false,
@@ -1781,6 +1949,35 @@
           "title",
           "body_format",
           "body_url"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IArticle.Identity": {
+        "type": "object",
+        "properties": {
+          "article_id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          }
+        },
+        "nullable": false,
+        "required": [
+          "article_id"
         ],
         "x-typia-jsDocTags": []
       },
@@ -1807,7 +2004,7 @@
             ]
           },
           "author": {
-            "$ref": "#/components/schemas/IArticle.IAuthor"
+            "$ref": "#/components/schemas/IUser.IAuthor"
           },
           "snapshots": {
             "x-typia-required": true,
@@ -1850,25 +2047,6 @@
       "IArticle.ISnapshot": {
         "type": "object",
         "properties": {
-          "id": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "uuid",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"uuid\">",
-                "kind": "format",
-                "value": "uuid",
-                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ]
-          },
           "title": {
             "x-typia-required": true,
             "x-typia-optional": false,
@@ -1877,7 +2055,21 @@
           "body_url": {
             "x-typia-required": true,
             "x-typia-optional": false,
-            "type": "string"
+            "type": "string",
+            "format": "url",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"url\">",
+                "kind": "format",
+                "value": "url",
+                "validate": "/^[a-zA-Z0-9]+:\\/\\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
           },
           "body_format": {
             "$ref": "#/components/schemas/ArticleBodyFormat"
@@ -1904,7 +2096,6 @@
         },
         "nullable": false,
         "required": [
-          "id",
           "title",
           "body_url",
           "body_format",
@@ -2120,9 +2311,31 @@
               }
             ],
             "default": 10
+          },
+          "article_id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
           }
         },
         "nullable": false,
+        "required": [
+          "article_id"
+        ],
         "x-typia-jsDocTags": []
       },
       "IComment.IPaginatedResponse": {
@@ -2210,7 +2423,7 @@
             ]
           },
           "author": {
-            "$ref": "#/components/schemas/IComment.IAuthor"
+            "$ref": "#/components/schemas/IUser.IAuthor"
           },
           "snapshots": {
             "x-typia-required": true,
@@ -2250,84 +2463,9 @@
         ],
         "x-typia-jsDocTags": []
       },
-      "IComment.IAuthor": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "uuid",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"uuid\">",
-                "kind": "format",
-                "value": "uuid",
-                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ]
-          },
-          "image_url": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "url",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"url\">",
-                "kind": "format",
-                "value": "url",
-                "validate": "/^[a-zA-Z0-9]+:\\/\\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test($input)",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ],
-            "nullable": true
-          },
-          "name": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string"
-          }
-        },
-        "nullable": false,
-        "required": [
-          "id",
-          "image_url",
-          "name"
-        ],
-        "x-typia-jsDocTags": []
-      },
       "IComment.ISnapshot": {
         "type": "object",
         "properties": {
-          "id": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "uuid",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"uuid\">",
-                "kind": "format",
-                "value": "uuid",
-                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ]
-          },
           "body": {
             "x-typia-required": true,
             "x-typia-optional": false,
@@ -2355,13 +2493,76 @@
         },
         "nullable": false,
         "required": [
-          "id",
           "body",
           "created_at"
         ],
         "x-typia-jsDocTags": []
       },
       "IComment.ICreate": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
+          },
+          "article_id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          }
+        },
+        "nullable": false,
+        "required": [
+          "body",
+          "article_id"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IComment.Identity": {
+        "type": "object",
+        "properties": {
+          "comment_id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          }
+        },
+        "nullable": false,
+        "required": [
+          "comment_id"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IComment.IUpdate": {
         "type": "object",
         "properties": {
           "body": {
