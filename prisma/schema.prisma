@@ -27,7 +27,13 @@ enum ArticleBodyFormat {
 
 /// Root Entity of Article
 /// 
-/// @namespace BBS
+/// @namespace All
+/// 
+/// @namespace Board
+/// 
+/// @namespace Comment
+/// 
+/// @namespace Article
 /// 
 /// @author industriously
 /// 
@@ -43,6 +49,12 @@ model articles {
   /// 
   author_id  String              @database.Uuid
   author     users               @relation(fields: [author_id], references: [id])
+  /// referenced in `boards`
+  /// 
+  /// `uuid` type
+  /// 
+  board_id   String              @database.Uuid
+  board      boards              @relation(fields: [board_id], references: [id])
   /// creation time of record
   /// 
   created_at DateTime            @database.Timestamptz
@@ -61,7 +73,9 @@ model articles {
 /// 
 /// When a user edit an article, a new snapshot record is created, and readers will view the snapshot record linked to the most recently created version among the connected records.
 /// 
-/// @namespace BBS
+/// @namespace All
+/// 
+/// @namespace Article
 /// 
 /// @author industriously
 /// 
@@ -98,7 +112,9 @@ model article_snapshots {
 /// 
 /// If author add attachment to an article, a new record of `article_snapshot_attachments` is created.
 /// 
-/// @namespace BBS
+/// @namespace All
+/// 
+/// @namespace Article
 /// 
 /// @author industriously
 /// 
@@ -122,38 +138,245 @@ model article_snapshot_attachments {
   attachment    attachments       @relation(fields: [attachment_id], references: [id])
 }
 
-/// Attachment Entity
+/// Root Entity of Board
 /// 
-/// All the attachment resources managed in the BBS
+/// @namespace All
 /// 
-/// @namespace BBS
+/// @namespace Board
+/// 
+/// @namespace Article
 /// 
 /// @author industriously
 /// 
-model attachments {
+model boards {
   /// record identity
   /// 
   /// `uuid` type
   /// 
-  id                         String                         @id @database.Uuid
-  /// name of attachment resource
+  id                            String                          @id @database.Uuid
+  name                          String
+  description                   String
+  /// referenced in `users`
   /// 
-  name                       String
-  /// extension of resource like `md`, `html`, `jpeg`...
+  /// `uuid` type
   /// 
-  extension                  String
-  /// URL path of real resource
-  /// 
-  url                        String
+  admin_id                      String                          @database.Uuid
+  admin                         users                           @relation(fields: [admin_id], references: [id])
   /// creation time of record
   /// 
-  created_at                 DateTime                       @database.Timestamptz
-  article_snapshot_relations article_snapshot_attachments[]
+  created_at                    DateTime                        @database.Timestamptz
+  /// deletion time of record
+  /// 
+  /// if null, a record is soft-deleted
+  /// 
+  deleted_at                    DateTime?                       @database.Timestamptz
+  articles                      articles[]
+  read_article_list_permissions read_article_list_permissions[]
+  read_article_permissions      read_article_permissions[]
+  write_article_permissions     write_article_permissions[]
+  read_comment_list_permissions read_comment_list_permissions[]
+  write_comment_permissions     write_comment_permissions[]
+}
+
+/// Permission for read article list of board
+/// 
+/// @namespace All
+/// 
+/// @namespace Board
+/// 
+/// @namespace Permission
+/// 
+/// @author industriously
+/// 
+model read_article_list_permissions {
+  /// record identity
+  /// 
+  /// `uuid` type
+  /// 
+  id         String            @id @database.Uuid
+  /// referenced in `boards`
+  /// 
+  /// `uuid` type
+  /// 
+  board_id   String            @database.Uuid
+  board      boards            @relation(fields: [board_id], references: [id])
+  /// referenced in `permission_groups`
+  /// 
+  /// `uuid` type
+  /// 
+  group_id   String            @database.Uuid
+  group      permission_groups @relation(fields: [group_id], references: [id])
+  /// creation time of record
+  /// 
+  created_at DateTime          @database.Timestamptz
+  /// deletion time of record
+  /// 
+  /// if null, a record is soft-deleted
+  /// 
+  deleted_at DateTime?         @database.Timestamptz
+}
+
+/// Permission for read article of board
+/// 
+/// @namespace All
+/// 
+/// @namespace Board
+/// 
+/// @namespace Permission
+/// 
+/// @author industriously
+/// 
+model read_article_permissions {
+  /// record identity
+  /// 
+  /// `uuid` type
+  /// 
+  id         String            @id @database.Uuid
+  /// referenced in `boards`
+  /// 
+  /// `uuid` type
+  /// 
+  board_id   String            @database.Uuid
+  board      boards            @relation(fields: [board_id], references: [id])
+  /// referenced in `permission_groups`
+  /// 
+  /// `uuid` type
+  /// 
+  group_id   String            @database.Uuid
+  group      permission_groups @relation(fields: [group_id], references: [id])
+  /// creation time of record
+  /// 
+  created_at DateTime          @database.Timestamptz
+  /// deletion time of record
+  /// 
+  /// if null, a record is soft-deleted
+  /// 
+  deleted_at DateTime?         @database.Timestamptz
+}
+
+/// Permission for write article of board
+/// 
+/// @namespace All
+/// 
+/// @namespace Board
+/// 
+/// @namespace Permission
+/// 
+/// @author industriously
+/// 
+model write_article_permissions {
+  /// record identity
+  /// 
+  /// `uuid` type
+  /// 
+  id         String            @id @database.Uuid
+  /// referenced in `boards`
+  /// 
+  /// `uuid` type
+  /// 
+  board_id   String            @database.Uuid
+  board      boards            @relation(fields: [board_id], references: [id])
+  /// referenced in `permission_groups`
+  /// 
+  /// `uuid` type
+  /// 
+  group_id   String            @database.Uuid
+  group      permission_groups @relation(fields: [group_id], references: [id])
+  /// creation time of record
+  /// 
+  created_at DateTime          @database.Timestamptz
+  /// deletion time of record
+  /// 
+  /// if null, a record is soft-deleted
+  /// 
+  deleted_at DateTime?         @database.Timestamptz
+}
+
+/// Permission for read comment list of board
+/// 
+/// @namespace All
+/// 
+/// @namespace Board
+/// 
+/// @namespace Permission
+/// 
+/// @author industriously
+/// 
+model read_comment_list_permissions {
+  /// record identity
+  /// 
+  /// `uuid` type
+  /// 
+  id         String            @id @database.Uuid
+  /// referenced in `boards`
+  /// 
+  /// `uuid` type
+  /// 
+  board_id   String            @database.Uuid
+  board      boards            @relation(fields: [board_id], references: [id])
+  /// referenced in `permission_groups`
+  /// 
+  /// `uuid` type
+  /// 
+  group_id   String            @database.Uuid
+  group      permission_groups @relation(fields: [group_id], references: [id])
+  /// creation time of record
+  /// 
+  created_at DateTime          @database.Timestamptz
+  /// deletion time of record
+  /// 
+  /// if null, a record is soft-deleted
+  /// 
+  deleted_at DateTime?         @database.Timestamptz
+}
+
+/// Permission for write comment of board
+/// 
+/// @namespace All
+/// 
+/// @namespace Board
+/// 
+/// @namespace Permission
+/// 
+/// @author industriously
+/// 
+model write_comment_permissions {
+  /// record identity
+  /// 
+  /// `uuid` type
+  /// 
+  id         String            @id @database.Uuid
+  /// referenced in `boards`
+  /// 
+  /// `uuid` type
+  /// 
+  board_id   String            @database.Uuid
+  board      boards            @relation(fields: [board_id], references: [id])
+  /// referenced in `permission_groups`
+  /// 
+  /// `uuid` type
+  /// 
+  group_id   String            @database.Uuid
+  group      permission_groups @relation(fields: [group_id], references: [id])
+  /// creation time of record
+  /// 
+  created_at DateTime          @database.Timestamptz
+  /// deletion time of record
+  /// 
+  /// if null, a record is soft-deleted
+  /// 
+  deleted_at DateTime?         @database.Timestamptz
 }
 
 /// Root Entity of Comment
 /// 
-/// @namespace BBS
+/// a user can comment short text on article or other comment
+/// 
+/// @namespace All
+/// 
+/// @namespace Article
+/// 
+/// @namespace Comment
 /// 
 /// @author industriously
 /// 
@@ -197,7 +420,13 @@ model comments {
 
 /// Snapshot of Comment
 /// 
-/// @namespace BBS
+/// an `comment_snapshots` record contains the content of an comment's specific version.
+/// 
+/// When a user edit an comment, a new snapshot record is created, and readers will view the snapshot record linked to the most recently created version among the connected records.
+/// 
+/// @namespace All
+/// 
+/// @namespace Comment
 /// 
 /// @author industriously
 /// 
@@ -219,7 +448,81 @@ model comment_snapshots {
   created_at DateTime @database.Timestamptz
 }
 
+/// Attachment Entity
+/// 
+/// All the attachment resources managed in the BBS
+/// 
+/// @namespace All
+/// 
+/// @namespace Article
+/// 
+/// @author industriously
+/// 
+model attachments {
+  /// record identity
+  /// 
+  /// `uuid` type
+  /// 
+  id                         String                         @id @database.Uuid
+  /// name of attachment resource
+  /// 
+  name                       String
+  /// extension of resource like `md`, `html`, `jpeg`...
+  /// 
+  extension                  String
+  /// URL path of real resource
+  /// 
+  url                        String
+  /// creation time of record
+  /// 
+  created_at                 DateTime                       @database.Timestamptz
+  article_snapshot_relations article_snapshot_attachments[]
+}
+
+/// Permission Group Entity
+/// 
+/// If user belong to a `permission_groups` record, user have permission on the group
+/// 
+/// e.g., `read article`, `write article`, `read comment`, `write comment`
+/// 
+/// @namespace All
+/// 
+/// @namespace Permission
+/// 
+/// @author industriously
+/// 
+model permission_groups {
+  /// record identity
+  /// 
+  /// `uuid` type
+  /// 
+  id                            String                          @id @database.Uuid
+  name                          String
+  /// referenced in `users`
+  /// 
+  /// `uuid` type
+  /// 
+  admin_id                      String                          @database.Uuid
+  admin                         users                           @relation(fields: [admin_id], references: [id])
+  /// creation time of record
+  /// 
+  created_at                    DateTime                        @database.Timestamptz
+  /// deletion time of record
+  /// 
+  /// if null, a record is soft-deleted
+  /// 
+  deleted_at                    DateTime?                       @database.Timestamptz
+  read_article_list_permissions read_article_list_permissions[]
+  read_article_permissions      read_article_permissions[]
+  write_article_permissions     write_article_permissions[]
+  read_comment_list_permissions read_comment_list_permissions[]
+  write_comment_permissions     write_comment_permissions[]
+  users                         user_permissions[]
+}
+
 /// Authentication Entity of User
+/// 
+/// @namespace All
 /// 
 /// @namespace User
 /// 
@@ -259,9 +562,15 @@ model authentications {
   deleted_at DateTime? @database.Timestamptz
 }
 
-/// Root Entity of User Profile
+/// Root Entity of User
 /// 
-/// @namespace BBS
+/// @namespace All
+/// 
+/// @namespace Article
+/// 
+/// @namespace Comment
+/// 
+/// @namespace Board
 /// 
 /// @namespace User
 /// 
@@ -272,28 +581,71 @@ model users {
   /// 
   /// `uuid` type
   /// 
-  id              String            @id @database.Uuid
+  id                        String              @id @database.Uuid
   /// displayed name of user
   /// 
-  name            String
+  name                      String
   /// url of user profile image
   /// 
-  image_url       String?
+  image_url                 String?
   /// user introduction
   /// 
-  introduction    String
+  introduction              String
   /// creation time of record
   /// 
-  created_at      DateTime          @database.Timestamptz
+  created_at                DateTime            @database.Timestamptz
   /// revision time of record
   /// 
-  updated_at      DateTime?         @database.Timestamptz
+  updated_at                DateTime?           @database.Timestamptz
   /// deletion time of record
   /// 
   /// if null, a record is soft-deleted
   /// 
-  deleted_at      DateTime?         @database.Timestamptz
-  authentications authentications[]
-  articles        articles[]
-  comments        comments[]
+  deleted_at                DateTime?           @database.Timestamptz
+  authentications           authentications[]
+  articles                  articles[]
+  comments                  comments[]
+  managed_permission_groups permission_groups[]
+  managed_boards            boards[]
+  permissions               user_permissions[]
+}
+
+/// User's Permission
+/// 
+/// If a user belong to a `permission_groups` record, a `user_permissions` record is created.
+/// 
+/// @namespace All
+/// 
+/// @namespace User
+/// 
+/// @namespace Permission
+/// 
+/// @author industriously
+/// 
+model user_permissions {
+  /// record identity
+  /// 
+  /// `uuid` type
+  /// 
+  id         String            @id @database.Uuid
+  /// referenced in `users`
+  /// 
+  /// `uuid` type
+  /// 
+  user_id    String            @database.Uuid
+  user       users             @relation(fields: [user_id], references: [id])
+  /// referenced in `permission_groups`
+  /// 
+  /// `uuid` type
+  /// 
+  group_id   String            @database.Uuid
+  group      permission_groups @relation(fields: [group_id], references: [id])
+  /// creation time of record
+  /// 
+  created_at DateTime          @database.Timestamptz
+  /// deletion time of record
+  /// 
+  /// if null, a record is soft-deleted
+  /// 
+  deleted_at DateTime?         @database.Timestamptz
 }
