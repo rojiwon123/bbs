@@ -14,7 +14,7 @@ import {
 import { get_token } from "../auth/_fragment";
 import { create_comment, restore_create_comment } from "./_fragment";
 
-const test = api.functional.articles.comments.getList;
+const test = api.functional.comments.getList;
 
 export const test_get_comment_list_successfully = async (
     connection: IConnection,
@@ -25,7 +25,7 @@ export const test_get_comment_list_successfully = async (
     const { comment_id } = await create_comment(permission, article_id);
 
     await Util.assertResponse(
-        test(connection, article_id, {}),
+        test(connection, { article_id }),
         HttpStatus.OK,
     )({
         success: true,
@@ -39,4 +39,4 @@ export const test_get_comment_list_successfully = async (
 
 export const test_get_comment_list_when_article_does_not_exist = (
     connection: IConnection,
-) => check_article_not_found(test(connection, Random.uuid(), {}));
+) => check_article_not_found(test(connection, { article_id: Random.uuid() }));

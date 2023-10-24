@@ -28,7 +28,7 @@ import {
     restore_create_comment,
 } from "./_fragment";
 
-const test = api.functional.articles.comments.remove;
+const test = api.functional.comments.remove;
 
 export const test_remove_comment_successfully = async (
     connection: IConnection,
@@ -39,7 +39,7 @@ export const test_remove_comment_successfully = async (
     const { comment_id } = await create_comment(permission, article_id);
 
     await Util.assertResponse(
-        test(permission, article_id, comment_id),
+        test(permission, comment_id),
         HttpStatus.OK,
     )({
         success: true,
@@ -65,7 +65,7 @@ export const test_remove_comment_when_user_is_not_author = async (
     const token = await get_token(connection, "testuser2");
 
     await check_permission_insufficient(
-        test(Util.addToken(token)(connection), article_id, comment_id),
+        test(Util.addToken(token)(connection), comment_id),
     );
 
     await restore_create_comment(comment_id);
@@ -79,7 +79,7 @@ export const test_remove_comment_when_token_is_missing = async (
     const article_id = await get_article_id_random(connection);
     const { comment_id } = await create_comment(permission, article_id);
 
-    await check_permission_required(test(connection, article_id, comment_id));
+    await check_permission_required(test(connection, comment_id));
 
     await restore_create_comment(comment_id);
 };
@@ -95,7 +95,7 @@ export const test_remove_comment_when_token_is_expired = async (
     const expired_token = await get_expired_token(connection, "testuser1");
 
     await check_permission_expired(
-        test(Util.addToken(expired_token)(connection), article_id, comment_id),
+        test(Util.addToken(expired_token)(connection), comment_id),
     );
 
     await restore_create_comment(comment_id);
@@ -111,11 +111,7 @@ export const test_remove_comment_when_token_is_invalid = async (
     );
 
     await check_permission_invalid(
-        test(
-            Util.addToken(Random.string(20))(connection),
-            article_id,
-            comment_id,
-        ),
+        test(Util.addToken(Random.string(20))(connection), comment_id),
     );
 
     await restore_create_comment(comment_id);
@@ -131,7 +127,7 @@ export const test_remove_comment_when_user_id_is_invalid = async (
     const { comment_id } = await create_comment(permission, article_id);
     const { user_id } = await remove_user(username);
 
-    await check_permission_invalid(test(permission, article_id, comment_id));
+    await check_permission_invalid(test(permission, comment_id));
 
     await restore_remove_user(user_id);
     await restore_create_comment(comment_id);

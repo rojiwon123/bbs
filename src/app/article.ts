@@ -58,7 +58,7 @@ export interface Article {
     ) => (
         identity: IArticle.Identity,
     ) => (
-        input: IArticle.ICreate,
+        input: IArticle.IUpdate,
     ) => Promise<
         Result<
             IArticle.Identity,

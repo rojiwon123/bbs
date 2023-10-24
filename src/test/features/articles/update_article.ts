@@ -30,7 +30,7 @@ const test = (
     api.functional.articles.update(
         connection,
         article_id,
-        typia.random<IArticle.ICreate>(),
+        typia.random<IArticle.IUpdate>(),
     );
 
 export const test_update_article_successfully = async (
