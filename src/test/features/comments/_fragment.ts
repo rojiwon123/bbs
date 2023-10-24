@@ -12,11 +12,10 @@ export const create_comment = (
     article_id: string & typia.tags.Format<"uuid">,
 ) =>
     Util.assertResponse(
-        api.functional.articles.comments.create(
-            connection,
+        api.functional.comments.create(connection, {
+            ...typia.random<IComment.ICreate>(),
             article_id,
-            typia.random<IComment.ICreate>(),
-        ),
+        }),
         HttpStatus.CREATED,
     )({
         success: true,
@@ -35,7 +34,7 @@ export const get_comment_list = (
     article_id: string & typia.tags.Format<"uuid">,
 ) =>
     Util.assertResponse(
-        api.functional.articles.comments.getList(connection, article_id, {}),
+        api.functional.comments.getList(connection, { article_id }),
         HttpStatus.OK,
     )({
         success: true,

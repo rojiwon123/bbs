@@ -16,12 +16,20 @@ import { Prisma } from "../../db/edge";
 import { UserEntity } from "./user";
 
 export interface Comment {
+    readonly checkCreatePermission: (
+        tx?: Prisma.TransactionClient,
+    ) => (
+        requestor: IUser.Identity,
+    ) => (
+        identity: IArticle.Identity,
+    ) => Promise<Result<null, Failure.Internal<ErrorCode.Article.NotFound>>>;
+
     readonly checkUpdatePermission: (
         tx?: Prisma.TransactionClient,
     ) => (
         requestor: IUser.Identity,
     ) => (
-        identity: IArticle.Identity & IComment.Identity,
+        identity: IComment.Identity,
     ) => Promise<
         Result<
             null,
@@ -32,8 +40,6 @@ export interface Comment {
     >;
     readonly getList: (
         tx?: Prisma.TransactionClient,
-    ) => (
-        identity: IArticle.Identity,
     ) => (
         input: IComment.ISearch,
     ) => Promise<
@@ -48,8 +54,6 @@ export interface Comment {
     ) => (
         requestor: IUser.Identity,
     ) => (
-        identiy: IArticle.Identity,
-    ) => (
         input: IComment.ICreate,
     ) => Promise<
         Result<IComment.Identity, Failure.Internal<ErrorCode.Article.NotFound>>
@@ -60,9 +64,9 @@ export interface Comment {
     ) => (
         requestor: IUser.Identity,
     ) => (
-        identiy: IArticle.Identity & IComment.Identity,
+        identiy: IComment.Identity,
     ) => (
-        input: IComment.ICreate,
+        input: IComment.IUpdate,
     ) => Promise<
         Result<
             IComment.Identity,
@@ -76,7 +80,7 @@ export interface Comment {
     ) => (
         requestor: IUser.Identity,
     ) => (
-        identiy: IArticle.Identity & IComment.Identity,
+        identiy: IComment.Identity,
     ) => Promise<
         Result<
             IComment.Identity,
@@ -87,15 +91,29 @@ export interface Comment {
     >;
 }
 export namespace Comment {
+    export const checkCreatePermission: Comment["checkCreatePermission"] =
+        (tx = prisma) =>
+        (requestor) =>
+        async ({ article_id }) => {
+            requestor;
+            const article = await tx.articles.findFirst({
+                where: { id: article_id },
+                select: { deleted_at: true },
+            });
+            if (isNull(article) || negate(isNull)(article.deleted_at))
+                return Result.Error.map(
+                    new Failure.Internal<ErrorCode.Article.NotFound>(
+                        "NOT_FOUND_ARTICLE",
+                    ),
+                );
+            return Result.Ok.map(null);
+        };
     export const checkUpdatePermission: Comment["checkUpdatePermission"] =
         (tx = prisma) =>
         ({ user_id }) =>
-        async ({ article_id, comment_id }) => {
+        async ({ comment_id }) => {
             const comment = await tx.comments.findFirst({
-                where: {
-                    id: comment_id,
-                    article_id,
-                },
+                where: { id: comment_id },
                 select: { author_id: true, deleted_at: true },
             });
             if (isNull(comment) || negate(isNull)(comment.deleted_at))
@@ -116,8 +134,7 @@ export namespace Comment {
 
     export const getList: Comment["getList"] =
         (tx = prisma) =>
-        ({ article_id }) =>
-        async ({ skip = 0, limit = 10 }) => {
+        async ({ article_id, skip = 0, limit = 10 }) => {
             // 권한 구분이 생길때, article_id를 사용해서 권한체크 함
             const article = await tx.articles.findFirst({
                 where: { id: article_id },
@@ -141,26 +158,19 @@ export namespace Comment {
         };
     export const create: Comment["create"] =
         (tx = prisma) =>
-        ({ user_id }) =>
-        ({ article_id }) =>
+        (requestor) =>
         async (input) => {
-            const article = await tx.articles.findFirst({
-                where: { id: article_id },
-                select: { deleted_at: true },
+            const permission = await checkCreatePermission(tx)(requestor)({
+                article_id: input.article_id,
             });
-            if (isNull(article) || negate(isNull)(article.deleted_at))
-                return Result.Error.map(
-                    new Failure.Internal<ErrorCode.Article.NotFound>(
-                        "NOT_FOUND_ARTICLE",
-                    ),
-                );
+            if (Result.Error.is(permission)) return permission;
             const now = DateMapper.toISO();
             const comment_id = Random.uuid();
             await tx.comments.create({
                 data: {
                     id: comment_id,
-                    author_id: user_id,
-                    article_id,
+                    author_id: requestor.user_id,
+                    article_id: input.article_id,
                     created_at: now,
                     snapshots: {
                         create: {
@@ -176,20 +186,21 @@ export namespace Comment {
     export const update: Comment["update"] =
         (tx = prisma) =>
         (requestor) =>
-        (identity) =>
+        ({ comment_id }) =>
         async (input) => {
-            const permission =
-                await checkUpdatePermission(tx)(requestor)(identity);
+            const permission = await checkUpdatePermission(tx)(requestor)({
+                comment_id,
+            });
             if (Result.Error.is(permission)) return permission;
             await tx.comment_snapshots.create({
                 data: {
                     id: Random.uuid(),
                     body: input.body,
-                    comment_id: identity.comment_id,
+                    comment_id: comment_id,
                     created_at: DateMapper.toISO(),
                 },
             });
-            return Result.Ok.map({ comment_id: identity.comment_id });
+            return Result.Ok.map({ comment_id });
         };
     export const remove: Comment["remove"] =
         (tx = prisma) =>

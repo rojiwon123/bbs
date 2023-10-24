@@ -14,7 +14,8 @@ export interface IArticle {
 
 export namespace IArticle {
     export type BodyFormat = ArticleBodyFormat;
-    export interface ICreate extends ISnapshot.ICreate {}
+    export interface IUpdate extends ISnapshot.ICreate {}
+    export interface ICreate extends IUpdate {}
     export interface Identity {
         article_id: string & typia.tags.Format<"uuid">;
     }

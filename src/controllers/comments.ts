@@ -9,7 +9,7 @@ import { IComment } from "@APP/types/IComment";
 import { Failure } from "@APP/utils/failure";
 import { Result } from "@APP/utils/result";
 
-@nest.Controller("articles/:article_id/comments")
+@nest.Controller("comments")
 export class CommentsController {
     /**
      * get comment list by filtering and sorting options.
@@ -22,11 +22,9 @@ export class CommentsController {
     @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Get()
     async getList(
-        @core.TypedParam("article_id")
-        article_id: string & typia.tags.Format<"uuid">,
         @core.TypedQuery() query: IComment.ISearch,
     ): Promise<IComment.IPaginatedResponse> {
-        const result = await Comment.getList()({ article_id })(query);
+        const result = await Comment.getList()(query);
         if (Result.Ok.is(result)) return Result.Ok.flatten(result);
 
         const error = Result.Error.flatten(result);
@@ -57,13 +55,11 @@ export class CommentsController {
     @core.TypedRoute.Post()
     async create(
         @Security.HttpBearer() security: Security,
-        @core.TypedParam("article_id")
-        article_id: string & typia.tags.Format<"uuid">,
         @core.TypedBody() body: IComment.ICreate,
     ): Promise<IComment.Identity> {
         const token = Security.required(security);
         const identity = await Security.verify()(token);
-        const result = await Comment.create()(identity)({ article_id })(body);
+        const result = await Comment.create()(identity)(body);
         if (Result.Ok.is(result)) return Result.Ok.flatten(result);
 
         const error = Result.Error.flatten(result);
@@ -101,18 +97,13 @@ export class CommentsController {
     @core.TypedRoute.Put(":comment_id")
     async update(
         @Security.HttpBearer() security: Security,
-        @core.TypedParam("article_id")
-        article_id: string & typia.tags.Format<"uuid">,
         @core.TypedParam("comment_id")
         comment_id: string & typia.tags.Format<"uuid">,
-        @core.TypedBody() body: IComment.ICreate,
+        @core.TypedBody() body: IComment.IUpdate,
     ): Promise<IComment.Identity> {
         const token = Security.required(security);
         const identity = await Security.verify()(token);
-        const result = await Comment.update()(identity)({
-            article_id,
-            comment_id,
-        })(body);
+        const result = await Comment.update()(identity)({ comment_id })(body);
         if (Result.Ok.is(result)) return Result.Ok.flatten(result);
 
         const error = Result.Error.flatten(result);
@@ -153,15 +144,12 @@ export class CommentsController {
     @core.TypedRoute.Delete(":comment_id")
     async remove(
         @Security.HttpBearer() security: Security,
-        @core.TypedParam("article_id")
-        article_id: string & typia.tags.Format<"uuid">,
         @core.TypedParam("comment_id")
         comment_id: string & typia.tags.Format<"uuid">,
     ): Promise<IComment.Identity> {
         const token = Security.required(security);
         const identity = await Security.verify()(token);
         const result = await Comment.remove()(identity)({
-            article_id,
             comment_id,
         });
         if (Result.Ok.is(result)) return Result.Ok.flatten(result);

@@ -31,11 +31,10 @@ const test = (
     connection: IConnection,
     article_id: string & typia.tags.Format<"uuid">,
 ) =>
-    api.functional.articles.comments.create(
-        connection,
+    api.functional.comments.create(connection, {
+        ...typia.random<IComment.ICreate>(),
         article_id,
-        typia.random<IComment.ICreate>(),
-    );
+    });
 
 export const test_create_comment_successfully = async (
     connection: IConnection,
