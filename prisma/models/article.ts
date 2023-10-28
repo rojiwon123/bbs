@@ -16,6 +16,9 @@ Table.create({
     Table.addId(),
     Table.addRelationalString("author")("users"),
     Table.addRelationalString("board")("boards"),
+    Table.addColumn("boolean")("is_notice", {
+        comments: Description.lines("If true, a article is notification."),
+    }),
     Table.setCreatable,
     /**
   Table.addTimestamptz("posted_at", {
@@ -79,4 +82,9 @@ Table.create({
     Table.addId(),
     Table.addRelationalString("snapshot")("article_snapshots"),
     Table.addRelationalString("attachment")("attachments"),
+    Table.addColumn("int")("sequence", {
+        comments: Description.lines(
+            "`sequence` is used to distinguish each individual `attachment`.",
+        ),
+    }),
 );

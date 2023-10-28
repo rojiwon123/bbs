@@ -6,27 +6,36 @@ import { IUser } from "./IUser";
 
 export interface IComment {
     id: string & typia.tags.Format<"uuid">;
-    author: IUser.IAuthor;
-    snapshots: IComment.ISnapshot[] & typia.tags.MinItems<1>;
+    /** 댓글 본문 */
+    body: string;
+    /** 댓글 생성자 정보 */
+    author: IUser.ISummary;
+    /** 상위 댓글 정보 */
+    parent: IComment.ISummary | null;
+    /** 소속 게시글 정보 */
+    article: IArticle.ISummary;
     created_at: string & typia.tags.Format<"date-time">;
+    updated_at: (string & typia.tags.Format<"date-time">) | null;
 }
 
 export namespace IComment {
     export interface Identity {
-        comment_id: string & typia.tags.Format<"uuid">;
+        comment_id: string;
+    }
+    export interface ISummary
+        extends Pick<
+            IComment,
+            "id" | "author" | "body" | "created_at" | "updated_at"
+        > {}
+
+    export interface ISearch extends IPage.ISearch {
+        parent_id?: string & typia.tags.Format<"uuid">;
+        sort?: IPage.SortType;
     }
 
-    export interface IUpdate extends ISnapshot.ICreate {}
-    export interface ICreate extends IUpdate, IArticle.Identity {}
-    export interface ISnapshot {
-        body: string;
-        created_at: string & typia.tags.Format<"date-time">;
-    }
+    export interface IPaginated extends IPage.IResponse<IComment.ISummary> {}
 
-    export namespace ISnapshot {
-        export interface ICreate extends Pick<ISnapshot, "body"> {}
-    }
+    export interface IUpdate extends Pick<IComment, "body"> {}
 
-    export interface ISearch extends IPage.ISearch, IArticle.Identity {}
-    export interface IPaginatedResponse extends IPage.IResponse<IComment> {}
+    export interface ICreate extends IUpdate {}
 }

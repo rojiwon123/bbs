@@ -102,7 +102,6 @@ export namespace Authentication {
                         id: Random.uuid(),
                         name: profile.name,
                         image_url: profile.image_url,
-                        introduction: "",
                         created_at: DateMapper.toISO(),
                     },
                 });

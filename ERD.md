@@ -6,7 +6,6 @@
 -   [Board](#Board)
 -   [Comment](#Comment)
 -   [Article](#Article)
--   [Permission](#Permission)
 -   [User](#User)
 
 ## All
@@ -17,6 +16,7 @@ articles {
     String id PK
     String author_id FK
     String board_id FK
+    Boolean is_notice
     DateTime created_at
     DateTime deleted_at "nullable"
 }
@@ -32,47 +32,18 @@ article_snapshot_attachments {
     String id PK
     String snapshot_id FK
     String attachment_id FK
+    Int sequence
 }
 boards {
     String id PK
     String name
     String description
-    String admin_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-read_article_list_permissions {
-    String id PK
-    String board_id FK
-    String group_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-read_article_permissions {
-    String id PK
-    String board_id FK
-    String group_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-write_article_permissions {
-    String id PK
-    String board_id FK
-    String group_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-read_comment_list_permissions {
-    String id PK
-    String board_id FK
-    String group_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-write_comment_permissions {
-    String id PK
-    String board_id FK
-    String group_id FK
+    String manager_membership_id FK
+    String read_article_list_membership_id FK "nullable"
+    String read_article_membership_id FK "nullable"
+    String write_article_membership_id FK
+    String read_comment_list_membership_id FK "nullable"
+    String write_comment_membership_id FK
     DateTime created_at
     DateTime deleted_at "nullable"
 }
@@ -97,10 +68,11 @@ attachments {
     String url
     DateTime created_at
 }
-permission_groups {
+memberships {
     String id PK
     String name
-    String admin_id FK
+    Int rank
+    String image_url "nullable"
     DateTime created_at
     DateTime deleted_at "nullable"
 }
@@ -116,18 +88,11 @@ authentications {
 }
 users {
     String id PK
+    String membership_id FK "nullable"
     String name
     String image_url "nullable"
-    String introduction
     DateTime created_at
     DateTime updated_at "nullable"
-    DateTime deleted_at "nullable"
-}
-user_permissions {
-    String id PK
-    String user_id FK
-    String group_id FK
-    DateTime created_at
     DateTime deleted_at "nullable"
 }
 articles }|--|| users : author
@@ -135,25 +100,18 @@ articles }|--|| boards : board
 article_snapshots }|--|| articles : article
 article_snapshot_attachments }|--|| article_snapshots : snapshot
 article_snapshot_attachments }|--|| attachments : attachment
-boards }|--|| users : admin
-read_article_list_permissions }|--|| boards : board
-read_article_list_permissions }|--|| permission_groups : group
-read_article_permissions }|--|| boards : board
-read_article_permissions }|--|| permission_groups : group
-write_article_permissions }|--|| boards : board
-write_article_permissions }|--|| permission_groups : group
-read_comment_list_permissions }|--|| boards : board
-read_comment_list_permissions }|--|| permission_groups : group
-write_comment_permissions }|--|| boards : board
-write_comment_permissions }|--|| permission_groups : group
+boards }|--|| memberships : manager_membership
+boards }o--|| memberships : read_article_list_membership
+boards }o--|| memberships : read_article_membership
+boards }|--|| memberships : write_article_membership
+boards }o--|| memberships : read_comment_list_membership
+boards }|--|| memberships : write_comment_membership
 comments }|--|| users : author
 comments }|--|| articles : article
 comments }o--o| comments : parent
 comment_snapshots }|--|| comments : comment
-permission_groups }|--|| users : admin
 authentications }o--|| users : user
-user_permissions }|--|| users : user
-user_permissions }|--|| permission_groups : group
+users }o--|| memberships : membership
 ```
 
 ### `articles`
@@ -174,6 +132,7 @@ Root Entity of Article
     > referenced in `boards`
     >
     > `uuid` type
+-   `is_notice`: If true, a article is notification.
 -   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
@@ -225,6 +184,7 @@ If author add attachment to an article, a new record of `article_snapshot_attach
     > referenced in `attachments`
     >
     > `uuid` type
+-   `sequence`: `sequence` is used to distinguish each individual `attachment`.
 
 ### `boards`
 
@@ -238,128 +198,28 @@ Root Entity of Board
     > `uuid` type
 -   `name`:
 -   `description`:
--   `admin_id`
-    > referenced in `users`
+-   `manager_membership_id`
+    > referenced in `memberships`
     >
     > `uuid` type
--   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `read_article_list_permissions`
-
-Permission for read article list of board
-
-**Properties**
-
--   `id`
-    > record identity
+-   `read_article_list_membership_id`
+    > referenced in `memberships`
     >
     > `uuid` type
--   `board_id`
-    > referenced in `boards`
+-   `read_article_membership_id`
+    > referenced in `memberships`
     >
     > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
+-   `write_article_membership_id`
+    > referenced in `memberships`
     >
     > `uuid` type
--   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `read_article_permissions`
-
-Permission for read article of board
-
-**Properties**
-
--   `id`
-    > record identity
+-   `read_comment_list_membership_id`
+    > referenced in `memberships`
     >
     > `uuid` type
--   `board_id`
-    > referenced in `boards`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `write_article_permissions`
-
-Permission for write article of board
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `board_id`
-    > referenced in `boards`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `read_comment_list_permissions`
-
-Permission for read comment list of board
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `board_id`
-    > referenced in `boards`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `write_comment_permissions`
-
-Permission for write comment of board
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `board_id`
-    > referenced in `boards`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
+-   `write_comment_membership_id`
+    > referenced in `memberships`
     >
     > `uuid` type
 -   `created_at`: creation time of record
@@ -438,13 +298,11 @@ All the attachment resources managed in the BBS
 -   `url`: URL path of real resource
 -   `created_at`: creation time of record
 
-### `permission_groups`
+### `memberships`
 
-Permission Group Entity
+Membership Entity
 
-If user belong to a `permission_groups` record, user have permission on the group
-
-e.g., `read article`, `write article`, `read comment`, `write comment`
+a user can receive one or zero membership, which signifies their permission level in the BBS.
 
 **Properties**
 
@@ -452,11 +310,9 @@ e.g., `read article`, `write article`, `read comment`, `write comment`
     > record identity
     >
     > `uuid` type
--   `name`:
--   `admin_id`
-    > referenced in `users`
-    >
-    > `uuid` type
+-   `name`: displayed name of membership
+-   `rank`: `rank` is used for membership grade comparison
+-   `image_url`:
 -   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
@@ -497,37 +353,16 @@ Root Entity of User
     > record identity
     >
     > `uuid` type
+-   `membership_id`
+    > referenced in `memberships`
+    >
+    > `uuid` type
+    >
+    > If null, user membership is same with unauthorized user
 -   `name`: displayed name of user
 -   `image_url`: url of user profile image
--   `introduction`: user introduction
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `user_permissions`
-
-User's Permission
-
-If a user belong to a `permission_groups` record, a `user_permissions` record is created.
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `user_id`
-    > referenced in `users`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
     >
@@ -541,6 +376,7 @@ articles {
     String id PK
     String author_id FK
     String board_id FK
+    Boolean is_notice
     DateTime created_at
     DateTime deleted_at "nullable"
 }
@@ -548,62 +384,41 @@ boards {
     String id PK
     String name
     String description
-    String admin_id FK
+    String manager_membership_id FK
+    String read_article_list_membership_id FK "nullable"
+    String read_article_membership_id FK "nullable"
+    String write_article_membership_id FK
+    String read_comment_list_membership_id FK "nullable"
+    String write_comment_membership_id FK
     DateTime created_at
     DateTime deleted_at "nullable"
 }
-read_article_list_permissions {
+memberships {
     String id PK
-    String board_id FK
-    String group_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-read_article_permissions {
-    String id PK
-    String board_id FK
-    String group_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-write_article_permissions {
-    String id PK
-    String board_id FK
-    String group_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-read_comment_list_permissions {
-    String id PK
-    String board_id FK
-    String group_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-write_comment_permissions {
-    String id PK
-    String board_id FK
-    String group_id FK
+    String name
+    Int rank
+    String image_url "nullable"
     DateTime created_at
     DateTime deleted_at "nullable"
 }
 users {
     String id PK
+    String membership_id FK "nullable"
     String name
     String image_url "nullable"
-    String introduction
     DateTime created_at
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
 articles }|--|| users : author
 articles }|--|| boards : board
-boards }|--|| users : admin
-read_article_list_permissions }|--|| boards : board
-read_article_permissions }|--|| boards : board
-write_article_permissions }|--|| boards : board
-read_comment_list_permissions }|--|| boards : board
-write_comment_permissions }|--|| boards : board
+boards }|--|| memberships : manager_membership
+boards }o--|| memberships : read_article_list_membership
+boards }o--|| memberships : read_article_membership
+boards }|--|| memberships : write_article_membership
+boards }o--|| memberships : read_comment_list_membership
+boards }|--|| memberships : write_comment_membership
+users }o--|| memberships : membership
 ```
 
 ### `articles`
@@ -624,6 +439,7 @@ Root Entity of Article
     > referenced in `boards`
     >
     > `uuid` type
+-   `is_notice`: If true, a article is notification.
 -   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
@@ -642,8 +458,28 @@ Root Entity of Board
     > `uuid` type
 -   `name`:
 -   `description`:
--   `admin_id`
-    > referenced in `users`
+-   `manager_membership_id`
+    > referenced in `memberships`
+    >
+    > `uuid` type
+-   `read_article_list_membership_id`
+    > referenced in `memberships`
+    >
+    > `uuid` type
+-   `read_article_membership_id`
+    > referenced in `memberships`
+    >
+    > `uuid` type
+-   `write_article_membership_id`
+    > referenced in `memberships`
+    >
+    > `uuid` type
+-   `read_comment_list_membership_id`
+    > referenced in `memberships`
+    >
+    > `uuid` type
+-   `write_comment_membership_id`
+    > referenced in `memberships`
     >
     > `uuid` type
 -   `created_at`: creation time of record
@@ -652,33 +488,11 @@ Root Entity of Board
     >
     > if null, a record is soft-deleted
 
-### `read_article_list_permissions`
+### `memberships`
 
-Permission for read article list of board
+Membership Entity
 
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `board_id`
-    > referenced in `boards`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `read_article_permissions`
-
-Permission for read article of board
+a user can receive one or zero membership, which signifies their permission level in the BBS.
 
 **Properties**
 
@@ -686,86 +500,9 @@ Permission for read article of board
     > record identity
     >
     > `uuid` type
--   `board_id`
-    > referenced in `boards`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `write_article_permissions`
-
-Permission for write article of board
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `board_id`
-    > referenced in `boards`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `read_comment_list_permissions`
-
-Permission for read comment list of board
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `board_id`
-    > referenced in `boards`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `write_comment_permissions`
-
-Permission for write comment of board
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `board_id`
-    > referenced in `boards`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
+-   `name`: displayed name of membership
+-   `rank`: `rank` is used for membership grade comparison
+-   `image_url`:
 -   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
@@ -782,9 +519,14 @@ Root Entity of User
     > record identity
     >
     > `uuid` type
+-   `membership_id`
+    > referenced in `memberships`
+    >
+    > `uuid` type
+    >
+    > If null, user membership is same with unauthorized user
 -   `name`: displayed name of user
 -   `image_url`: url of user profile image
--   `introduction`: user introduction
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
 -   `deleted_at`
@@ -800,6 +542,7 @@ articles {
     String id PK
     String author_id FK
     String board_id FK
+    Boolean is_notice
     DateTime created_at
     DateTime deleted_at "nullable"
 }
@@ -819,9 +562,9 @@ comment_snapshots {
 }
 users {
     String id PK
+    String membership_id FK "nullable"
     String name
     String image_url "nullable"
-    String introduction
     DateTime created_at
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
@@ -851,6 +594,7 @@ Root Entity of Article
     > referenced in `boards`
     >
     > `uuid` type
+-   `is_notice`: If true, a article is notification.
 -   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
@@ -920,9 +664,14 @@ Root Entity of User
     > record identity
     >
     > `uuid` type
+-   `membership_id`
+    > referenced in `memberships`
+    >
+    > `uuid` type
+    >
+    > If null, user membership is same with unauthorized user
 -   `name`: displayed name of user
 -   `image_url`: url of user profile image
--   `introduction`: user introduction
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
 -   `deleted_at`
@@ -938,6 +687,7 @@ articles {
     String id PK
     String author_id FK
     String board_id FK
+    Boolean is_notice
     DateTime created_at
     DateTime deleted_at "nullable"
 }
@@ -953,12 +703,18 @@ article_snapshot_attachments {
     String id PK
     String snapshot_id FK
     String attachment_id FK
+    Int sequence
 }
 boards {
     String id PK
     String name
     String description
-    String admin_id FK
+    String manager_membership_id FK
+    String read_article_list_membership_id FK "nullable"
+    String read_article_membership_id FK "nullable"
+    String write_article_membership_id FK
+    String read_comment_list_membership_id FK "nullable"
+    String write_comment_membership_id FK
     DateTime created_at
     DateTime deleted_at "nullable"
 }
@@ -979,9 +735,9 @@ attachments {
 }
 users {
     String id PK
+    String membership_id FK "nullable"
     String name
     String image_url "nullable"
-    String introduction
     DateTime created_at
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
@@ -991,7 +747,6 @@ articles }|--|| boards : board
 article_snapshots }|--|| articles : article
 article_snapshot_attachments }|--|| article_snapshots : snapshot
 article_snapshot_attachments }|--|| attachments : attachment
-boards }|--|| users : admin
 comments }|--|| users : author
 comments }|--|| articles : article
 comments }o--o| comments : parent
@@ -1015,6 +770,7 @@ Root Entity of Article
     > referenced in `boards`
     >
     > `uuid` type
+-   `is_notice`: If true, a article is notification.
 -   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
@@ -1066,6 +822,7 @@ If author add attachment to an article, a new record of `article_snapshot_attach
     > referenced in `attachments`
     >
     > `uuid` type
+-   `sequence`: `sequence` is used to distinguish each individual `attachment`.
 
 ### `boards`
 
@@ -1079,8 +836,28 @@ Root Entity of Board
     > `uuid` type
 -   `name`:
 -   `description`:
--   `admin_id`
-    > referenced in `users`
+-   `manager_membership_id`
+    > referenced in `memberships`
+    >
+    > `uuid` type
+-   `read_article_list_membership_id`
+    > referenced in `memberships`
+    >
+    > `uuid` type
+-   `read_article_membership_id`
+    > referenced in `memberships`
+    >
+    > `uuid` type
+-   `write_article_membership_id`
+    > referenced in `memberships`
+    >
+    > `uuid` type
+-   `read_comment_list_membership_id`
+    > referenced in `memberships`
+    >
+    > `uuid` type
+-   `write_comment_membership_id`
+    > referenced in `memberships`
     >
     > `uuid` type
 -   `created_at`: creation time of record
@@ -1148,243 +925,16 @@ Root Entity of User
     > record identity
     >
     > `uuid` type
+-   `membership_id`
+    > referenced in `memberships`
+    >
+    > `uuid` type
+    >
+    > If null, user membership is same with unauthorized user
 -   `name`: displayed name of user
 -   `image_url`: url of user profile image
--   `introduction`: user introduction
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-## Permission
-
-```mermaid
-erDiagram
-read_article_list_permissions {
-    String id PK
-    String board_id FK
-    String group_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-read_article_permissions {
-    String id PK
-    String board_id FK
-    String group_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-write_article_permissions {
-    String id PK
-    String board_id FK
-    String group_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-read_comment_list_permissions {
-    String id PK
-    String board_id FK
-    String group_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-write_comment_permissions {
-    String id PK
-    String board_id FK
-    String group_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-permission_groups {
-    String id PK
-    String name
-    String admin_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-user_permissions {
-    String id PK
-    String user_id FK
-    String group_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
-read_article_list_permissions }|--|| permission_groups : group
-read_article_permissions }|--|| permission_groups : group
-write_article_permissions }|--|| permission_groups : group
-read_comment_list_permissions }|--|| permission_groups : group
-write_comment_permissions }|--|| permission_groups : group
-user_permissions }|--|| permission_groups : group
-```
-
-### `read_article_list_permissions`
-
-Permission for read article list of board
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `board_id`
-    > referenced in `boards`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `read_article_permissions`
-
-Permission for read article of board
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `board_id`
-    > referenced in `boards`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `write_article_permissions`
-
-Permission for write article of board
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `board_id`
-    > referenced in `boards`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `read_comment_list_permissions`
-
-Permission for read comment list of board
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `board_id`
-    > referenced in `boards`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `write_comment_permissions`
-
-Permission for write comment of board
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `board_id`
-    > referenced in `boards`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `permission_groups`
-
-Permission Group Entity
-
-If user belong to a `permission_groups` record, user have permission on the group
-
-e.g., `read article`, `write article`, `read comment`, `write comment`
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `name`:
--   `admin_id`
-    > referenced in `users`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `user_permissions`
-
-User's Permission
-
-If a user belong to a `permission_groups` record, a `user_permissions` record is created.
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `user_id`
-    > referenced in `users`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
     >
@@ -1394,6 +944,14 @@ If a user belong to a `permission_groups` record, a `user_permissions` record is
 
 ```mermaid
 erDiagram
+memberships {
+    String id PK
+    String name
+    Int rank
+    String image_url "nullable"
+    DateTime created_at
+    DateTime deleted_at "nullable"
+}
 authentications {
     String id PK
     String user_id FK "nullable"
@@ -1406,23 +964,37 @@ authentications {
 }
 users {
     String id PK
+    String membership_id FK "nullable"
     String name
     String image_url "nullable"
-    String introduction
     DateTime created_at
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
-user_permissions {
-    String id PK
-    String user_id FK
-    String group_id FK
-    DateTime created_at
-    DateTime deleted_at "nullable"
-}
 authentications }o--|| users : user
-user_permissions }|--|| users : user
+users }o--|| memberships : membership
 ```
+
+### `memberships`
+
+Membership Entity
+
+a user can receive one or zero membership, which signifies their permission level in the BBS.
+
+**Properties**
+
+-   `id`
+    > record identity
+    >
+    > `uuid` type
+-   `name`: displayed name of membership
+-   `rank`: `rank` is used for membership grade comparison
+-   `image_url`:
+-   `created_at`: creation time of record
+-   `deleted_at`
+    > deletion time of record
+    >
+    > if null, a record is soft-deleted
 
 ### `authentications`
 
@@ -1458,37 +1030,16 @@ Root Entity of User
     > record identity
     >
     > `uuid` type
+-   `membership_id`
+    > referenced in `memberships`
+    >
+    > `uuid` type
+    >
+    > If null, user membership is same with unauthorized user
 -   `name`: displayed name of user
 -   `image_url`: url of user profile image
--   `introduction`: user introduction
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
-
-### `user_permissions`
-
-User's Permission
-
-If a user belong to a `permission_groups` record, a `user_permissions` record is created.
-
-**Properties**
-
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `user_id`
-    > referenced in `users`
-    >
-    > `uuid` type
--   `group_id`
-    > referenced in `permission_groups`
-    >
-    > `uuid` type
--   `created_at`: creation time of record
 -   `deleted_at`
     > deletion time of record
     >
