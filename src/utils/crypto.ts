@@ -2,6 +2,7 @@ import { isUndefined } from "@fxts/core";
 import crypto from "crypto";
 
 import { Failure } from "./failure";
+import { Random } from "./random";
 import { Result } from "./result";
 
 export namespace Crypto {
@@ -23,7 +24,7 @@ export namespace Crypto {
         key: string;
     }): Result<string, Failure.External<"Crypto.encrypt">> => {
         try {
-            const iv = crypto.randomBytes(IV_LEN);
+            const iv = Buffer.from(Random.string(IV_LEN));
             const cipher = crypto.createCipheriv("aes-256-gcm", key, iv, {
                 authTagLength: TAG_LEN,
             });

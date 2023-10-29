@@ -1,21 +1,21 @@
-import { isNull } from "@fxts/core";
 import { RandomGenerator } from "@nestia/e2e";
 import { IConnection, IPropagation } from "@nestia/fetcher";
 import { HttpStatus } from "@nestjs/common";
 import api from "@project/api";
 import typia from "typia";
 
-import { prisma } from "@APP/infrastructure/DB";
-import { Mock } from "@APP/test/internal/mocker";
-import { Util } from "@APP/test/internal/utils";
+import { Mocker } from "@APP/test/internal/mocker";
+import { APIValidator } from "@APP/test/internal/validator";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IAuthentication } from "@APP/types/IAuthentication";
 import { DateMapper } from "@APP/utils/date";
 
+import { Seed } from "./seed";
+
 export const get_token = async (connection: IConnection, code: string) => {
     const {
         access_token: { token },
-    } = await Util.assertResponse(
+    } = await APIValidator.assert(
         api.functional.auth.oauth.authorize(connection, {
             oauth_type: RandomGenerator.pick(["github", "kakao"]),
             code,
@@ -35,11 +35,11 @@ export const get_expired_token = async (
     const now = new Date();
     now.setFullYear(now.getFullYear() - 1);
     const iso = now.toISOString();
-    Mock.implement(DateMapper, "toISO", () => iso);
+    Mocker.implement(DateMapper, "toISO", () => iso);
 
     const token = await get_token(connection, code);
 
-    Mock.restore(DateMapper, "toISO");
+    Mocker.restore(DateMapper, "toISO");
 
     return token;
 };
@@ -50,7 +50,7 @@ export const check_permission_expired = async (
         | IPropagation.IBranch<false, HttpStatus.UNAUTHORIZED, unknown>
     >,
 ) =>
-    Util.assertResponse(
+    APIValidator.assert(
         response,
         HttpStatus.UNAUTHORIZED,
     )({
@@ -64,7 +64,7 @@ export const check_permission_required = (
         | IPropagation.IBranch<false, HttpStatus.UNAUTHORIZED, unknown>
     >,
 ) =>
-    Util.assertResponse(
+    APIValidator.assert(
         response,
         HttpStatus.UNAUTHORIZED,
     )({
@@ -78,7 +78,7 @@ export const check_permission_invalid = (
         | IPropagation.IBranch<false, HttpStatus.UNAUTHORIZED, unknown>
     >,
 ) =>
-    Util.assertResponse(
+    APIValidator.assert(
         response,
         HttpStatus.UNAUTHORIZED,
     )({
@@ -92,7 +92,7 @@ export const check_permission_insufficient = (
         | IPropagation.IBranch<false, HttpStatus.FORBIDDEN, unknown>
     >,
 ) =>
-    Util.assertResponse(
+    APIValidator.assert(
         response,
         HttpStatus.FORBIDDEN,
     )({
@@ -101,21 +101,4 @@ export const check_permission_insufficient = (
             typia.createAssertEquals<ErrorCode.Permission.Insufficient>(),
     });
 
-export const remove_user = async (username: string) => {
-    const user = await prisma.users.findFirst({
-        where: { name: username, deleted_at: null },
-    });
-    if (isNull(user)) throw Error("user not found");
-    await prisma.users.update({
-        where: { id: user.id },
-        data: { deleted_at: DateMapper.toISO() },
-    });
-    return { user_id: user.id };
-};
-
-export const restore_remove_user = async (user_id: string) => {
-    await prisma.users.update({
-        where: { id: user_id },
-        data: { deleted_at: null },
-    });
-};
+export const check_seed_changed = async () => (await Seed.size.check())();

@@ -1,11 +1,13 @@
-import { isNull } from "@fxts/core";
+import { isNull, isUndefined } from "@fxts/core";
+import { RandomGenerator } from "@nestia/e2e";
+import assert from "assert";
 import typia from "typia";
 
 import { prisma } from "@APP/infrastructure/DB";
 import { DateMapper } from "@APP/utils/date";
 import { Random } from "@APP/utils/random";
 
-import { ArticleBodyFormat } from "../../../db/edge";
+import { ArticleBodyFormat, Prisma } from "../../../db/edge";
 
 export namespace Seed {
     type UUID = string & typia.tags.Format<"uuid">;
@@ -36,10 +38,64 @@ export namespace Seed {
 
     export const getBoardId = async (name: string): Promise<UUID> => {
         const board = await prisma.boards.findFirst({
-            where: { name, deleted_at: null },
+            where: { name },
         });
         if (isNull(board)) throw Error("not found board");
         return board.id;
+    };
+
+    export const getUpdatedArticleId = async (
+        board_id: string,
+    ): Promise<UUID> => {
+        const articles = await prisma.articles.findMany({
+            where: { deleted_at: null, board_id },
+            select: {
+                id: true,
+                _count: {
+                    select: { snapshots: true },
+                },
+            },
+        });
+        return RandomGenerator.pick(
+            articles.filter(({ _count: { snapshots } }) => snapshots > 1),
+        ).id;
+    };
+
+    export const getDeletedArticleId = async (
+        board_id: string,
+    ): Promise<UUID> => {
+        const articles = await prisma.articles.findMany({
+            where: { deleted_at: { not: null }, board_id },
+        });
+        return RandomGenerator.pick(articles).id;
+    };
+
+    export const getUpdatedCommentId = async (
+        article_id: string,
+        parent_id: string | null = null,
+    ): Promise<UUID> => {
+        const articles = await prisma.comments.findMany({
+            where: { deleted_at: null, article_id, parent_id },
+            select: {
+                id: true,
+                _count: {
+                    select: { snapshots: true },
+                },
+            },
+        });
+        return RandomGenerator.pick(
+            articles.filter(({ _count: { snapshots } }) => snapshots > 1),
+        ).id;
+    };
+
+    export const getDeletedCommentId = async (
+        article_id: string,
+        parent_id: string | null = null,
+    ): Promise<UUID> => {
+        const articles = await prisma.comments.findMany({
+            where: { deleted_at: { not: null }, article_id, parent_id },
+        });
+        return RandomGenerator.pick(articles).id;
     };
 
     export const createMembership = async (
@@ -256,72 +312,145 @@ export namespace Seed {
         return comment;
     };
 
-    export const count = async () => ({
-        users: {
-            total: await prisma.users.count(),
-            deleted: await prisma.users.count({
-                where: { deleted_at: { not: null } },
-            }),
-        },
-        authentications: {
-            total: await prisma.authentications.count(),
-            deleted: await prisma.authentications.count({
-                where: { deleted_at: { not: null } },
-            }),
-        },
-        memberships: {
-            total: await prisma.memberships.count(),
-            deleted: await prisma.memberships.count({
-                where: { deleted_at: { not: null } },
-            }),
-        },
-        boards: {
-            total: await prisma.boards.count(),
-            deleted: await prisma.boards.count({
-                where: { deleted_at: { not: null } },
-            }),
-        },
-        articles: {
-            total: await prisma.articles.count(),
-            deleted: await prisma.articles.count({
-                where: { deleted_at: { not: null } },
-            }),
-        },
-        article_snapshots: {
-            total: await prisma.article_snapshots.count(),
-        },
-        article_attachment_snapshots: {
-            total: await prisma.article_attachment_snapshots.count(),
-        },
-        comments: {
-            total: await prisma.comments.count(),
-            deleted: await prisma.comments.count({
-                where: { deleted_at: { not: null } },
-            }),
-        },
-        comment_snapshots: {
-            total: await prisma.comment_snapshots.count(),
-        },
-        attachments: {
-            total: await prisma.attachments.count(),
-        },
-    });
+    export const deleteUser = async (id: string) => {
+        await prisma.authentications.deleteMany({ where: { user_id: id } });
+        await prisma.users.delete({ where: { id } });
+    };
+
+    export const deleteBoard = async (id: string) =>
+        prisma.boards.delete({ where: { id } });
+
+    export const deleteArticle = async (id: string) => {
+        await prisma.article_attachment_snapshots.deleteMany({
+            where: { snapshot: { article_id: id } },
+        });
+        await prisma.article_snapshots.deleteMany({
+            where: { article_id: id },
+        });
+        await prisma.articles.delete({ where: { id } });
+    };
+
+    export const deleteComment = async (id: string) => {
+        await prisma.comment_snapshots.deleteMany({
+            where: { comment_id: id },
+        });
+        await prisma.comments.delete({ where: { id } });
+    };
+
+    class Size {
+        private before?: {
+            users: {
+                total: number;
+                deleted: number;
+            };
+            authentications: {
+                total: number;
+                deleted: number;
+            };
+            memberships: {
+                total: number;
+                deleted: number;
+            };
+            boards: {
+                total: number;
+                deleted: number;
+            };
+            articles: {
+                total: number;
+                deleted: number;
+            };
+            article_snapshots: {
+                total: number;
+            };
+            article_attachment_snapshots: {
+                total: number;
+            };
+            comments: {
+                total: number;
+                deleted: number;
+            };
+            comment_snapshots: {
+                total: number;
+            };
+            attachments: {
+                total: number;
+            };
+        };
+        private async count() {
+            return {
+                users: {
+                    total: await prisma.users.count(),
+                    deleted: await prisma.users.count({
+                        where: { deleted_at: { not: null } },
+                    }),
+                },
+                authentications: {
+                    total: await prisma.authentications.count(),
+                    deleted: await prisma.authentications.count({
+                        where: { deleted_at: { not: null } },
+                    }),
+                },
+                memberships: {
+                    total: await prisma.memberships.count(),
+                    deleted: await prisma.memberships.count({
+                        where: { deleted_at: { not: null } },
+                    }),
+                },
+                boards: {
+                    total: await prisma.boards.count(),
+                    deleted: await prisma.boards.count({
+                        where: { deleted_at: { not: null } },
+                    }),
+                },
+                articles: {
+                    total: await prisma.articles.count(),
+                    deleted: await prisma.articles.count({
+                        where: { deleted_at: { not: null } },
+                    }),
+                },
+                article_snapshots: {
+                    total: await prisma.article_snapshots.count(),
+                },
+                article_attachment_snapshots: {
+                    total: await prisma.article_attachment_snapshots.count(),
+                },
+                comments: {
+                    total: await prisma.comments.count(),
+                    deleted: await prisma.comments.count({
+                        where: { deleted_at: { not: null } },
+                    }),
+                },
+                comment_snapshots: {
+                    total: await prisma.comment_snapshots.count(),
+                },
+                attachments: {
+                    total: await prisma.attachments.count(),
+                },
+            };
+        }
+        async init() {
+            this.before = await this.count();
+        }
+        async check(): Promise<() => void> {
+            const before = this.before;
+            if (isUndefined(before)) throw Error("Size does not initalized");
+            const after = await this.count();
+            return () =>
+                assert.deepStrictEqual(after, before, "size is changed");
+        }
+    }
+
+    export const size = new Size();
 
     export const init = async () => {
         await createMembership("브론즈", 1);
         await createMembership("실버", 2);
         await createMembership("골드", 3);
-        await createMembership("플레티넘", 4);
-        await createMembership("에메랄드", 5);
-        await createMembership("다이아", 6);
 
         await createUser("user0", null);
         await createUser("user1", "브론즈");
         await createUser("user2", "실버");
         await createUser("user3", "골드");
-        await createUser("user4", "플레티넘");
-        await createUser("user5", "에메랄드");
-        await createUser("user6", "다이아");
 
         await createBoard("board1", {
             read_article_list: null,
@@ -329,23 +458,23 @@ export namespace Seed {
             read_comment_list: null,
             write_article: "브론즈",
             write_comment: "브론즈",
-            manager: "다이아",
+            manager: "골드",
         });
         await Promise.all(
-            Array.from({ length: 50 }, async () => {
+            Array.from({ length: 16 }, async (_, idx) => {
                 const article = await createArticle(
                     {
                         author: "user1",
                         board: "board1",
-                        is_notice: Random.int({ min: 0, max: 4 }) < 2,
+                        is_notice: !!+idx.toString(2).padStart(3, "0").at(-1)!,
                     },
                     {
-                        is_updated: Random.int({ min: 0, max: 4 }) < 2,
-                        is_deleted: Random.int({ min: 0, max: 4 }) < 2,
+                        is_updated: !!+idx.toString(2).padStart(3, "0").at(-2)!,
+                        is_deleted: !!+idx.toString(2).padStart(3, "0").at(-3)!,
                     },
                 );
                 await Promise.all(
-                    Array.from({ length: 20 }, async () => {
+                    Array.from({ length: 8 }, async () => {
                         const comment = await createComment(
                             {
                                 author: "user2",
@@ -353,11 +482,17 @@ export namespace Seed {
                                 parent_id: null,
                             },
                             {
-                                is_updated: Random.int({ min: 0, max: 4 }) < 2,
-                                is_deleted: Random.int({ min: 0, max: 4 }) < 2,
+                                is_updated: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-1)!,
+                                is_deleted: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-2)!,
                             },
                         );
-                        Array.from({ length: 20 }, () =>
+                        Array.from({ length: 8 }, () =>
                             createComment(
                                 {
                                     author: "user3",
@@ -365,10 +500,14 @@ export namespace Seed {
                                     parent_id: comment.id,
                                 },
                                 {
-                                    is_updated:
-                                        Random.int({ min: 0, max: 4 }) < 2,
-                                    is_deleted:
-                                        Random.int({ min: 0, max: 4 }) < 2,
+                                    is_updated: !!+idx
+                                        .toString(2)
+                                        .padStart(3, "0")
+                                        .at(-1)!,
+                                    is_deleted: !!+idx
+                                        .toString(2)
+                                        .padStart(3, "0")
+                                        .at(-2)!,
                                 },
                             ),
                         );
@@ -377,51 +516,61 @@ export namespace Seed {
             }),
         );
         await createBoard("board2", {
-            read_article_list: "골드",
-            read_article: "골드",
-            read_comment_list: "골드",
-            write_article: "골드",
-            write_comment: "골드",
-            manager: "다이아",
+            read_article_list: null,
+            read_article: "브론즈",
+            read_comment_list: "브론즈",
+            write_article: "브론즈",
+            write_comment: "브론즈",
+            manager: "골드",
         });
         await Promise.all(
-            Array.from({ length: 50 }, async () => {
+            Array.from({ length: 16 }, async (_, idx) => {
                 const article = await createArticle(
                     {
-                        author: "user4",
+                        author: "user3",
                         board: "board2",
-                        is_notice: Random.int({ min: 0, max: 4 }) < 2,
+                        is_notice: !!+idx.toString(2).padStart(3, "0").at(-1)!,
                     },
                     {
-                        is_updated: Random.int({ min: 0, max: 4 }) < 2,
-                        is_deleted: Random.int({ min: 0, max: 4 }) < 2,
+                        is_updated: !!+idx.toString(2).padStart(3, "0").at(-2)!,
+                        is_deleted: !!+idx.toString(2).padStart(3, "0").at(-3)!,
                     },
                 );
                 await Promise.all(
-                    Array.from({ length: 20 }, async () => {
+                    Array.from({ length: 8 }, async () => {
                         const comment = await createComment(
                             {
-                                author: "user6",
+                                author: "user2",
                                 article_id: article.id,
                                 parent_id: null,
                             },
                             {
-                                is_updated: Random.int({ min: 0, max: 4 }) < 2,
-                                is_deleted: Random.int({ min: 0, max: 4 }) < 2,
+                                is_updated: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-1)!,
+                                is_deleted: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-2)!,
                             },
                         );
-                        Array.from({ length: 20 }, () =>
+                        Array.from({ length: 8 }, () =>
                             createComment(
                                 {
-                                    author: "user5",
+                                    author: "user1",
                                     article_id: article.id,
                                     parent_id: comment.id,
                                 },
                                 {
-                                    is_updated:
-                                        Random.int({ min: 0, max: 4 }) < 2,
-                                    is_deleted:
-                                        Random.int({ min: 0, max: 4 }) < 2,
+                                    is_updated: !!+idx
+                                        .toString(2)
+                                        .padStart(3, "0")
+                                        .at(-1)!,
+                                    is_deleted: !!+idx
+                                        .toString(2)
+                                        .padStart(3, "0")
+                                        .at(-2)!,
                                 },
                             ),
                         );
@@ -432,91 +581,45 @@ export namespace Seed {
         await createBoard("board3", {
             read_article_list: null,
             read_article: "브론즈",
-            read_comment_list: "브론즈",
-            write_article: "실버",
-            write_comment: "실버",
-            manager: "다이아",
+            read_comment_list: "실버",
+            write_article: "골드",
+            write_comment: "골드",
+            manager: "골드",
         });
+
         await Promise.all(
-            Array.from({ length: 50 }, async () => {
+            Array.from({ length: 16 }, async (_, idx) => {
                 const article = await createArticle(
                     {
                         author: "user3",
-                        board: "board3",
-                        is_notice: Random.int({ min: 0, max: 4 }) < 2,
+                        board: "board2",
+                        is_notice: !!+idx.toString(2).padStart(3, "0").at(-1)!,
                     },
                     {
-                        is_updated: Random.int({ min: 0, max: 4 }) < 2,
-                        is_deleted: Random.int({ min: 0, max: 4 }) < 2,
+                        is_updated: !!+idx.toString(2).padStart(3, "0").at(-2)!,
+                        is_deleted: !!+idx.toString(2).padStart(3, "0").at(-3)!,
                     },
                 );
                 await Promise.all(
-                    Array.from({ length: 20 }, async () => {
+                    Array.from({ length: 8 }, async () => {
                         const comment = await createComment(
                             {
-                                author: "user2",
+                                author: "user3",
                                 article_id: article.id,
                                 parent_id: null,
                             },
                             {
-                                is_updated: Random.int({ min: 0, max: 4 }) < 2,
-                                is_deleted: Random.int({ min: 0, max: 4 }) < 2,
+                                is_updated: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-1)!,
+                                is_deleted: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-2)!,
                             },
                         );
-                        Array.from({ length: 20 }, () =>
-                            createComment(
-                                {
-                                    author: "user4",
-                                    article_id: article.id,
-                                    parent_id: comment.id,
-                                },
-                                {
-                                    is_updated:
-                                        Random.int({ min: 0, max: 4 }) < 2,
-                                    is_deleted:
-                                        Random.int({ min: 0, max: 4 }) < 2,
-                                },
-                            ),
-                        );
-                    }),
-                );
-            }),
-        );
-        await createBoard("board4", {
-            read_article_list: "브론즈",
-            read_article: "실버",
-            read_comment_list: "골드",
-            write_article: "골드",
-            write_comment: "골드",
-            manager: "다이아",
-        });
-        await Promise.all(
-            Array.from({ length: 50 }, async () => {
-                const article = await createArticle(
-                    {
-                        author: "user6",
-                        board: "board4",
-                        is_notice: Random.int({ min: 0, max: 4 }) < 2,
-                    },
-                    {
-                        is_updated: Random.int({ min: 0, max: 4 }) < 2,
-                        is_deleted: Random.int({ min: 0, max: 4 }) < 2,
-                    },
-                );
-                await Promise.all(
-                    Array.from({ length: 20 }, async () => {
-                        const comment = await createComment(
-                            {
-                                author: "user5",
-                                article_id: article.id,
-                                parent_id: null,
-                            },
-                            {
-                                is_updated: Random.int({ min: 0, max: 4 }) < 2,
-                                is_deleted: Random.int({ min: 0, max: 4 }) < 2,
-                            },
-                        );
-                        Array.from({ length: 20 }, () =>
+                        Array.from({ length: 8 }, () =>
                             createComment(
                                 {
                                     author: "user3",
@@ -524,10 +627,14 @@ export namespace Seed {
                                     parent_id: comment.id,
                                 },
                                 {
-                                    is_updated:
-                                        Random.int({ min: 0, max: 4 }) < 2,
-                                    is_deleted:
-                                        Random.int({ min: 0, max: 4 }) < 2,
+                                    is_updated: !!+idx
+                                        .toString(2)
+                                        .padStart(3, "0")
+                                        .at(-1)!,
+                                    is_deleted: !!+idx
+                                        .toString(2)
+                                        .padStart(3, "0")
+                                        .at(-2)!,
                                 },
                             ),
                         );
@@ -535,23 +642,40 @@ export namespace Seed {
                 );
             }),
         );
+
+        const board = await createBoard("deleted", {
+            read_article_list: null,
+            read_article: null,
+            read_comment_list: null,
+            write_article: "브론즈",
+            write_comment: "브론즈",
+            manager: "브론즈",
+        });
+
+        await prisma.boards.update({
+            where: { id: board.id },
+            data: { deleted_at: DateMapper.toISO() },
+        });
+
+        await size.init();
+        console.log("seed initialized");
     };
 
     export const restore = async () => {
-        await prisma.comment_snapshots.deleteMany();
-        await prisma.comments.deleteMany();
+        const truncate = (table: string) =>
+            prisma.$queryRaw(Prisma.raw(`TRUNCATE table ${table} cascade`));
 
-        await prisma.article_attachment_snapshots.deleteMany();
-        await prisma.article_snapshots.deleteMany();
-        await prisma.articles.deleteMany();
-
-        await prisma.attachments.deleteMany();
-
-        await prisma.boards.deleteMany();
-
-        await prisma.authentications.deleteMany();
-        await prisma.users.deleteMany();
-
-        await prisma.memberships.deleteMany();
+        await prisma.$transaction([
+            truncate("comment_snapshots"),
+            truncate("comments"),
+            truncate("article_attachment_snapshots"),
+            truncate("article_snapshots"),
+            truncate("articles"),
+            truncate("attachments"),
+            truncate("boards"),
+            truncate("authentications"),
+            truncate("users"),
+            truncate("memberships"),
+        ]);
     };
 }

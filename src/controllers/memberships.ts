@@ -1,7 +1,9 @@
 import core from "@nestia/core";
 import * as nest from "@nestjs/common";
 
+import { Membership } from "@APP/app/membership";
 import { IMembership } from "@APP/types/IMembership";
+import { Result } from "@APP/utils/result";
 
 @nest.Controller("memberships")
 export class MembershipsController {
@@ -11,7 +13,8 @@ export class MembershipsController {
      * @return 활성화된 멤버십 목록
      */
     @core.TypedRoute.Get()
-    getList(): Promise<IMembership[]> {
-        throw Error();
+    async getList(): Promise<IMembership[]> {
+        const result = await Membership.getList()();
+        return Result.Ok.flatten(result);
     }
 }

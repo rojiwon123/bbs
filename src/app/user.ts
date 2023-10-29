@@ -52,6 +52,7 @@ export namespace User {
                     updated_at: true,
                     deleted_at: true,
                     membership: {
+                        where: { deleted_at: null },
                         select: {
                             id: true,
                             name: true,

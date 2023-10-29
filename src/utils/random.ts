@@ -21,7 +21,7 @@ export namespace Random {
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
         return Array.from({ length }, () =>
-            chars.charAt(int({ max: chars.length })),
+            chars.charAt(int({ max: chars.length - 1 })),
         ).join("");
     };
 

@@ -2,8 +2,11 @@ import core from "@nestia/core";
 import * as nest from "@nestjs/common";
 import typia from "typia";
 
+import { Board } from "@APP/app/board";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IBoard } from "@APP/types/IBoard";
+import { Failure } from "@APP/utils/failure";
+import { Result } from "@APP/utils/result";
 
 @nest.Controller("boards")
 export class BoardsController {
@@ -13,8 +16,9 @@ export class BoardsController {
      * @return 게시판 목록
      */
     @core.TypedRoute.Get()
-    getList(): Promise<IBoard[]> {
-        throw Error();
+    async getList(): Promise<IBoard.ISummary[]> {
+        const result = await Board.getList()();
+        return Result.Ok.flatten(result);
     }
 
     /**
@@ -24,12 +28,14 @@ export class BoardsController {
      */
     @core.TypedException<ErrorCode.Board.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Get(":board_id")
-    get(
+    async get(
         @core.TypedParam("board_id")
         board_id: string & typia.tags.Format<"uuid">,
     ): Promise<IBoard> {
-        board_id;
-        throw Error();
+        const result = await Board.get()(board_id);
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        throw Failure.Http.fromInternal(error, nest.HttpStatus.NOT_FOUND);
     }
 
     /** 서비스 관리자 API
