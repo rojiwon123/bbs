@@ -89,7 +89,7 @@ export class BoardsArticlesController {
     create(
         @core.TypedParam("board_id")
         board_id: string & typia.tags.Format<"uuid">,
-        @core.TypedBody() body: IArticle.ICreate,
+        @core.TypedBody() body: IArticle.ICreateBody,
     ): Promise<IArticle.Identity> {
         board_id;
         body;
@@ -124,7 +124,7 @@ export class BoardsArticlesController {
         board_id: string & typia.tags.Format<"uuid">,
         @core.TypedParam("article_id")
         article_id: string & typia.tags.Format<"uuid">,
-        @core.TypedBody() body: IArticle.IUpdate,
+        @core.TypedBody() body: IArticle.IUpdateBody,
     ): Promise<IArticle.Identity> {
         board_id;
         article_id;

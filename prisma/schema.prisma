@@ -106,14 +106,14 @@ model article_snapshots {
   /// creation time of record
   /// 
   created_at           DateTime                       @database.Timestamptz
-  attachment_relations article_snapshot_attachments[]
+  attachment_snapshots article_attachment_snapshots[]
 }
 
-/// Relation Attachment with Article Snapshot
+/// Attachment Snapshot for Article
 /// 
-/// an `article_snapshot_attachments` entity connects an `article_snapshots` record with an `attachments` record.
+/// an `article_attachment_snapshots` entity connects an `article_snapshots` record with an `attachments` record.
 /// 
-/// If author add attachment to an article, a new record of `article_snapshot_attachments` is created.
+/// If author add attachment to an article, a new record of `article_attachment_snapshots` is created.
 /// 
 /// @namespace All
 /// 
@@ -121,7 +121,7 @@ model article_snapshots {
 /// 
 /// @author industriously
 /// 
-model article_snapshot_attachments {
+model article_attachment_snapshots {
   /// record identity
   /// 
   /// `uuid` type
@@ -304,20 +304,20 @@ model attachments {
   /// 
   /// `uuid` type
   /// 
-  id                         String                         @id @database.Uuid
+  id                           String                         @id @database.Uuid
   /// name of attachment resource
   /// 
-  name                       String
+  name                         String
   /// extension of resource like `md`, `html`, `jpeg`...
   /// 
-  extension                  String
+  extension                    String
   /// URL path of real resource
   /// 
-  url                        String
+  url                          String
   /// creation time of record
   /// 
-  created_at                 DateTime                       @database.Timestamptz
-  article_snapshot_relations article_snapshot_attachments[]
+  created_at                   DateTime                       @database.Timestamptz
+  article_attachment_snapshots article_attachment_snapshots[]
 }
 
 /// Membership Entity
@@ -348,6 +348,9 @@ model memberships {
   /// creation time of record
   /// 
   created_at                   DateTime  @database.Timestamptz
+  /// revision time of record
+  /// 
+  updated_at                   DateTime? @database.Timestamptz
   /// deletion time of record
   /// 
   /// if null, a record is soft-deleted

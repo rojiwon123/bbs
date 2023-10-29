@@ -28,7 +28,7 @@ article_snapshots {
     ArticleBodyFormat body_format
     DateTime created_at
 }
-article_snapshot_attachments {
+article_attachment_snapshots {
     String id PK
     String snapshot_id FK
     String attachment_id FK
@@ -74,6 +74,7 @@ memberships {
     Int rank
     String image_url "nullable"
     DateTime created_at
+    DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
 authentications {
@@ -98,8 +99,8 @@ users {
 articles }|--|| users : author
 articles }|--|| boards : board
 article_snapshots }|--|| articles : article
-article_snapshot_attachments }|--|| article_snapshots : snapshot
-article_snapshot_attachments }|--|| attachments : attachment
+article_attachment_snapshots }|--|| article_snapshots : snapshot
+article_attachment_snapshots }|--|| attachments : attachment
 boards }|--|| memberships : manager_membership
 boards }o--|| memberships : read_article_list_membership
 boards }o--|| memberships : read_article_membership
@@ -162,13 +163,13 @@ When a user edit an article, a new snapshot record is created, and readers will 
 -   `body_format`: one of `html`, `md`, `txt`
 -   `created_at`: creation time of record
 
-### `article_snapshot_attachments`
+### `article_attachment_snapshots`
 
-Relation Attachment with Article Snapshot
+Attachment Snapshot for Article
 
-an `article_snapshot_attachments` entity connects an `article_snapshots` record with an `attachments` record.
+an `article_attachment_snapshots` entity connects an `article_snapshots` record with an `attachments` record.
 
-If author add attachment to an article, a new record of `article_snapshot_attachments` is created.
+If author add attachment to an article, a new record of `article_attachment_snapshots` is created.
 
 **Properties**
 
@@ -314,6 +315,7 @@ a user can receive one or zero membership, which signifies their permission leve
 -   `rank`: `rank` is used for membership grade comparison
 -   `image_url`:
 -   `created_at`: creation time of record
+-   `updated_at`: revision time of record
 -   `deleted_at`
     > deletion time of record
     >
@@ -399,6 +401,7 @@ memberships {
     Int rank
     String image_url "nullable"
     DateTime created_at
+    DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
 users {
@@ -504,6 +507,7 @@ a user can receive one or zero membership, which signifies their permission leve
 -   `rank`: `rank` is used for membership grade comparison
 -   `image_url`:
 -   `created_at`: creation time of record
+-   `updated_at`: revision time of record
 -   `deleted_at`
     > deletion time of record
     >
@@ -699,7 +703,7 @@ article_snapshots {
     ArticleBodyFormat body_format
     DateTime created_at
 }
-article_snapshot_attachments {
+article_attachment_snapshots {
     String id PK
     String snapshot_id FK
     String attachment_id FK
@@ -745,8 +749,8 @@ users {
 articles }|--|| users : author
 articles }|--|| boards : board
 article_snapshots }|--|| articles : article
-article_snapshot_attachments }|--|| article_snapshots : snapshot
-article_snapshot_attachments }|--|| attachments : attachment
+article_attachment_snapshots }|--|| article_snapshots : snapshot
+article_attachment_snapshots }|--|| attachments : attachment
 comments }|--|| users : author
 comments }|--|| articles : article
 comments }o--o| comments : parent
@@ -800,13 +804,13 @@ When a user edit an article, a new snapshot record is created, and readers will 
 -   `body_format`: one of `html`, `md`, `txt`
 -   `created_at`: creation time of record
 
-### `article_snapshot_attachments`
+### `article_attachment_snapshots`
 
-Relation Attachment with Article Snapshot
+Attachment Snapshot for Article
 
-an `article_snapshot_attachments` entity connects an `article_snapshots` record with an `attachments` record.
+an `article_attachment_snapshots` entity connects an `article_snapshots` record with an `attachments` record.
 
-If author add attachment to an article, a new record of `article_snapshot_attachments` is created.
+If author add attachment to an article, a new record of `article_attachment_snapshots` is created.
 
 **Properties**
 
@@ -950,6 +954,7 @@ memberships {
     Int rank
     String image_url "nullable"
     DateTime created_at
+    DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
 authentications {
@@ -991,6 +996,7 @@ a user can receive one or zero membership, which signifies their permission leve
 -   `rank`: `rank` is used for membership grade comparison
 -   `image_url`:
 -   `created_at`: creation time of record
+-   `updated_at`: revision time of record
 -   `deleted_at`
     > deletion time of record
     >

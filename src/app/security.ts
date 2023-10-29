@@ -1,4 +1,4 @@
-import { isNull, negate } from "@fxts/core";
+import { isNull } from "@fxts/core";
 import {
     ExecutionContext,
     HttpStatus,
@@ -14,6 +14,7 @@ import { Result } from "@APP/utils/result";
 
 import { Prisma } from "../../db/edge";
 import { Token } from "./token";
+import { User } from "./user";
 
 export type Security<T = string> = { token: T | null };
 export namespace Security {
@@ -61,7 +62,7 @@ export namespace Security {
 
     export const verify =
         (tx: Prisma.TransactionClient = prisma) =>
-        async (token: string): Promise<IUser.Identity> => {
+        async (token: string): Promise<IUser> => {
             const payload = Token.verify(token);
             if (Result.Error.is(payload)) {
                 const error = Result.Error.flatten(payload);
@@ -80,17 +81,14 @@ export namespace Security {
                     }
                 throw Failure.Http.fromExternal(error);
             }
-            const user_id = Result.Ok.flatten(payload).user_id;
-            const user = await tx.users.findFirst({
-                where: { id: user_id },
-                select: { deleted_at: true },
-            });
-            if (isNull(user) || negate(isNull)(user.deleted_at))
+            const { user_id } = Result.Ok.flatten(payload);
+            const user = await User.get(tx)({ user_id });
+            if (Result.Error.is(user))
                 throw new Failure.Http(
                     "INVALID_PERMISSION" satisfies ErrorCode.Permission.Invalid,
                     HttpStatus.UNAUTHORIZED,
                 );
 
-            return { user_id };
+            return Result.Ok.flatten(user);
         };
 }

@@ -25,8 +25,7 @@ Table.create({
     }),
     Table.setCreatable,
     Table.addRelation({
-        tableName: "article_snapshot_attachments",
-        fieldName: "article_snapshot_relations",
+        tableName: "article_attachment_snapshots",
         options: { list: true },
     }),
 );

@@ -108,7 +108,7 @@ export class BoardsArticlesCommentsController {
         board_id: string & typia.tags.Format<"uuid">,
         @core.TypedParam("article_id")
         article_id: string & typia.tags.Format<"uuid">,
-        @core.TypedBody() body: IComment.ICreate,
+        @core.TypedBody() body: IComment.ICreateBody,
     ): Promise<IComment.Identity> {
         board_id;
         article_id;
@@ -149,7 +149,7 @@ export class BoardsArticlesCommentsController {
         article_id: string & typia.tags.Format<"uuid">,
         @core.TypedParam("comment_id")
         comment_id: string & typia.tags.Format<"uuid">,
-        @core.TypedBody() body: IComment.IUpdate,
+        @core.TypedBody() body: IComment.IUpdateBody,
     ): Promise<IComment.Identity> {
         board_id;
         article_id;

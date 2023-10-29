@@ -6,7 +6,7 @@ import api from "@project/api";
 import typia from "typia";
 
 import { prisma } from "@APP/infrastructure/DB";
-import { Mock } from "@APP/test/internal/mock";
+import { Mock } from "@APP/test/internal/mocker";
 import { Util } from "@APP/test/internal/utils";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IAuthentication } from "@APP/types/IAuthentication";

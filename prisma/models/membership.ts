@@ -23,6 +23,7 @@ Table.create({
     }),
     Table.addColumn("string")("image_url", { optional: true }),
     Table.setCreatable,
+    Table.setUpdatable,
     Table.setDeletable,
     Table.addRelation({
         tableName: "users",

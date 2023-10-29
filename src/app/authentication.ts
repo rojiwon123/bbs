@@ -13,6 +13,7 @@ import { Result } from "@APP/utils/result";
 
 import { Prisma } from "../../db/edge";
 import { Token } from "./token";
+import { User } from "./user";
 
 export interface Authentication {
     readonly getUrls: () => Promise<Result.Ok<IAuthentication.IOauthUrls>>;
@@ -97,19 +98,18 @@ export namespace Authentication {
                 }));
 
             if (isNull(auth.user)) {
-                const user = await tx.users.create({
-                    data: {
-                        id: Random.uuid(),
+                const { user_id } = Result.Ok.flatten(
+                    await User.create(tx)({
                         name: profile.name,
                         image_url: profile.image_url,
-                        created_at: DateMapper.toISO(),
-                    },
-                });
+                        membership_id: null,
+                    }),
+                );
                 await tx.authentications.updateMany({
                     where: { id: auth.id },
-                    data: { user_id: user.id },
+                    data: { user_id },
                 });
-                return getAuthentication(user.id);
+                return getAuthentication(user_id);
             }
             return getAuthentication(auth.user.id);
         };

@@ -1,6 +1,7 @@
 import typia from "typia";
 
 import { IMembership } from "./IMembership";
+import { Omit } from "./global";
 
 export interface IUser {
     id: string & typia.tags.Format<"uuid">;
@@ -20,4 +21,13 @@ export namespace IUser {
     }
     export interface ISummary
         extends Pick<IUser, "id" | "name" | "image_url" | "membership"> {}
+
+    export interface IUpdate extends Pick<IUser, "id" | "name" | "image_url"> {
+        membership_id: (string & typia.tags.Format<"uuid">) | null;
+    }
+    export interface ICreate extends Omit<IUpdate, "id"> {}
+
+    export interface IUpdateBody
+        extends Omit<IUpdate, "id" | "membership_id"> {}
+    export interface ICreateBody extends Omit<ICreate, "membership_id"> {}
 }

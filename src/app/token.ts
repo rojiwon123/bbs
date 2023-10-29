@@ -11,7 +11,7 @@ import { Result } from "@APP/utils/result";
 
 export interface Token {
     readonly generate: (
-        input: IToken.IInput,
+        input: IToken.ICreate,
     ) => Result<IToken.IOutput, Failure.External<"Crypto.encrypt">>;
     readonly verify: (
         token: string,

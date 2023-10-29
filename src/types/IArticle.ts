@@ -4,6 +4,7 @@ import { ArticleBodyFormat } from "../../db/edge";
 import { IBoard } from "./IBoard";
 import { IPage } from "./IPage";
 import { IUser } from "./IUser";
+import { Omit } from "./global";
 
 export interface IArticle {
     id: string & typia.tags.Format<"uuid">;
@@ -36,14 +37,24 @@ export namespace IArticle {
             "id" | "title" | "author" | "created_at" | "updated_at"
         > {}
 
+    export interface IUpdate
+        extends Pick<
+            IArticle,
+            "id" | "title" | "body_format" | "body_url" | "is_notice"
+        > {}
+
+    export interface ICreate extends Omit<IUpdate, "id"> {
+        author_id: string & typia.tags.Format<"uuid">;
+        board_id: string & typia.tags.Format<"uuid">;
+    }
+
     export interface ISearch extends IPage.ISearch {
         /** @default latest */
         sort?: IPage.SortType;
     }
     export interface IPaginated extends IPage.IResponse<ISummary> {}
 
-    export interface IUpdate
-        extends Pick<IArticle, "title" | "body_format" | "body_url"> {}
-
-    export interface ICreate extends IUpdate {}
+    export interface IUpdateBody extends Omit<IUpdate, "id" | "is_notice"> {}
+    export interface ICreateBody
+        extends Omit<ICreate, "author_id" | "board_id" | "is_notice"> {}
 }

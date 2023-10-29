@@ -62,18 +62,18 @@ Table.create({
     }),
     Table.setCreatable,
     Table.addRelation({
-        tableName: "article_snapshot_attachments",
-        fieldName: "attachment_relations",
+        tableName: "article_attachment_snapshots",
+        fieldName: "attachment_snapshots",
         options: { list: true },
     }),
 );
 
 Table.create({
-    tableName: "article_snapshot_attachments",
+    tableName: "article_attachment_snapshots",
     comments: Description.lines(
-        "Relation Attachment with Article Snapshot",
-        `an \`article_snapshot_attachments\` entity connects an \`article_snapshots\` record with an \`attachments\` record.`,
-        `If author add attachment to an article, a new record of \`article_snapshot_attachments\` is created.`,
+        "Attachment Snapshot for Article",
+        `an \`article_attachment_snapshots\` entity connects an \`article_snapshots\` record with an \`attachments\` record.`,
+        `If author add attachment to an article, a new record of \`article_attachment_snapshots\` is created.`,
         Description.namespace(),
         Description.namespace("Article"),
         Description.author(),

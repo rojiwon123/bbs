@@ -1,21 +1,17 @@
-import { IConnection, IPropagation } from "@nestia/fetcher";
+import { IPropagation } from "@nestia/fetcher";
 
 import { IPage } from "@APP/types/IPage";
 
-export namespace Util {
-    export const addHeaders =
-        (headers: Record<string, string>) =>
-        (connection: IConnection): IConnection => ({
-            ...connection,
-            headers: {
-                ...connection.headers,
-                ...headers,
-            },
-        });
-
-    export const addToken = (token: string) =>
-        addHeaders({ authorization: `bearer ${token}` });
-
+export namespace APIValidator {
+    class APIValidation extends Error {
+        constructor(
+            public expected: { success: boolean; status: IPropagation.Status },
+            public actual: { success: boolean; status: IPropagation.Status },
+        ) {
+            super("The API response is not as expected");
+            this.name = "APIValidation";
+        }
+    }
     type Success<
         P extends IPropagation.IBranch<boolean, unknown, any>,
         Status,
@@ -30,17 +26,7 @@ export namespace Util {
         ? P["data"]
         : never;
 
-    class AssertResponse extends Error {
-        constructor(
-            public expected: { success: boolean; status: IPropagation.Status },
-            public actual: { success: boolean; status: IPropagation.Status },
-        ) {
-            super("The API response is not as expected");
-            this.name = "AssertResponse";
-        }
-    }
-
-    export const assertResponse =
+    export const assert =
         <
             P extends IPropagation.IBranch<boolean, unknown, any>,
             S extends IPropagation.Status,
@@ -57,7 +43,7 @@ export namespace Util {
         }): Promise<Body<P, S>> => {
             const { status, success, data, headers } = await response;
             if (expected_status !== status || expected.success !== success) {
-                throw new AssertResponse(
+                throw new APIValidation(
                     { success: expected.success, status: expected_status },
                     { success, status },
                 );
@@ -67,7 +53,7 @@ export namespace Util {
             return data;
         };
 
-    export const assertNotEmptyPaginatedResponse =
+    export const assertNotEmpty =
         <T extends IPage.IResponse<R>, R>(
             assertEquals: (input: unknown) => T,
         ) =>

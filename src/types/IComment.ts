@@ -3,6 +3,7 @@ import typia from "typia";
 import { IArticle } from "./IArticle";
 import { IPage } from "./IPage";
 import { IUser } from "./IUser";
+import { Omit } from "./global";
 
 export interface IComment {
     id: string & typia.tags.Format<"uuid">;
@@ -28,6 +29,14 @@ export namespace IComment {
             "id" | "author" | "body" | "created_at" | "updated_at"
         > {}
 
+    export interface IUpdate extends Pick<IComment, "id" | "body"> {}
+
+    export interface ICreate extends Omit<IUpdate, "id"> {
+        author_id: string & typia.tags.Format<"uuid">;
+        parent_id: (string & typia.tags.Format<"uuid">) | null;
+        article_id: string & typia.tags.Format<"uuid">;
+    }
+
     export interface ISearch extends IPage.ISearch {
         parent_id?: string & typia.tags.Format<"uuid">;
         sort?: IPage.SortType;
@@ -35,7 +44,7 @@ export namespace IComment {
 
     export interface IPaginated extends IPage.IResponse<IComment.ISummary> {}
 
-    export interface IUpdate extends Pick<IComment, "body"> {}
-
-    export interface ICreate extends IUpdate {}
+    export interface IUpdateBody extends Omit<IUpdate, "id"> {}
+    export interface ICreateBody
+        extends Omit<ICreate, "article_id" | "author_id" | "parent_id"> {}
 }

@@ -6,7 +6,7 @@ import { IOauth } from "@APP/types/IOauth";
 import { Failure } from "@APP/utils/failure";
 import { Result } from "@APP/utils/result";
 
-export namespace Mock {
+export namespace Mocker {
     type MethodNames<T extends object> = {
         [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
     }[keyof T];
@@ -28,7 +28,7 @@ export namespace Mock {
         mocker["restore"]();
     };
 
-    export const run = () => {
+    export const init = () => {
         implement(
             Oauth.Kakao,
             "getUrlForLogin",
