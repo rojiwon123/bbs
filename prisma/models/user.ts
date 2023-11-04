@@ -26,6 +26,7 @@ Table.create({
     Table.setCreatable,
     Table.setUpdatable,
     Table.setDeletable,
+    Table.addColumn("unique")({ fields: ["oauth_sub", "oauth_type"] }),
 );
 
 Table.create({

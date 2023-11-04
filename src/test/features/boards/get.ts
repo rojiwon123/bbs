@@ -3,7 +3,6 @@ import { HttpStatus } from "@nestjs/common";
 import api from "@project/api";
 import typia from "typia";
 
-import { check_seed_changed } from "@APP/test/internal/fragment";
 import { Seed } from "@APP/test/internal/seed";
 import { APIValidator } from "@APP/test/internal/validator";
 import { ErrorCode } from "@APP/types/ErrorCode";
@@ -37,5 +36,3 @@ export const test_get_board_when_board_is_deleted = async (
         success: false,
         assertBody: typia.createAssertEquals<ErrorCode.Board.NotFound>(),
     });
-
-export const test_seed_changed = check_seed_changed;

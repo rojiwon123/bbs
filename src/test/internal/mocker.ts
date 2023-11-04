@@ -48,7 +48,7 @@ export namespace Mocker {
                 );
             return Result.Ok.map({
                 oauth_sub: code,
-                profile: typia.random<IOauth.IProfile>(),
+                profile: { ...typia.random<IOauth.IProfile>(), name: code },
             });
         });
 
@@ -59,7 +59,7 @@ export namespace Mocker {
                 );
             return Result.Ok.map({
                 oauth_sub: code,
-                profile: typia.random<IOauth.IProfile>(),
+                profile: { ...typia.random<IOauth.IProfile>(), name: code },
             });
         });
     };

@@ -1,9 +1,13 @@
 import core from "@nestia/core";
 import * as nest from "@nestjs/common";
+import { Request } from "express";
 import typia from "typia";
 
+import { BoardsArticlesUsecase } from "@APP/application/boards-articles.usecase";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
+import { Failure } from "@APP/utils/failure";
+import { Result } from "@APP/utils/result";
 
 @nest.Controller("boards/:board_id/articles")
 export class BoardsArticlesController {
@@ -25,14 +29,37 @@ export class BoardsArticlesController {
     )
     @core.TypedException<ErrorCode.Board.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Get()
-    getList(
+    async getList(
         @core.TypedParam("board_id")
         board_id: string & typia.tags.Format<"uuid">,
         @core.TypedQuery() query: IArticle.ISearch,
+        @nest.Request() req: Request,
     ): Promise<IArticle.IPaginated> {
-        board_id;
-        query;
-        throw Error();
+        const result = await BoardsArticlesUsecase.getList(req)({ board_id })(
+            query,
+        );
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        if (error instanceof Error)
+            switch (error.message) {
+                case "EXPIRED_PERMISSION":
+                case "INVALID_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.UNAUTHORIZED,
+                    );
+                case "INSUFFICIENT_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.FORBIDDEN,
+                    );
+                case "NOT_FOUND_BOARD":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.NOT_FOUND,
+                    );
+            }
+        throw Failure.Http.fromExternal(error);
     }
 
     /**
@@ -86,14 +113,38 @@ export class BoardsArticlesController {
     )
     @core.TypedException<ErrorCode.Board.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Post()
-    create(
+    async create(
         @core.TypedParam("board_id")
         board_id: string & typia.tags.Format<"uuid">,
         @core.TypedBody() body: IArticle.ICreateBody,
+        @nest.Request() req: Request,
     ): Promise<IArticle.Identity> {
-        board_id;
-        body;
-        throw Error();
+        const result = await BoardsArticlesUsecase.create(req)({ board_id })(
+            body,
+        );
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        if (error instanceof Error)
+            switch (error.message) {
+                case "REQUIRED_PERMISSION":
+                case "EXPIRED_PERMISSION":
+                case "INVALID_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.UNAUTHORIZED,
+                    );
+                case "INSUFFICIENT_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.FORBIDDEN,
+                    );
+                case "NOT_FOUND_BOARD":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.NOT_FOUND,
+                    );
+            }
+        throw Failure.Http.fromExternal(error);
     }
 
     /**

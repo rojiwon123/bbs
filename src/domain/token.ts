@@ -6,32 +6,17 @@ import { IToken } from "@APP/types/IToken";
 import { Crypto } from "@APP/utils/crypto";
 import { DateMapper } from "@APP/utils/date";
 import { Failure } from "@APP/utils/failure";
-import { assertModule } from "@APP/utils/fx";
 import { Result } from "@APP/utils/result";
 
-export interface Token {
-    readonly generate: (
-        input: IToken.ICreate,
-    ) => Result<IToken.IOutput, Failure.External<"Crypto.encrypt">>;
-    readonly verify: (
-        token: string,
-    ) => Result<
-        IToken.IPayload,
-        | Failure.Internal<"EXPIRED" | "INVALID">
-        | Failure.External<"Crypto.decrypt">
-    >;
-}
-
-/**
- * 인증 토큰 발급 모듈
- */
 export namespace Token {
     const hour = 1000 * 60 * 60 * 1;
     const day = hour * 24;
 
     const duration = day * 7;
 
-    export const generate: Token["generate"] = (input) => {
+    export const generate = (
+        input: IToken.ICreate,
+    ): Result<IToken.IOutput, Failure.External<"Crypto.encrypt">> => {
         const expired_at = DateMapper.toISO(new Date(Date.now() + duration));
         return pipe(
             input,
@@ -42,7 +27,10 @@ export namespace Token {
                     expired_at,
                 }),
             (plain) =>
-                Crypto.encrypt({ plain, key: Configuration.ACCESS_TOKEN_KEY }),
+                Crypto.encrypt({
+                    plain,
+                    key: Configuration.ACCESS_TOKEN_KEY,
+                }),
 
             unless(
                 Result.Error.is,
@@ -56,7 +44,13 @@ export namespace Token {
         );
     };
 
-    export const verify: Token["verify"] = (token) => {
+    export const verify = (
+        token: string,
+    ): Result<
+        IToken.IPayload,
+        | Failure.External<"Crypto.decrypt">
+        | Failure.Internal<"INVALID" | "EXPIRED">
+    > => {
         const now = new Date();
         const decrypted = Crypto.decrypt({
             token,
@@ -77,5 +71,3 @@ export namespace Token {
         return Result.Ok.map(payload);
     };
 }
-
-assertModule<Token>(Token);

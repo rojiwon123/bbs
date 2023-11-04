@@ -19,6 +19,7 @@ export namespace IUser {
     export interface Identity {
         user_id: string & typia.tags.Format<"uuid">;
     }
+
     export interface ISummary
         extends Pick<IUser, "id" | "name" | "image_url" | "membership"> {}
 

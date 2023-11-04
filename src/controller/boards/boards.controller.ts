@@ -2,7 +2,7 @@ import core from "@nestia/core";
 import * as nest from "@nestjs/common";
 import typia from "typia";
 
-import { Board } from "@APP/app/board";
+import { BoardsUsecase } from "@APP/application/boards.usecase";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IBoard } from "@APP/types/IBoard";
 import { Failure } from "@APP/utils/failure";
@@ -17,7 +17,7 @@ export class BoardsController {
      */
     @core.TypedRoute.Get()
     async getList(): Promise<IBoard.ISummary[]> {
-        const result = await Board.getList()();
+        const result = await BoardsUsecase.getList();
         return Result.Ok.flatten(result);
     }
 
@@ -32,7 +32,7 @@ export class BoardsController {
         @core.TypedParam("board_id")
         board_id: string & typia.tags.Format<"uuid">,
     ): Promise<IBoard> {
-        const result = await Board.get()(board_id);
+        const result = await BoardsUsecase.get({ board_id });
         if (Result.Ok.is(result)) return Result.Ok.flatten(result);
         const error = Result.Error.flatten(result);
         throw Failure.Http.fromInternal(error, nest.HttpStatus.NOT_FOUND);

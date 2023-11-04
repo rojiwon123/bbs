@@ -2,7 +2,6 @@ import typia from "typia";
 
 import { IArticle } from "./IArticle";
 import { IPage } from "./IPage";
-import { IUser } from "./IUser";
 import { Omit } from "./global";
 
 export interface IComment {
@@ -10,7 +9,7 @@ export interface IComment {
     /** 댓글 본문 */
     body: string;
     /** 댓글 생성자 정보 */
-    author: IUser.ISummary;
+    author: IArticle.IAuthor;
     /** 상위 댓글 정보 */
     parent: IComment.ISummary | null;
     /** 소속 게시글 정보 */

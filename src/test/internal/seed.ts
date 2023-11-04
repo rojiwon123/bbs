@@ -312,9 +312,9 @@ export namespace Seed {
         return comment;
     };
 
-    export const deleteUser = async (id: string) => {
-        await prisma.authentications.deleteMany({ where: { user_id: id } });
-        await prisma.users.delete({ where: { id } });
+    export const deleteUser = async (name: string) => {
+        await prisma.authentications.deleteMany({ where: { user: { name } } });
+        await prisma.users.deleteMany({ where: { name } });
     };
 
     export const deleteBoard = async (id: string) =>
@@ -442,6 +442,8 @@ export namespace Seed {
 
     export const size = new Size();
 
+    export const check_size_changed = async () => (await size.check())();
+
     export const init = async () => {
         await createMembership("브론즈", 1);
         await createMembership("실버", 2);
@@ -516,7 +518,7 @@ export namespace Seed {
             }),
         );
         await createBoard("board2", {
-            read_article_list: null,
+            read_article_list: "브론즈",
             read_article: "브론즈",
             read_comment_list: "브론즈",
             write_article: "브론즈",
@@ -579,8 +581,8 @@ export namespace Seed {
             }),
         );
         await createBoard("board3", {
-            read_article_list: null,
-            read_article: "브론즈",
+            read_article_list: "브론즈",
+            read_article: "실버",
             read_comment_list: "실버",
             write_article: "골드",
             write_comment: "골드",

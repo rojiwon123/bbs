@@ -1,7 +1,7 @@
 import core from "@nestia/core";
 import * as nest from "@nestjs/common";
 
-import { Membership } from "@APP/app/membership";
+import { MembershipsUsecase } from "@APP/application/memberships.usecase";
 import { IMembership } from "@APP/types/IMembership";
 import { Result } from "@APP/utils/result";
 
@@ -14,7 +14,7 @@ export class MembershipsController {
      */
     @core.TypedRoute.Get()
     async getList(): Promise<IMembership[]> {
-        const result = await Membership.getList()();
+        const result = await MembershipsUsecase.getList();
         return Result.Ok.flatten(result);
     }
 }
