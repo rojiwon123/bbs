@@ -44,8 +44,18 @@ export namespace Seed {
         return board.id;
     };
 
+    export const getArticleId = async (board_id: UUID): Promise<UUID> => {
+        const articles = await prisma.articles.findMany({
+            where: { deleted_at: null, board_id },
+            select: {
+                id: true,
+            },
+        });
+        return RandomGenerator.pick(articles).id;
+    };
+
     export const getUpdatedArticleId = async (
-        board_id: string,
+        board_id: UUID,
     ): Promise<UUID> => {
         const articles = await prisma.articles.findMany({
             where: { deleted_at: null, board_id },
@@ -108,10 +118,10 @@ export namespace Seed {
                 id: Random.uuid(),
                 name,
                 rank,
-                created_at: DateMapper.toISO(),
+                created_at: Random.iso(),
                 image_url: createNullableUrl(),
                 ...(is_deleted
-                    ? { deleted_at: DateMapper.toISO() }
+                    ? { deleted_at: Random.iso() }
                     : { deleted_at: null }),
             },
         });
@@ -126,11 +136,11 @@ export namespace Seed {
             data: {
                 id: Random.uuid(),
                 name,
-                created_at: DateMapper.toISO(),
+                created_at: Random.iso(),
                 image_url: createNullableUrl(),
                 membership_id: await getNullableMembershipId(membership),
                 ...(is_deleted
-                    ? { deleted_at: DateMapper.toISO() }
+                    ? { deleted_at: Random.iso() }
                     : { deleted_at: null }),
             },
         });
@@ -140,9 +150,9 @@ export namespace Seed {
                 user_id: user.id,
                 oauth_type: "github",
                 oauth_sub: name,
-                created_at: DateMapper.toISO(),
+                created_at: Random.iso(),
                 ...(is_deleted
-                    ? { deleted_at: DateMapper.toISO() }
+                    ? { deleted_at: Random.iso() }
                     : { deleted_at: null }),
             },
         });
@@ -152,9 +162,9 @@ export namespace Seed {
                 user_id: user.id,
                 oauth_type: "kakao",
                 oauth_sub: name,
-                created_at: DateMapper.toISO(),
+                created_at: Random.iso(),
                 ...(is_deleted
-                    ? { deleted_at: DateMapper.toISO() }
+                    ? { deleted_at: Random.iso() }
                     : { deleted_at: null }),
             },
         });
@@ -178,9 +188,9 @@ export namespace Seed {
                 id: Random.uuid(),
                 name,
                 description: Random.string(50),
-                created_at: DateMapper.toISO(),
+                created_at: Random.iso(),
                 ...(is_deleted
-                    ? { deleted_at: DateMapper.toISO() }
+                    ? { deleted_at: Random.iso() }
                     : { deleted_at: null }),
                 manager_membership_id: await getMembershipId(
                     membership.manager,
@@ -222,14 +232,14 @@ export namespace Seed {
             is_deleted?: boolean;
         },
     ) => {
-        const created_at = DateMapper.toISO();
+        const created_at = Random.iso();
 
         const article = await prisma.articles.create({
             data: {
                 id: Random.uuid(),
                 created_at,
                 ...(is_deleted
-                    ? { deleted_at: DateMapper.toISO() }
+                    ? { deleted_at: Random.iso() }
                     : { deleted_at: null }),
                 author_id: await getUserId(author),
                 board_id: await getBoardId(board),
@@ -247,7 +257,7 @@ export namespace Seed {
             },
         });
         if (is_updated) {
-            const now = new Date();
+            const now = new Date(created_at);
             now.setMonth(now.getMonth() + 1);
             await prisma.article_snapshots.create({
                 data: {
@@ -274,7 +284,7 @@ export namespace Seed {
             is_deleted = false,
         }: { is_updated?: boolean; is_deleted?: boolean },
     ) => {
-        const created_at = DateMapper.toISO();
+        const created_at = Random.iso();
         const comment = await prisma.comments.create({
             data: {
                 id: Random.uuid(),
@@ -283,7 +293,7 @@ export namespace Seed {
                 author_id: await getUserId(input.author),
                 created_at,
                 ...(is_deleted
-                    ? { deleted_at: DateMapper.toISO() }
+                    ? { deleted_at: Random.iso() }
                     : { deleted_at: null }),
             },
         });
@@ -297,7 +307,7 @@ export namespace Seed {
             },
         });
         if (is_updated) {
-            const now = new Date();
+            const now = new Date(created_at);
             now.setHours(now.getHours() + 5);
             await prisma.comment_snapshots.create({
                 data: {
@@ -463,7 +473,7 @@ export namespace Seed {
             manager: "골드",
         });
         await Promise.all(
-            Array.from({ length: 16 }, async (_, idx) => {
+            Array.from({ length: 32 }, async (_, idx) => {
                 const article = await createArticle(
                     {
                         author: "user1",
@@ -526,7 +536,7 @@ export namespace Seed {
             manager: "골드",
         });
         await Promise.all(
-            Array.from({ length: 16 }, async (_, idx) => {
+            Array.from({ length: 32 }, async (_, idx) => {
                 const article = await createArticle(
                     {
                         author: "user3",
@@ -590,11 +600,11 @@ export namespace Seed {
         });
 
         await Promise.all(
-            Array.from({ length: 16 }, async (_, idx) => {
+            Array.from({ length: 32 }, async (_, idx) => {
                 const article = await createArticle(
                     {
                         author: "user3",
-                        board: "board2",
+                        board: "board3",
                         is_notice: !!+idx.toString(2).padStart(3, "0").at(-1)!,
                     },
                     {

@@ -78,6 +78,7 @@ export namespace BoardsArticlesUsecase {
             if (Result.Error.is(permission)) return permission;
 
             const data = await Article.getList(tx)({
+                where: { board_id: identity.board_id },
                 skip: (page - 1) * size,
                 take: size,
                 orderBy: { created_at: sort === "latest" ? "desc" : "asc" },

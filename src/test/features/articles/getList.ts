@@ -1,6 +1,7 @@
 import { IConnection } from "@nestia/fetcher";
 import { HttpStatus } from "@nestjs/common";
 import api from "@project/api";
+import assert from "assert";
 import typia from "typia";
 
 import { Connection } from "@APP/test/internal/connection";
@@ -26,6 +27,44 @@ export const test_get_article_list_when_board_is_public_and_request_is_unauthori
             ),
         });
     };
+
+export const test_get_article_list_with_query = async (
+    connection: IConnection,
+) => {
+    const board_id = await Seed.getBoardId("board1");
+    const expected = await APIValidator.assert(
+        test(connection, board_id, { size: 20, page: 1, sort: "oldest" }),
+        HttpStatus.OK,
+    )({
+        success: true,
+        assertBody: APIValidator.assertNotEmpty(
+            typia.createAssertEquals<IArticle.IPaginated>(),
+        ),
+    });
+    const actual = await APIValidator.assert(
+        test(connection, board_id, { size: 10, page: 2, sort: "oldest" }),
+        HttpStatus.OK,
+    )({
+        success: true,
+        assertBody: APIValidator.assertNotEmpty(
+            typia.createAssertEquals<IArticle.IPaginated>(),
+        ),
+    });
+    const actual_latest = await APIValidator.assert(
+        test(connection, board_id, { size: 100, page: 1, sort: "latest" }),
+        HttpStatus.OK,
+    )({
+        success: true,
+        assertBody: APIValidator.assertNotEmpty(
+            typia.createAssertEquals<IArticle.IPaginated>(),
+        ),
+    });
+    assert.deepStrictEqual(actual.data, expected.data.slice(10, 20));
+    assert.deepStrictEqual(
+        actual_latest.data.reverse().slice(10, 20),
+        actual.data,
+    );
+};
 
 export const test_get_article_list_when_board_is_private_and_request_is_unauthorized =
     async (connection: IConnection) => {
