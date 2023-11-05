@@ -8,6 +8,7 @@ import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
 import { IBoard } from "@APP/types/IBoard";
 import { Failure } from "@APP/utils/failure";
+import { Entity } from "@APP/utils/fx";
 import { Result } from "@APP/utils/result";
 
 export namespace BoardsArticlesUsecase {
@@ -117,5 +118,93 @@ export namespace BoardsArticlesUsecase {
                 id: identity.article_id,
                 board_id: identity.board_id,
             });
+        };
+
+    export const update =
+        (req: Request) =>
+        (identity: IBoard.Identity & IArticle.Identity) =>
+        async (
+            input: IArticle.IUpdateBody,
+        ): Promise<
+            Result<
+                IArticle.Identity,
+                | Failure.External<"Crypto.decrypt">
+                | Failure.Internal<
+                      | ErrorCode.Permission.Expired
+                      | ErrorCode.Permission.Invalid
+                      | ErrorCode.Permission.Required
+                      | ErrorCode.Permission.Insufficient
+                      | ErrorCode.Article.NotFound
+                  >
+            >
+        > => {
+            const tx = prisma;
+            const security =
+                await Authentication.verifyRequiredUserByHttpBearer(tx)(req);
+            if (Result.Error.is(security)) return security;
+            const user = Result.Ok.flatten(security);
+            const article = await tx.articles.findFirst({
+                where: { id: identity.article_id, board_id: identity.board_id },
+                select: { author_id: true, deleted_at: true },
+            });
+            if (!Entity.exist(article))
+                return Result.Error.map(
+                    new Failure.Internal<ErrorCode.Article.NotFound>(
+                        "NOT_FOUND_ARTICLE",
+                    ),
+                );
+            if (user.id !== article.author_id)
+                return Result.Error.map(
+                    new Failure.Internal<ErrorCode.Permission.Insufficient>(
+                        "INSUFFICIENT_PERMISSION",
+                    ),
+                );
+
+            return Article.update(tx)({
+                ...input,
+                id: identity.article_id,
+            });
+        };
+
+    export const remove =
+        (req: Request) =>
+        async (
+            identity: IBoard.Identity & IArticle.Identity,
+        ): Promise<
+            Result<
+                IArticle.Identity,
+                | Failure.External<"Crypto.decrypt">
+                | Failure.Internal<
+                      | ErrorCode.Permission.Expired
+                      | ErrorCode.Permission.Invalid
+                      | ErrorCode.Permission.Required
+                      | ErrorCode.Permission.Insufficient
+                      | ErrorCode.Article.NotFound
+                  >
+            >
+        > => {
+            const tx = prisma;
+            const security =
+                await Authentication.verifyRequiredUserByHttpBearer(tx)(req);
+            if (Result.Error.is(security)) return security;
+            const user = Result.Ok.flatten(security);
+            const article = await tx.articles.findFirst({
+                where: { id: identity.article_id, board_id: identity.board_id },
+                select: { author_id: true, is_notice: true, deleted_at: true },
+            });
+            if (!Entity.exist(article))
+                return Result.Error.map(
+                    new Failure.Internal<ErrorCode.Article.NotFound>(
+                        "NOT_FOUND_ARTICLE",
+                    ),
+                );
+            if (user.id !== article.author_id)
+                return Result.Error.map(
+                    new Failure.Internal<ErrorCode.Permission.Insufficient>(
+                        "INSUFFICIENT_PERMISSION",
+                    ),
+                );
+
+            return Article.remove(tx)(identity);
         };
 }

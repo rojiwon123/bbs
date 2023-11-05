@@ -3,6 +3,7 @@ import { isNull, map, pipe, toArray } from "@fxts/core";
 import { prisma } from "@APP/infrastructure/DB";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
+import { IBoard } from "@APP/types/IBoard";
 import { IMembership } from "@APP/types/IMembership";
 import { DateMapper } from "@APP/utils/date";
 import { Failure } from "@APP/utils/failure";
@@ -13,6 +14,33 @@ import { Result } from "@APP/utils/result";
 import { Prisma } from "../../db/edge";
 
 export namespace Article {
+    export const create =
+        (tx: Prisma.TransactionClient = prisma) =>
+        async (input: IArticle.ICreate) => {
+            const created_at = DateMapper.toISO();
+            const article_id = Random.uuid();
+            await tx.articles.create({
+                data: {
+                    id: article_id,
+                    board_id: input.board_id,
+                    author_id: input.author_id,
+                    is_notice: false,
+                    created_at,
+                    deleted_at: null,
+                    snapshots: {
+                        create: {
+                            id: Random.uuid(),
+                            title: input.title,
+                            body_format: input.format,
+                            body_url: input.url,
+                            created_at,
+                        },
+                    },
+                },
+            });
+            return Result.Ok.map<IArticle.Identity>({ article_id });
+        };
+
     export const getList =
         (tx: Prisma.TransactionClient = prisma) =>
         (input: {
@@ -116,31 +144,56 @@ export namespace Article {
             });
         };
 
-    export const create =
+    export const update =
         (tx: Prisma.TransactionClient = prisma) =>
-        async (input: IArticle.ICreate) => {
-            const created_at = DateMapper.toISO();
-            const article_id = Random.uuid();
-            await tx.articles.create({
+        async (
+            input: IArticle.IUpdate,
+        ): Promise<Result.Ok<IArticle.Identity>> => {
+            await tx.article_snapshots.create({
                 data: {
-                    id: article_id,
-                    board_id: input.board_id,
-                    author_id: input.author_id,
-                    is_notice: false,
-                    created_at,
-                    deleted_at: null,
-                    snapshots: {
-                        create: {
-                            id: Random.uuid(),
-                            title: input.title,
-                            body_format: input.format,
-                            body_url: input.url,
-                            created_at,
-                        },
-                    },
+                    id: Random.uuid(),
+                    article_id: input.id,
+                    title: input.title,
+                    body_format: input.format,
+                    body_url: input.url,
+                    created_at: DateMapper.toISO(),
                 },
             });
-            return Result.Ok.map<IArticle.Identity>({ article_id });
+            return Result.Ok.map({ article_id: input.id });
+        };
+
+    export const setNotice =
+        (tx: Prisma.TransactionClient = prisma) =>
+        async ({
+            board_id,
+            article_ids,
+            is_notice,
+        }: IArticle.ISetNoticeInput): Promise<Result.Ok<number>> => {
+            const { count } = await tx.articles.updateMany({
+                where: {
+                    id: { in: article_ids },
+                    board_id,
+                    deleted_at: null,
+                },
+                data: { is_notice },
+            });
+            return Result.Ok.map(count);
+        };
+
+    export const remove =
+        (tx: Prisma.TransactionClient = prisma) =>
+        async (
+            identity: IArticle.Identity & IBoard.Identity,
+        ): Promise<Result.Ok<IArticle.Identity>> => {
+            await tx.articles.updateMany({
+                where: {
+                    id: identity.article_id,
+                    board_id: identity.board_id,
+                    deleted_at: null,
+                },
+                data: { deleted_at: DateMapper.toISO() },
+            });
+            return Result.Ok.map({ article_id: identity.article_id });
         };
 }
 

@@ -173,6 +173,64 @@ export class BoardsArticlesController {
     }
 
     /**
+     * 매니저 api는 별도로 빼자 -> 매니저 권한 API 만들 것 게시글 수정/삭제, 공지글 생성, 공지 설정 변경
+     * 
+     * 게시판 매니저 권한을 통해 게시글들의 공지 설정을 변경합니다.
+     *
+     * 전달된 식별자에 해당하는 게시글이 없어도 오류가 발생하지 않습니다.
+     *
+     * @summary 게시글 공지 설정 변경
+     * @tag articles
+     * @security bearer
+     * @param board_id 게시판 id
+     * @param body 게시글 공지 정보
+     * @return 수정된 게시글 수
+    @core.TypedException<
+        | ErrorCode.Permission.Required
+        | ErrorCode.Permission.Expired
+        | ErrorCode.Permission.Invalid
+    >(nest.HttpStatus.UNAUTHORIZED)
+    @core.TypedException<ErrorCode.Permission.Insufficient>(
+        nest.HttpStatus.FORBIDDEN,
+    )
+    @core.TypedException<ErrorCode.Board.NotFound>(nest.HttpStatus.NOT_FOUND)
+    @core.TypedRoute.Patch()
+    async setNotice(
+        @core.TypedParam("board_id")
+        board_id: string & typia.tags.Format<"uuid">,
+        @core.TypedBody() body: IArticle.ISetNoticeBody,
+        @nest.Request() req: Request,
+    ): Promise<number> {
+        const result = await BoardsArticlesUsecase.setNotice(req)({ board_id })(
+            body,
+        );
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        if (error instanceof Error)
+            switch (error.message) {
+                case "REQUIRED_PERMISSION":
+                case "EXPIRED_PERMISSION":
+                case "INVALID_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.UNAUTHORIZED,
+                    );
+                case "INSUFFICIENT_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.FORBIDDEN,
+                    );
+                case "NOT_FOUND_BOARD":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.NOT_FOUND,
+                    );
+            }
+        throw Failure.Http.fromExternal(error);
+    }
+    */
+
+    /**
      * 게시판 게시글을 수정합니다.
      *
      * @summary 게시글 수정
@@ -191,21 +249,43 @@ export class BoardsArticlesController {
     @core.TypedException<ErrorCode.Permission.Insufficient>(
         nest.HttpStatus.FORBIDDEN,
     )
-    @core.TypedException<ErrorCode.Board.NotFound | ErrorCode.Article.NotFound>(
-        nest.HttpStatus.NOT_FOUND,
-    )
+    @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Put(":article_id")
-    update(
+    async update(
         @core.TypedParam("board_id")
         board_id: string & typia.tags.Format<"uuid">,
         @core.TypedParam("article_id")
         article_id: string & typia.tags.Format<"uuid">,
         @core.TypedBody() body: IArticle.IUpdateBody,
+        @nest.Request() req: Request,
     ): Promise<IArticle.Identity> {
-        board_id;
-        article_id;
-        body;
-        throw Error();
+        const result = await BoardsArticlesUsecase.update(req)({
+            board_id,
+            article_id,
+        })(body);
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        if (error instanceof Error)
+            switch (error.message) {
+                case "EXPIRED_PERMISSION":
+                case "INVALID_PERMISSION":
+                case "REQUIRED_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.UNAUTHORIZED,
+                    );
+                case "INSUFFICIENT_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.FORBIDDEN,
+                    );
+                case "NOT_FOUND_ARTICLE":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.NOT_FOUND,
+                    );
+            }
+        throw Failure.Http.fromExternal(error);
     }
 
     /**
@@ -226,18 +306,41 @@ export class BoardsArticlesController {
     @core.TypedException<ErrorCode.Permission.Insufficient>(
         nest.HttpStatus.FORBIDDEN,
     )
-    @core.TypedException<ErrorCode.Board.NotFound | ErrorCode.Article.NotFound>(
-        nest.HttpStatus.NOT_FOUND,
-    )
+    @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Delete(":article_id")
-    remove(
+    async remove(
         @core.TypedParam("board_id")
         board_id: string & typia.tags.Format<"uuid">,
         @core.TypedParam("article_id")
         article_id: string & typia.tags.Format<"uuid">,
+        @nest.Request() req: Request,
     ): Promise<IArticle.Identity> {
-        board_id;
-        article_id;
-        throw Error();
+        const result = await BoardsArticlesUsecase.remove(req)({
+            board_id,
+            article_id,
+        });
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        if (error instanceof Error)
+            switch (error.message) {
+                case "EXPIRED_PERMISSION":
+                case "INVALID_PERMISSION":
+                case "REQUIRED_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.UNAUTHORIZED,
+                    );
+                case "INSUFFICIENT_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.FORBIDDEN,
+                    );
+                case "NOT_FOUND_ARTICLE":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.NOT_FOUND,
+                    );
+            }
+        throw Failure.Http.fromExternal(error);
     }
 }

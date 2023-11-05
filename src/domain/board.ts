@@ -17,7 +17,8 @@ export namespace Board {
             action:
                 | "read_article_list_membership"
                 | "read_article_membership"
-                | "write_article_membership",
+                | "write_article_membership"
+                | "manager_membership",
         ) =>
         (tx: Prisma.TransactionClient = prisma) =>
         async (
@@ -42,6 +43,7 @@ export namespace Board {
                         action === "read_article_membership",
                     write_article_membership:
                         action === "write_article_membership",
+                    manager_membership: action === "manager_membership",
                 },
             });
 
@@ -68,6 +70,8 @@ export namespace Board {
     export const checkCreateArticlePermission = check(
         "write_article_membership",
     );
+
+    export const checkManagerPermission = check("manager_membership");
 
     export const get =
         (tx: Prisma.TransactionClient = prisma) =>
