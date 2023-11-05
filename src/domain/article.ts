@@ -117,6 +117,22 @@ export namespace Article {
                 Result.Ok.map,
             );
 
+    export const remove =
+        (tx: Prisma.TransactionClient = prisma) =>
+        async (
+            identity: IArticle.Identity & IBoard.Identity,
+        ): Promise<Result.Ok<IArticle.Identity>> => {
+            await tx.articles.updateMany({
+                where: {
+                    id: identity.article_id,
+                    board_id: identity.board_id,
+                    deleted_at: null,
+                },
+                data: { deleted_at: DateMapper.toISO() },
+            });
+            return Result.Ok.map({ article_id: identity.article_id });
+        };
+
     export const update =
         (tx: Prisma.TransactionClient = prisma) =>
         async (
@@ -151,22 +167,6 @@ export namespace Article {
                 data: { is_notice },
             });
             return Result.Ok.map(count);
-        };
-
-    export const remove =
-        (tx: Prisma.TransactionClient = prisma) =>
-        async (
-            identity: IArticle.Identity & IBoard.Identity,
-        ): Promise<Result.Ok<IArticle.Identity>> => {
-            await tx.articles.updateMany({
-                where: {
-                    id: identity.article_id,
-                    board_id: identity.board_id,
-                    deleted_at: null,
-                },
-                data: { deleted_at: DateMapper.toISO() },
-            });
-            return Result.Ok.map({ article_id: identity.article_id });
         };
 }
 

@@ -2,6 +2,7 @@ import { isNull, map, pipe, toArray } from "@fxts/core";
 
 import { prisma } from "@APP/infrastructure/DB";
 import { ErrorCode } from "@APP/types/ErrorCode";
+import { IArticle } from "@APP/types/IArticle";
 import { IComment } from "@APP/types/IComment";
 import { DateMapper } from "@APP/utils/date";
 import { Failure } from "@APP/utils/failure";
@@ -110,6 +111,22 @@ export namespace Comment {
                 toArray,
                 Result.Ok.map,
             );
+
+    export const remove =
+        (tx: Prisma.TransactionClient = prisma) =>
+        async (
+            identity: IArticle.Identity & IComment.Identity,
+        ): Promise<Result.Ok<IComment.Identity>> => {
+            await tx.comments.updateMany({
+                where: {
+                    id: identity.comment_id,
+                    article_id: identity.article_id,
+                    deleted_at: null,
+                },
+                data: { deleted_at: DateMapper.toISO() },
+            });
+            return Result.Ok.map({ comment_id: identity.comment_id });
+        };
 }
 
 export namespace CommentJson {

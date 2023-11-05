@@ -257,23 +257,44 @@ export class BoardsArticlesCommentsController {
     @core.TypedException<ErrorCode.Permission.Insufficient>(
         nest.HttpStatus.FORBIDDEN,
     )
-    @core.TypedException<
-        | ErrorCode.Board.NotFound
-        | ErrorCode.Article.NotFound
-        | ErrorCode.Comment.NotFound
-    >(nest.HttpStatus.NOT_FOUND)
+    @core.TypedException<ErrorCode.Comment.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Delete(":comment_id")
-    remove(
+    async remove(
         @core.TypedParam("board_id")
         board_id: string & typia.tags.Format<"uuid">,
         @core.TypedParam("article_id")
         article_id: string & typia.tags.Format<"uuid">,
         @core.TypedParam("comment_id")
         comment_id: string & typia.tags.Format<"uuid">,
+        @nest.Request() req: Request,
     ): Promise<IComment.Identity> {
-        board_id;
-        article_id;
-        comment_id;
-        throw Error();
+        const result = await BoardsArticlesCommentsUsecase.remove(req)({
+            board_id,
+            article_id,
+            comment_id,
+        });
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        if (error instanceof Error)
+            switch (error.message) {
+                case "REQUIRED_PERMISSION":
+                case "EXPIRED_PERMISSION":
+                case "INVALID_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.UNAUTHORIZED,
+                    );
+                case "INSUFFICIENT_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.FORBIDDEN,
+                    );
+                case "NOT_FOUND_COMMENT":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.NOT_FOUND,
+                    );
+            }
+        throw Failure.Http.fromExternal(error);
     }
 }
