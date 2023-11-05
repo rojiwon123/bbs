@@ -518,8 +518,8 @@ export namespace Seed {
             read_article_list: "브론즈",
             read_article: "브론즈",
             read_comment_list: "브론즈",
-            write_article: "브론즈",
-            write_comment: "브론즈",
+            write_article: "실버",
+            write_comment: "실버",
             manager: "골드",
         });
         await Promise.all(

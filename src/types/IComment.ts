@@ -7,7 +7,7 @@ import { Omit } from "./global";
 export interface IComment {
     id: string & typia.tags.Format<"uuid">;
     /** 댓글 본문 */
-    body: string;
+    body: string | null;
     /** 댓글 생성자 정보 */
     author: IArticle.IAuthor;
     /** 상위 댓글 정보 */
@@ -20,7 +20,7 @@ export interface IComment {
 
 export namespace IComment {
     export interface Identity {
-        comment_id: string;
+        comment_id: string & typia.tags.Format<"uuid">;
     }
     export interface ISummary
         extends Pick<
@@ -28,7 +28,10 @@ export namespace IComment {
             "id" | "author" | "body" | "created_at" | "updated_at"
         > {}
 
-    export interface IUpdate extends Pick<IComment, "id" | "body"> {}
+    export interface IUpdate extends Pick<IComment, "id"> {
+        /** 댓글 본문 */
+        body: string;
+    }
 
     export interface ICreate extends Omit<IUpdate, "id"> {
         author_id: string & typia.tags.Format<"uuid">;

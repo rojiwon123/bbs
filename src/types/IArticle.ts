@@ -29,15 +29,6 @@ export namespace IArticle {
         url: string & typia.tags.Format<"url">;
         format: BodyFormat;
     }
-    export interface Identity {
-        article_id: string & typia.tags.Format<"uuid">;
-    }
-
-    export interface ISummary
-        extends Pick<
-            IArticle,
-            "id" | "title" | "author" | "created_at" | "updated_at"
-        > {}
 
     export interface IDeletedAuthor {
         status: "deleted";
@@ -49,12 +40,22 @@ export namespace IArticle {
 
     export type IAuthor = IDeletedAuthor | IActiveAuthor;
 
+    export interface Identity {
+        article_id: string & typia.tags.Format<"uuid">;
+    }
+
+    export interface ISummary
+        extends Pick<
+            IArticle,
+            "id" | "title" | "author" | "created_at" | "updated_at"
+        > {}
+
     export interface IUpdate extends Pick<IArticle, "id">, IArticle.IBody {
         /** 게시글 제목 */
         title: string;
     }
 
-    export interface ICreate extends IUpdate {
+    export interface ICreate extends Omit<IUpdate, "id"> {
         /** 공지 여부 */
         is_notice: boolean;
         author_id: string & typia.tags.Format<"uuid">;
