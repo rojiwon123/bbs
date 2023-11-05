@@ -146,3 +146,5 @@ export const test_get_article_when_membership_is_insufficient = async (
             typia.createAssertEquals<ErrorCode.Permission.Insufficient>(),
     });
 };
+
+export const test_seed_changed = Seed.check_size_changed;
