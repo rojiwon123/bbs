@@ -130,7 +130,7 @@ export namespace BoardsArticlesCommentsUsecase {
     export const remove =
         (req: Request) =>
         async (
-            identity: IBoard.Identity & IArticle.Identity & IComment.Identity,
+            identity: IArticle.Identity & IComment.Identity,
         ): Promise<
             Result<
                 IComment.Identity,
@@ -169,5 +169,54 @@ export namespace BoardsArticlesCommentsUsecase {
                     ),
                 );
             return Comment.remove(tx)(identity);
+        };
+
+    export const update =
+        (req: Request) =>
+        (identity: IArticle.Identity & IComment.Identity) =>
+        async (
+            input: IComment.IUpdateBody,
+        ): Promise<
+            Result<
+                IComment.Identity,
+                | Failure.External<"Crypto.decrypt">
+                | Failure.Internal<
+                      | ErrorCode.Permission.Required
+                      | ErrorCode.Permission.Expired
+                      | ErrorCode.Permission.Invalid
+                      | ErrorCode.Permission.Insufficient
+                      | ErrorCode.Comment.NotFound
+                  >
+            >
+        > => {
+            const tx = prisma;
+            const security =
+                await Authentication.verifyRequiredUserByHttpBearer(tx)(req);
+            if (Result.Error.is(security)) return security;
+            const user = Result.Ok.flatten(security);
+            const comment = await tx.comments.findFirst({
+                where: {
+                    id: identity.comment_id,
+                    article_id: identity.article_id,
+                },
+                select: { author_id: true, deleted_at: true },
+            });
+            if (!Entity.exist(comment))
+                return Result.Error.map(
+                    new Failure.Internal<ErrorCode.Comment.NotFound>(
+                        "NOT_FOUND_COMMENT",
+                    ),
+                );
+            if (user.id !== comment.author_id)
+                return Result.Error.map(
+                    new Failure.Internal<ErrorCode.Permission.Insufficient>(
+                        "INSUFFICIENT_PERMISSION",
+                    ),
+                );
+
+            return Comment.update(tx)({
+                ...input,
+                id: identity.comment_id,
+            });
         };
 }

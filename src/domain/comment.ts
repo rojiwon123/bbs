@@ -127,6 +127,22 @@ export namespace Comment {
             });
             return Result.Ok.map({ comment_id: identity.comment_id });
         };
+
+    export const update =
+        (tx: Prisma.TransactionClient = prisma) =>
+        async (
+            input: IComment.IUpdate,
+        ): Promise<Result.Ok<IComment.Identity>> => {
+            await tx.comment_snapshots.create({
+                data: {
+                    id: Random.uuid(),
+                    body: input.body,
+                    comment_id: input.id,
+                    created_at: DateMapper.toISO(),
+                },
+            });
+            return Result.Ok.map({ comment_id: input.id });
+        };
 }
 
 export namespace CommentJson {

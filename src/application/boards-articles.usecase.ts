@@ -174,9 +174,9 @@ export namespace BoardsArticlesUsecase {
                 IArticle.Identity,
                 | Failure.External<"Crypto.decrypt">
                 | Failure.Internal<
+                      | ErrorCode.Permission.Required
                       | ErrorCode.Permission.Expired
                       | ErrorCode.Permission.Invalid
-                      | ErrorCode.Permission.Required
                       | ErrorCode.Permission.Insufficient
                       | ErrorCode.Article.NotFound
                   >
