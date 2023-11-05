@@ -120,9 +120,7 @@ export namespace Seed {
                 rank,
                 created_at: Random.iso(),
                 image_url: createNullableUrl(),
-                ...(is_deleted
-                    ? { deleted_at: Random.iso() }
-                    : { deleted_at: null }),
+                deleted_at: is_deleted ? Random.iso() : null,
             },
         });
     };
@@ -132,6 +130,7 @@ export namespace Seed {
         membership: string | null,
         is_deleted = false,
     ) => {
+        const iso = Random.iso();
         const user = await prisma.users.create({
             data: {
                 id: Random.uuid(),
@@ -139,9 +138,7 @@ export namespace Seed {
                 created_at: Random.iso(),
                 image_url: createNullableUrl(),
                 membership_id: await getNullableMembershipId(membership),
-                ...(is_deleted
-                    ? { deleted_at: Random.iso() }
-                    : { deleted_at: null }),
+                deleted_at: is_deleted ? iso : null,
             },
         });
         await prisma.authentications.create({
@@ -151,9 +148,7 @@ export namespace Seed {
                 oauth_type: "github",
                 oauth_sub: name,
                 created_at: Random.iso(),
-                ...(is_deleted
-                    ? { deleted_at: Random.iso() }
-                    : { deleted_at: null }),
+                deleted_at: is_deleted ? iso : null,
             },
         });
         await prisma.authentications.create({
@@ -163,9 +158,7 @@ export namespace Seed {
                 oauth_type: "kakao",
                 oauth_sub: name,
                 created_at: Random.iso(),
-                ...(is_deleted
-                    ? { deleted_at: Random.iso() }
-                    : { deleted_at: null }),
+                deleted_at: is_deleted ? iso : null,
             },
         });
         return user;
@@ -189,9 +182,7 @@ export namespace Seed {
                 name,
                 description: Random.string(50),
                 created_at: Random.iso(),
-                ...(is_deleted
-                    ? { deleted_at: Random.iso() }
-                    : { deleted_at: null }),
+                deleted_at: is_deleted ? Random.iso() : null,
                 manager_membership_id: await getMembershipId(
                     membership.manager,
                 ),
@@ -238,9 +229,7 @@ export namespace Seed {
             data: {
                 id: Random.uuid(),
                 created_at,
-                ...(is_deleted
-                    ? { deleted_at: Random.iso() }
-                    : { deleted_at: null }),
+                deleted_at: is_deleted ? Random.iso() : null,
                 author_id: await getUserId(author),
                 board_id: await getBoardId(board),
                 is_notice,
@@ -292,9 +281,7 @@ export namespace Seed {
                 parent_id: input.parent_id,
                 author_id: await getUserId(input.author),
                 created_at,
-                ...(is_deleted
-                    ? { deleted_at: Random.iso() }
-                    : { deleted_at: null }),
+                deleted_at: is_deleted ? Random.iso() : null,
             },
         });
 

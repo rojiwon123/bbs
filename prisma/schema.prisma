@@ -367,6 +367,8 @@ model memberships {
 
 /// Authentication Entity of User
 /// 
+/// combination of `oauth_sub` and `oauth_type` is unique
+/// 
 /// @namespace All
 /// 
 /// @namespace User

@@ -325,6 +325,8 @@ a user can receive one or zero membership, which signifies their permission leve
 
 Authentication Entity of User
 
+combination of `oauth_sub` and `oauth_type` is unique
+
 **Properties**
 
 -   `id`
@@ -1005,6 +1007,8 @@ a user can receive one or zero membership, which signifies their permission leve
 ### `authentications`
 
 Authentication Entity of User
+
+combination of `oauth_sub` and `oauth_type` is unique
 
 **Properties**
 

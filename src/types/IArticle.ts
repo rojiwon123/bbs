@@ -49,16 +49,22 @@ export namespace IArticle {
 
     export type IAuthor = IDeletedAuthor | IActiveAuthor;
 
-    export interface IUpdate
-        extends Pick<IArticle, "id" | "is_notice">,
-            IArticle.IBody {
+    export interface IUpdate extends Pick<IArticle, "id">, IArticle.IBody {
         /** 게시글 제목 */
         title: string;
     }
 
-    export interface ICreate extends Omit<IUpdate, "id"> {
+    export interface ICreate extends IUpdate {
+        /** 공지 여부 */
+        is_notice: boolean;
         author_id: string & typia.tags.Format<"uuid">;
         board_id: string & typia.tags.Format<"uuid">;
+    }
+
+    export interface ISetNoticeInput {
+        board_id: string & typia.tags.Format<"uuid">;
+        article_ids: (string & typia.tags.Format<"uuid">)[];
+        is_notice: boolean;
     }
 
     export interface ISearch extends IPage.ISearch {
@@ -68,8 +74,10 @@ export namespace IArticle {
 
     export interface IPaginated extends IPage.IResponse<ISummary> {}
 
-    export interface IUpdateBody extends Omit<IUpdate, "id" | "is_notice"> {}
+    export interface IUpdateBody extends Omit<IUpdate, "id"> {}
 
     export interface ICreateBody
         extends Omit<ICreate, "author_id" | "board_id" | "is_notice"> {}
+
+    export interface ISetNoticeBody extends Omit<ISetNoticeInput, "board_id"> {}
 }

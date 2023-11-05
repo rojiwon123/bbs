@@ -80,7 +80,7 @@ export const test_create_article_when_token_is_invalid = async (
 export const test_create_article_when_user_is_invalid = async (
     connection: IConnection,
 ) => {
-    const username = "create_article_test";
+    const username = "create_article_when_user_is_invalid";
     await Seed.createUser(username, null);
     const token = await get_token(connection, username);
     await Seed.deleteUser(username);

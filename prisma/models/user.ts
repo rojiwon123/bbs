@@ -6,6 +6,7 @@ Table.create({
     tableName: "authentications",
     comments: Description.lines(
         "Authentication Entity of User",
+        "combination of `oauth_sub` and `oauth_type` is unique",
         Description.namespace(),
         Description.namespace("User"),
         Description.author(),
