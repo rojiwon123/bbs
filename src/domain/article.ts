@@ -57,38 +57,9 @@ export namespace Article {
                         skip,
                         take,
                         orderBy,
-                        select: {
-                            id: true,
-                            created_at: true,
-                            deleted_at: true,
-                            snapshots: ArticleJson.selectSnapshots({
-                                title: true,
-                                created_at: true,
-                            }),
-                            author: { select: ArticleJson.selectAuthor() },
-                            board: {
-                                select: ArticleJson.selectBoard(),
-                            },
-                        },
+                        select: ArticleJson.selectSummary(),
                     }),
-                map((article): IArticle.ISummary => {
-                    const author: IArticle.IAuthor = ArticleJson.mapAuthor(
-                        article.author,
-                    );
-
-                    const snapshot = article.snapshots.at(-1) ?? null;
-                    return {
-                        id: article.id,
-                        title: isNull(snapshot) ? null : snapshot.title,
-                        author,
-                        created_at: DateMapper.toISO(article.created_at),
-                        updated_at: isNull(snapshot)
-                            ? null
-                            : article.created_at < snapshot.created_at
-                            ? DateMapper.toISO(snapshot.created_at)
-                            : null,
-                    };
-                }),
+                map(ArticleJson.mapSummary),
                 toArray,
             );
 
@@ -118,6 +89,7 @@ export namespace Article {
                     deleted_at: true,
                 },
             });
+
             if (!Entity.exist(article))
                 return Result.Error.map(
                     new Failure.Internal<ErrorCode.Article.NotFound>(
@@ -125,7 +97,7 @@ export namespace Article {
                     ),
                 );
 
-            const snapshot = article.snapshots.at(-1) ?? null;
+            const snapshot = article.snapshots.at(0) ?? null;
             return Result.Ok.map<IArticle>({
                 id: article.id,
                 author: ArticleJson.mapAuthor(article.author),
@@ -230,6 +202,18 @@ export namespace ArticleJson {
             orderBy: { created_at: "desc" },
         }) satisfies Prisma.articles$snapshotsArgs;
 
+    export const selectSummary = () =>
+        ({
+            id: true,
+            created_at: true,
+            deleted_at: true,
+            snapshots: selectSnapshots({
+                title: true,
+                created_at: true,
+            }),
+            author: { select: selectAuthor() },
+        }) satisfies Prisma.articlesSelect;
+
     export const mapAuthor = (
         user: NonNullable<
             Awaited<
@@ -259,5 +243,30 @@ export namespace ArticleJson {
             };
         }
         return { status: "deleted" };
+    };
+
+    export const mapSummary = (
+        article: NonNullable<
+            Awaited<
+                ReturnType<
+                    typeof prisma.articles.findFirst<{
+                        select: ReturnType<typeof selectSummary>;
+                    }>
+                >
+            >
+        >,
+    ): IArticle.ISummary => {
+        const snapshot = article.snapshots.at(0) ?? null;
+        return {
+            id: article.id,
+            title: isNull(snapshot) ? null : snapshot.title,
+            author: ArticleJson.mapAuthor(article.author),
+            created_at: DateMapper.toISO(article.created_at),
+            updated_at: isNull(snapshot)
+                ? null
+                : article.created_at < snapshot.created_at
+                ? DateMapper.toISO(snapshot.created_at)
+                : null,
+        };
     };
 }

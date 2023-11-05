@@ -1,9 +1,13 @@
 import core from "@nestia/core";
 import * as nest from "@nestjs/common";
+import { Request } from "express";
 import typia from "typia";
 
+import { BoardsArticlesCommentsUsecase } from "@APP/application/boards-articles-comments.usecase";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IComment } from "@APP/types/IComment";
+import { Failure } from "@APP/utils/failure";
+import { Result } from "@APP/utils/result";
 
 @nest.Controller("boards/:board_id/articles/:article_id/comments")
 export class BoardsArticlesCommentsController {
@@ -66,18 +70,44 @@ export class BoardsArticlesCommentsController {
         | ErrorCode.Comment.NotFound
     >(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Get(":comment_id")
-    get(
+    async get(
         @core.TypedParam("board_id")
         board_id: string & typia.tags.Format<"uuid">,
         @core.TypedParam("article_id")
         article_id: string & typia.tags.Format<"uuid">,
         @core.TypedParam("comment_id")
         comment_id: string & typia.tags.Format<"uuid">,
+        @nest.Request() req: Request,
     ): Promise<IComment> {
-        board_id;
-        article_id;
-        comment_id;
-        throw Error();
+        const result = await BoardsArticlesCommentsUsecase.get(req)({
+            board_id,
+            article_id,
+            comment_id,
+        });
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        if (error instanceof Error)
+            switch (error.message) {
+                case "EXPIRED_PERMISSION":
+                case "INVALID_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.UNAUTHORIZED,
+                    );
+                case "INSUFFICIENT_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.FORBIDDEN,
+                    );
+                case "NOT_FOUND_BOARD":
+                case "NOT_FOUND_ARTICLE":
+                case "NOT_FOUND_COMMENT":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.NOT_FOUND,
+                    );
+            }
+        throw Failure.Http.fromExternal(error);
     }
 
     /**
@@ -103,17 +133,43 @@ export class BoardsArticlesCommentsController {
         nest.HttpStatus.NOT_FOUND,
     )
     @core.TypedRoute.Post()
-    create(
+    async create(
         @core.TypedParam("board_id")
         board_id: string & typia.tags.Format<"uuid">,
         @core.TypedParam("article_id")
         article_id: string & typia.tags.Format<"uuid">,
         @core.TypedBody() body: IComment.ICreateBody,
+        @nest.Request() req: Request,
     ): Promise<IComment.Identity> {
-        board_id;
-        article_id;
-        body;
-        throw Error();
+        const result = await BoardsArticlesCommentsUsecase.create(req)({
+            board_id,
+            article_id,
+        })(body);
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        if (error instanceof Error)
+            switch (error.message) {
+                case "REQUIRED_PERMISSION":
+                case "EXPIRED_PERMISSION":
+                case "INVALID_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.UNAUTHORIZED,
+                    );
+                case "INSUFFICIENT_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.FORBIDDEN,
+                    );
+                case "NOT_FOUND_BOARD":
+                case "NOT_FOUND_ARTICLE":
+                case "NOT_FOUND_COMMENT":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.NOT_FOUND,
+                    );
+            }
+        throw Failure.Http.fromExternal(error);
     }
 
     /**
