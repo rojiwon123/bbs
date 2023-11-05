@@ -30,9 +30,11 @@ export class BoardsArticlesCommentsController {
     @core.TypedException<ErrorCode.Permission.Insufficient>(
         nest.HttpStatus.FORBIDDEN,
     )
-    @core.TypedException<ErrorCode.Board.NotFound | ErrorCode.Article.NotFound>(
-        nest.HttpStatus.NOT_FOUND,
-    )
+    @core.TypedException<
+        | ErrorCode.Board.NotFound
+        | ErrorCode.Article.NotFound
+        | ErrorCode.Comment.NotFound
+    >(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Get()
     getList(
         @core.TypedParam("board_id")
