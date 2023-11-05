@@ -15,12 +15,13 @@ const test = (
     connection: IConnection,
     board_id: string & typia.tags.Format<"uuid">,
     article_id: string & typia.tags.Format<"uuid">,
+    parent_id: (string & typia.tags.Format<"uuid">) | null = null,
 ) =>
     api.functional.boards.articles.comments.create(
         connection,
         board_id,
         article_id,
-        typia.random<IComment.ICreateBody>(),
+        { ...typia.random<IComment.ICreateBody>(), parent_id },
     );
 
 export const test_create_comment_successfully = async (
@@ -31,6 +32,30 @@ export const test_create_comment_successfully = async (
     const article_id = await Seed.getArticleId(board_id);
     const { comment_id } = await APIValidator.assert(
         test(Connection.authorize(token)(connection), board_id, article_id),
+        HttpStatus.CREATED,
+    )({
+        success: true,
+        assertBody: typia.createAssertEquals<IComment.Identity>(),
+    });
+
+    await Seed.deleteComment(comment_id);
+};
+
+export const test_create_re_comment_success_fully = async (
+    connection: IConnection,
+) => {
+    const token = await get_token(connection, "user3");
+    const board_id = await Seed.getBoardId("board1");
+    const article_id = await Seed.getArticleId(board_id);
+    const parent_id = await Seed.getCommentId(article_id);
+
+    const { comment_id } = await APIValidator.assert(
+        test(
+            Connection.authorize(token)(connection),
+            board_id,
+            article_id,
+            parent_id,
+        ),
         HttpStatus.CREATED,
     )({
         success: true,
@@ -126,13 +151,13 @@ export const test_create_comment_when_article_does_not_exist = async (
     connection: IConnection,
 ) => {
     const token = await get_token(connection, "user1");
-    const board_id = await Seed.getBoardId("board3");
+    const board_id = await Seed.getBoardId("board1");
     await APIValidator.assert(
         test(Connection.authorize(token)(connection), board_id, Random.uuid()),
         HttpStatus.NOT_FOUND,
     )({
         success: false,
-        assertBody: typia.createAssertEquals<ErrorCode.Board.NotFound>(),
+        assertBody: typia.createAssertEquals<ErrorCode.Article.NotFound>(),
     });
 };
 

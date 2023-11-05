@@ -8,6 +8,7 @@ import { Seed } from "./internal/seed";
 import { runTest } from "./runner";
 
 void (async () => {
+    console.time("test time");
     Mocker.init();
     await Seed.init();
     const app = await Backend.start({ logger: false });
@@ -21,6 +22,6 @@ void (async () => {
     const check = await Seed.size.check();
     await Seed.restore();
     check();
-
+    console.timeEnd("test time");
     process.exit(state);
 })();

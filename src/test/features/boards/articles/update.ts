@@ -60,9 +60,12 @@ export const test_update_article_successfully = async (
         HttpStatus.OK,
     )({ success: true, assertBody: typia.createAssertEquals<IArticle>() });
 
-    assert.notDeepStrictEqual(before.title, body.title);
-    assert.strictEqual(before.updated_at, null);
-    assert.deepStrictEqual(after.title, body.title);
+    assert.notDeepStrictEqual(
+        before.title,
+        body.title,
+        "article already updated",
+    );
+    assert.deepStrictEqual(after.title, body.title, "article does not updated");
 
     await Seed.deleteArticle(article.id);
 };

@@ -48,5 +48,5 @@ export namespace IComment {
 
     export interface IUpdateBody extends Omit<IUpdate, "id"> {}
     export interface ICreateBody
-        extends Omit<ICreate, "article_id" | "author_id" | "parent_id"> {}
+        extends Omit<ICreate, "article_id" | "author_id"> {}
 }

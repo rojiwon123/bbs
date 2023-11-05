@@ -4,7 +4,7 @@ import assert from "assert";
 import typia from "typia";
 
 import { prisma } from "@APP/infrastructure/DB";
-import { DateMapper } from "@APP/utils/date";
+import { Entity } from "@APP/utils/fx";
 import { Random } from "@APP/utils/random";
 
 import { ArticleBodyFormat, Prisma } from "../../../db/edge";
@@ -46,19 +46,24 @@ export namespace Seed {
 
     export const getArticleId = async (board_id: UUID): Promise<UUID> => {
         const articles = await prisma.articles.findMany({
-            where: { deleted_at: null, board_id },
+            where: { board_id, deleted_at: null },
             select: {
                 id: true,
+                _count: {
+                    select: { snapshots: true },
+                },
             },
         });
-        return RandomGenerator.pick(articles).id;
+        return RandomGenerator.pick(
+            articles.filter(({ _count: { snapshots } }) => snapshots === 1),
+        ).id;
     };
 
     export const getUpdatedArticleId = async (
         board_id: UUID,
     ): Promise<UUID> => {
         const articles = await prisma.articles.findMany({
-            where: { deleted_at: null, board_id },
+            where: { board_id, deleted_at: null },
             select: {
                 id: true,
                 _count: {
@@ -75,9 +80,23 @@ export namespace Seed {
         board_id: string,
     ): Promise<UUID> => {
         const articles = await prisma.articles.findMany({
-            where: { deleted_at: { not: null }, board_id },
+            where: { board_id, deleted_at: { not: null } },
         });
         return RandomGenerator.pick(articles).id;
+    };
+
+    export const getCommentId = async (
+        article_id: string,
+        parent_id: string | null = null,
+    ): Promise<UUID> => {
+        const comments = await prisma.comments.findMany({
+            where: { article_id, parent_id, deleted_at: null },
+            select: { id: true, _count: { select: { snapshots: true } } },
+        });
+
+        return RandomGenerator.pick(
+            comments.filter(({ _count: { snapshots } }) => snapshots === 1),
+        ).id;
     };
 
     export const getUpdatedCommentId = async (
@@ -85,13 +104,8 @@ export namespace Seed {
         parent_id: string | null = null,
     ): Promise<UUID> => {
         const articles = await prisma.comments.findMany({
-            where: { deleted_at: null, article_id, parent_id },
-            select: {
-                id: true,
-                _count: {
-                    select: { snapshots: true },
-                },
-            },
+            where: { article_id, parent_id, deleted_at: null },
+            select: { id: true, _count: { select: { snapshots: true } } },
         });
         return RandomGenerator.pick(
             articles.filter(({ _count: { snapshots } }) => snapshots > 1),
@@ -103,7 +117,7 @@ export namespace Seed {
         parent_id: string | null = null,
     ): Promise<UUID> => {
         const articles = await prisma.comments.findMany({
-            where: { deleted_at: { not: null }, article_id, parent_id },
+            where: { article_id, parent_id, deleted_at: { not: null } },
         });
         return RandomGenerator.pick(articles).id;
     };
@@ -113,14 +127,18 @@ export namespace Seed {
         rank: number,
         is_deleted = false,
     ) => {
+        const now = new Date();
+        now.setMinutes(
+            now.getMinutes() - Random.int({ min: 10, max: 100_0000 }),
+        );
         return prisma.memberships.create({
             data: {
                 id: Random.uuid(),
                 name,
                 rank,
-                created_at: Random.iso(),
+                created_at: now,
                 image_url: createNullableUrl(),
-                deleted_at: is_deleted ? Random.iso() : null,
+                deleted_at: is_deleted ? now : null,
             },
         });
     };
@@ -130,15 +148,18 @@ export namespace Seed {
         membership: string | null,
         is_deleted = false,
     ) => {
-        const iso = Random.iso();
+        const now = new Date();
+        now.setMinutes(
+            now.getMinutes() - Random.int({ min: 10, max: 100_0000 }),
+        );
         const user = await prisma.users.create({
             data: {
                 id: Random.uuid(),
                 name,
-                created_at: Random.iso(),
+                created_at: now,
                 image_url: createNullableUrl(),
                 membership_id: await getNullableMembershipId(membership),
-                deleted_at: is_deleted ? iso : null,
+                deleted_at: is_deleted ? now : null,
             },
         });
         await prisma.authentications.create({
@@ -147,8 +168,8 @@ export namespace Seed {
                 user_id: user.id,
                 oauth_type: "github",
                 oauth_sub: name,
-                created_at: Random.iso(),
-                deleted_at: is_deleted ? iso : null,
+                created_at: now,
+                deleted_at: is_deleted ? now : null,
             },
         });
         await prisma.authentications.create({
@@ -157,8 +178,8 @@ export namespace Seed {
                 user_id: user.id,
                 oauth_type: "kakao",
                 oauth_sub: name,
-                created_at: Random.iso(),
-                deleted_at: is_deleted ? iso : null,
+                created_at: now,
+                deleted_at: is_deleted ? now : null,
             },
         });
         return user;
@@ -176,13 +197,17 @@ export namespace Seed {
         },
         is_deleted = false,
     ) => {
+        const now = new Date();
+        now.setMinutes(
+            now.getMinutes() - Random.int({ min: 10, max: 100_0000 }),
+        );
         return prisma.boards.create({
             data: {
                 id: Random.uuid(),
                 name,
                 description: Random.string(50),
-                created_at: Random.iso(),
-                deleted_at: is_deleted ? Random.iso() : null,
+                created_at: now,
+                deleted_at: is_deleted ? now : null,
                 manager_membership_id: await getMembershipId(
                     membership.manager,
                 ),
@@ -223,13 +248,15 @@ export namespace Seed {
             is_deleted?: boolean;
         },
     ) => {
-        const created_at = Random.iso();
-
+        const now = new Date();
+        now.setMinutes(
+            now.getMinutes() - Random.int({ min: 10, max: 100_0000 }),
+        );
         const article = await prisma.articles.create({
             data: {
                 id: Random.uuid(),
-                created_at,
-                deleted_at: is_deleted ? Random.iso() : null,
+                created_at: now,
+                deleted_at: is_deleted ? now : null,
                 author_id: await getUserId(author),
                 board_id: await getBoardId(board),
                 is_notice,
@@ -238,7 +265,7 @@ export namespace Seed {
         await prisma.article_snapshots.create({
             data: {
                 id: Random.uuid(),
-                created_at,
+                created_at: now,
                 title: Random.string(20),
                 body_format: typia.random<ArticleBodyFormat>(),
                 body_url: createUrl(),
@@ -246,8 +273,7 @@ export namespace Seed {
             },
         });
         if (is_updated) {
-            const now = new Date(created_at);
-            now.setMonth(now.getMonth() + 1);
+            now.setMinutes(now.getMinutes() + 5);
             await prisma.article_snapshots.create({
                 data: {
                     id: Random.uuid(),
@@ -273,15 +299,18 @@ export namespace Seed {
             is_deleted = false,
         }: { is_updated?: boolean; is_deleted?: boolean },
     ) => {
-        const created_at = Random.iso();
+        const now = new Date();
+        now.setMinutes(
+            now.getMinutes() - Random.int({ min: 10, max: 100_0000 }),
+        );
         const comment = await prisma.comments.create({
             data: {
                 id: Random.uuid(),
                 article_id: input.article_id,
                 parent_id: input.parent_id,
                 author_id: await getUserId(input.author),
-                created_at,
-                deleted_at: is_deleted ? Random.iso() : null,
+                created_at: now,
+                deleted_at: is_deleted ? now : null,
             },
         });
 
@@ -289,18 +318,17 @@ export namespace Seed {
             data: {
                 id: Random.uuid(),
                 body: Random.string(100),
-                created_at,
+                created_at: now,
                 comment_id: comment.id,
             },
         });
         if (is_updated) {
-            const now = new Date(created_at);
-            now.setHours(now.getHours() + 5);
+            now.setMinutes(now.getMinutes() + 5);
             await prisma.comment_snapshots.create({
                 data: {
                     id: Random.uuid(),
                     body: Random.string(100),
-                    created_at: DateMapper.toISO(now),
+                    created_at: now,
                     comment_id: comment.id,
                 },
             });
@@ -442,166 +470,143 @@ export namespace Seed {
     export const check_size_changed = async () => (await size.check())();
 
     export const init = async () => {
-        await createMembership("브론즈", 1);
-        await createMembership("실버", 2);
-        await createMembership("골드", 3);
-
-        await createUser("user0", null);
-        await createUser("user1", "브론즈");
-        await createUser("user2", "실버");
-        await createUser("user3", "골드");
-
-        await createBoard("board1", {
-            read_article_list: null,
-            read_article: null,
-            read_comment_list: null,
-            write_article: "브론즈",
-            write_comment: "브론즈",
-            manager: "골드",
-        });
-        await Promise.all(
-            Array.from({ length: 32 }, async (_, idx) => {
-                const article = await createArticle(
-                    {
-                        author: "user1",
-                        board: "board1",
-                        is_notice: !!+idx.toString(2).padStart(3, "0").at(-1)!,
-                    },
-                    {
-                        is_updated: !!+idx.toString(2).padStart(3, "0").at(-2)!,
-                        is_deleted: !!+idx.toString(2).padStart(3, "0").at(-3)!,
-                    },
-                );
-                await Promise.all(
-                    Array.from({ length: 8 }, async () => {
-                        const comment = await createComment(
-                            {
-                                author: "user2",
-                                article_id: article.id,
-                                parent_id: null,
-                            },
-                            {
-                                is_updated: !!+idx
-                                    .toString(2)
-                                    .padStart(3, "0")
-                                    .at(-1)!,
-                                is_deleted: !!+idx
-                                    .toString(2)
-                                    .padStart(3, "0")
-                                    .at(-2)!,
-                            },
-                        );
-                        Array.from({ length: 8 }, () =>
-                            createComment(
-                                {
-                                    author: "user3",
-                                    article_id: article.id,
-                                    parent_id: comment.id,
-                                },
-                                {
-                                    is_updated: !!+idx
-                                        .toString(2)
-                                        .padStart(3, "0")
-                                        .at(-1)!,
-                                    is_deleted: !!+idx
-                                        .toString(2)
-                                        .padStart(3, "0")
-                                        .at(-2)!,
-                                },
-                            ),
-                        );
-                    }),
-                );
+        console.time("seed init");
+        await Promise.all([
+            createMembership("브론즈", 1),
+            createMembership("실버", 2),
+            createMembership("골드", 3),
+        ]);
+        const [board1, board2, board3] = await Promise.all([
+            createBoard("board1", {
+                read_article_list: null,
+                read_article: null,
+                read_comment_list: null,
+                write_article: "브론즈",
+                write_comment: "브론즈",
+                manager: "골드",
             }),
-        );
-        await createBoard("board2", {
-            read_article_list: "브론즈",
-            read_article: "브론즈",
-            read_comment_list: "브론즈",
-            write_article: "실버",
-            write_comment: "실버",
-            manager: "골드",
-        });
-        await Promise.all(
-            Array.from({ length: 32 }, async (_, idx) => {
-                const article = await createArticle(
-                    {
-                        author: "user3",
-                        board: "board2",
-                        is_notice: !!+idx.toString(2).padStart(3, "0").at(-1)!,
-                    },
-                    {
-                        is_updated: !!+idx.toString(2).padStart(3, "0").at(-2)!,
-                        is_deleted: !!+idx.toString(2).padStart(3, "0").at(-3)!,
-                    },
-                );
-                await Promise.all(
-                    Array.from({ length: 8 }, async () => {
-                        const comment = await createComment(
-                            {
-                                author: "user2",
-                                article_id: article.id,
-                                parent_id: null,
-                            },
-                            {
-                                is_updated: !!+idx
-                                    .toString(2)
-                                    .padStart(3, "0")
-                                    .at(-1)!,
-                                is_deleted: !!+idx
-                                    .toString(2)
-                                    .padStart(3, "0")
-                                    .at(-2)!,
-                            },
-                        );
-                        Array.from({ length: 8 }, () =>
-                            createComment(
-                                {
-                                    author: "user1",
-                                    article_id: article.id,
-                                    parent_id: comment.id,
-                                },
-                                {
-                                    is_updated: !!+idx
-                                        .toString(2)
-                                        .padStart(3, "0")
-                                        .at(-1)!,
-                                    is_deleted: !!+idx
-                                        .toString(2)
-                                        .padStart(3, "0")
-                                        .at(-2)!,
-                                },
-                            ),
-                        );
-                    }),
-                );
+            createBoard("board2", {
+                read_article_list: "브론즈",
+                read_article: "브론즈",
+                read_comment_list: "브론즈",
+                write_article: "실버",
+                write_comment: "실버",
+                manager: "골드",
             }),
-        );
-        await createBoard("board3", {
-            read_article_list: "브론즈",
-            read_article: "실버",
-            read_comment_list: "실버",
-            write_article: "골드",
-            write_comment: "골드",
-            manager: "골드",
-        });
+            createBoard("board3", {
+                read_article_list: "브론즈",
+                read_article: "실버",
+                read_comment_list: "실버",
+                write_article: "골드",
+                write_comment: "골드",
+                manager: "골드",
+            }),
+            createBoard(
+                "deleted",
+                {
+                    read_article_list: null,
+                    read_article: null,
+                    read_comment_list: null,
+                    write_article: "브론즈",
+                    write_comment: "브론즈",
+                    manager: "브론즈",
+                },
+                true,
+            ),
+            createUser("user0", null),
+            createUser("user1", "브론즈"),
+            createUser("user2", "실버"),
+            createUser("user3", "골드"),
+        ]);
 
-        await Promise.all(
-            Array.from({ length: 32 }, async (_, idx) => {
-                const article = await createArticle(
-                    {
-                        author: "user3",
-                        board: "board3",
-                        is_notice: !!+idx.toString(2).padStart(3, "0").at(-1)!,
-                    },
-                    {
-                        is_updated: !!+idx.toString(2).padStart(3, "0").at(-2)!,
-                        is_deleted: !!+idx.toString(2).padStart(3, "0").at(-3)!,
-                    },
-                );
-                await Promise.all(
-                    Array.from({ length: 8 }, async () => {
-                        const comment = await createComment(
+        const articles = (
+            await Promise.all([
+                ...Array.from({ length: 32 }, (_, idx) =>
+                    createArticle(
+                        {
+                            author: "user1",
+                            board: "board1",
+                            is_notice: !!+idx
+                                .toString(2)
+                                .padStart(3, "0")
+                                .at(-1)!,
+                        },
+                        {
+                            is_updated: !!+idx
+                                .toString(2)
+                                .padStart(3, "0")
+                                .at(-2)!,
+                            is_deleted: !!+idx
+                                .toString(2)
+                                .padStart(3, "0")
+                                .at(-3)!,
+                        },
+                    ),
+                ),
+                ...Array.from({ length: 16 }, (_, idx) =>
+                    createArticle(
+                        {
+                            author: "user3",
+                            board: "board2",
+                            is_notice: !!+idx
+                                .toString(2)
+                                .padStart(3, "0")
+                                .at(-1)!,
+                        },
+                        {
+                            is_updated: !!+idx
+                                .toString(2)
+                                .padStart(3, "0")
+                                .at(-2)!,
+                            is_deleted: !!+idx
+                                .toString(2)
+                                .padStart(3, "0")
+                                .at(-3)!,
+                        },
+                    ),
+                ),
+                ...Array.from({ length: 16 }, (_, idx) =>
+                    createArticle(
+                        {
+                            author: "user3",
+                            board: "board3",
+                            is_notice: !!+idx
+                                .toString(2)
+                                .padStart(3, "0")
+                                .at(-1)!,
+                        },
+                        {
+                            is_updated: !!+idx
+                                .toString(2)
+                                .padStart(3, "0")
+                                .at(-2)!,
+                            is_deleted: !!+idx
+                                .toString(2)
+                                .padStart(3, "0")
+                                .at(-3)!,
+                        },
+                    ),
+                ),
+            ])
+        ).filter(Entity.exist);
+
+        const board1_articles = articles.filter(
+            (article) => article.board_id === board1.id,
+        );
+
+        const board2_articles = articles.filter(
+            (article) => article.board_id === board2.id,
+        );
+
+        const board3_articles = articles.filter(
+            (article) => article.board_id === board3.id,
+        );
+
+        const board1_parents = await Promise.all(
+            board1_articles
+                .map((article) =>
+                    Array.from({ length: 32 }, (_, idx) =>
+                        createComment(
                             {
                                 author: "user3",
                                 article_id: article.id,
@@ -617,53 +622,146 @@ export namespace Seed {
                                     .padStart(3, "0")
                                     .at(-2)!,
                             },
-                        );
-                        Array.from({ length: 8 }, () =>
-                            createComment(
-                                {
-                                    author: "user3",
-                                    article_id: article.id,
-                                    parent_id: comment.id,
-                                },
-                                {
-                                    is_updated: !!+idx
-                                        .toString(2)
-                                        .padStart(3, "0")
-                                        .at(-1)!,
-                                    is_deleted: !!+idx
-                                        .toString(2)
-                                        .padStart(3, "0")
-                                        .at(-2)!,
-                                },
-                            ),
-                        );
-                    }),
-                );
-            }),
+                        ),
+                    ),
+                )
+                .flat(1),
+        );
+        const board2_parents = await Promise.all(
+            board2_articles
+                .map((article) =>
+                    Array.from({ length: 16 }, (_, idx) =>
+                        createComment(
+                            {
+                                author: "user2",
+                                article_id: article.id,
+                                parent_id: null,
+                            },
+                            {
+                                is_updated: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-1)!,
+                                is_deleted: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-2)!,
+                            },
+                        ),
+                    ),
+                )
+                .flat(1),
+        );
+        const board3_parents = await Promise.all(
+            board3_articles
+                .map((article) =>
+                    Array.from({ length: 16 }, (_, idx) =>
+                        createComment(
+                            {
+                                author: "user3",
+                                article_id: article.id,
+                                parent_id: null,
+                            },
+                            {
+                                is_updated: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-1)!,
+                                is_deleted: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-2)!,
+                            },
+                        ),
+                    ),
+                )
+                .flat(1),
         );
 
-        const board = await createBoard("deleted", {
-            read_article_list: null,
-            read_article: null,
-            read_comment_list: null,
-            write_article: "브론즈",
-            write_comment: "브론즈",
-            manager: "브론즈",
-        });
-
-        await prisma.boards.update({
-            where: { id: board.id },
-            data: { deleted_at: DateMapper.toISO() },
-        });
+        await Promise.all([
+            ...board1_parents
+                .filter(Entity.exist)
+                .map((comment) =>
+                    Array.from({ length: 32 }, (_, idx) =>
+                        createComment(
+                            {
+                                author: "user1",
+                                article_id: comment.article_id,
+                                parent_id: comment.id,
+                            },
+                            {
+                                is_updated: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-1)!,
+                                is_deleted: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-2)!,
+                            },
+                        ),
+                    ),
+                )
+                .flat(1),
+            ...board2_parents
+                .filter(Entity.exist)
+                .map((comment) =>
+                    Array.from({ length: 16 }, (_, idx) =>
+                        createComment(
+                            {
+                                author: "user1",
+                                article_id: comment.article_id,
+                                parent_id: comment.id,
+                            },
+                            {
+                                is_updated: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-1)!,
+                                is_deleted: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-2)!,
+                            },
+                        ),
+                    ),
+                )
+                .flat(1),
+            ...board3_parents
+                .filter(Entity.exist)
+                .map((comment) =>
+                    Array.from({ length: 16 }, (_, idx) =>
+                        createComment(
+                            {
+                                author: "user3",
+                                article_id: comment.article_id,
+                                parent_id: comment.id,
+                            },
+                            {
+                                is_updated: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-1)!,
+                                is_deleted: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-2)!,
+                            },
+                        ),
+                    ),
+                )
+                .flat(1),
+        ]);
 
         await size.init();
-        console.log("seed initialized");
+        console.timeEnd("seed init");
     };
 
     export const restore = async () => {
         const truncate = (table: string) =>
             prisma.$queryRaw(Prisma.raw(`TRUNCATE table ${table} cascade`));
 
+        console.time("seed reset");
         await prisma.$transaction([
             truncate("comment_snapshots"),
             truncate("comments"),
@@ -676,5 +774,6 @@ export namespace Seed {
             truncate("users"),
             truncate("memberships"),
         ]);
+        console.timeEnd("seed reset");
     };
 }
