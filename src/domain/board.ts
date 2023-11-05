@@ -75,7 +75,7 @@ export namespace Board {
 
     export const checkReadArticlePermission = check("read_article_membership");
 
-    export const checkReadCommentPermission =
+    export const checkReadCommentListPermission =
         (tx: Prisma.TransactionClient = prisma) =>
         async (
             actor: IUser | null,
@@ -110,46 +110,6 @@ export namespace Board {
                         "NOT_FOUND_ARTICLE",
                     ),
                 );
-            return Result.Ok.map(null);
-        };
-
-    export const checkReadCommentListPermission =
-        (tx: Prisma.TransactionClient = prisma) =>
-        async (
-            actor: IUser | null,
-            target: IBoard.Identity & IArticle.Identity,
-            parent: IComment.Identity | null = null,
-        ): Promise<
-            Result<
-                null,
-                Failure.Internal<
-                    | ErrorCode.Permission.Insufficient
-                    | ErrorCode.Board.NotFound
-                    | ErrorCode.Article.NotFound
-                    | ErrorCode.Comment.NotFound
-                >
-            >
-        > => {
-            const permission = await checkReadCommentPermission(tx)(
-                actor,
-                target,
-            );
-            if (Result.Error.is(permission)) return permission;
-            if (!isNull(parent)) {
-                const comment = await tx.comments.findFirst({
-                    where: {
-                        id: parent.comment_id,
-                        article_id: target.article_id,
-                    },
-                    select: { deleted_at: true },
-                });
-                if (!Entity.exist(comment))
-                    return Result.Error.map(
-                        new Failure.Internal<ErrorCode.Comment.NotFound>(
-                            "NOT_FOUND_COMMENT",
-                        ),
-                    );
-            }
             return Result.Ok.map(null);
         };
 

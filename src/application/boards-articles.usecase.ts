@@ -48,45 +48,6 @@ export namespace BoardsArticlesUsecase {
             });
         };
 
-    export const getList =
-        (req: Request) =>
-        (identity: IBoard.Identity) =>
-        async ({
-            sort = "latest",
-            page = 1,
-            size = 10,
-        }: IArticle.ISearch): Promise<
-            Result<
-                IArticle.IPaginated,
-                | Failure.External<"Crypto.decrypt">
-                | Failure.Internal<
-                      | ErrorCode.Permission.Expired
-                      | ErrorCode.Permission.Invalid
-                      | ErrorCode.Permission.Insufficient
-                      | ErrorCode.Board.NotFound
-                  >
-            >
-        > => {
-            const tx = prisma;
-            const security =
-                await Authentication.verifyOptionalUserByHttpBearer(tx)(req);
-            if (Result.Error.is(security)) return security;
-            const user = Result.Ok.flatten(security);
-            const permission = await Board.checkReadArticleListPermission(tx)(
-                user,
-                identity,
-            );
-            if (Result.Error.is(permission)) return permission;
-
-            const data = await Article.getList(tx)({
-                where: { board_id: identity.board_id },
-                skip: (page - 1) * size,
-                take: size,
-                orderBy: { created_at: sort === "latest" ? "desc" : "asc" },
-            });
-            return Result.Ok.map({ data, page, size });
-        };
-
     export const get =
         (req: Request) =>
         async (
@@ -118,6 +79,47 @@ export namespace BoardsArticlesUsecase {
                 id: identity.article_id,
                 board_id: identity.board_id,
             });
+        };
+
+    export const getList =
+        (req: Request) =>
+        (identity: IBoard.Identity) =>
+        async ({
+            sort = "latest",
+            page = 1,
+            size = 10,
+        }: IArticle.ISearch): Promise<
+            Result<
+                IArticle.IPaginated,
+                | Failure.External<"Crypto.decrypt">
+                | Failure.Internal<
+                      | ErrorCode.Permission.Expired
+                      | ErrorCode.Permission.Invalid
+                      | ErrorCode.Permission.Insufficient
+                      | ErrorCode.Board.NotFound
+                  >
+            >
+        > => {
+            const tx = prisma;
+            const security =
+                await Authentication.verifyOptionalUserByHttpBearer(tx)(req);
+            if (Result.Error.is(security)) return security;
+            const user = Result.Ok.flatten(security);
+            const permission = await Board.checkReadArticleListPermission(tx)(
+                user,
+                identity,
+            );
+            if (Result.Error.is(permission)) return permission;
+
+            const data = Result.Ok.flatten(
+                await Article.getList(tx)({
+                    where: { board_id: identity.board_id },
+                    skip: (page - 1) * size,
+                    take: size,
+                    orderBy: { created_at: sort === "latest" ? "desc" : "asc" },
+                }),
+            );
+            return Result.Ok.map({ data, page, size });
         };
 
     export const update =

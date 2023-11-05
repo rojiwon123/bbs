@@ -152,7 +152,7 @@ export const test_get_comment_list_when_token_is_invalid = async (
 export const test_get_comment_list_when_user_is_invalid = async (
     connection: IConnection,
 ) => {
-    const username = "create_article_test";
+    const username = "get_comment_list_when_user_is_invalid";
     await Seed.createUser(username, null);
     const token = await get_token(connection, username);
     await Seed.deleteUser(username);
@@ -216,41 +216,6 @@ export const test_get_comment_list_when_article_is_deleted = async (
     )({
         success: false,
         assertBody: typia.createAssertEquals<ErrorCode.Article.NotFound>(),
-    });
-};
-
-export const test_get_comment_list_when_parent_does_not_exist = async (
-    connection: IConnection,
-) => {
-    const token = await get_token(connection, "user2");
-    const board_id = await Seed.getBoardId("board2");
-    const article_id = await Seed.getArticleId(board_id);
-    await APIValidator.assert(
-        test(Connection.authorize(token)(connection), board_id, article_id, {
-            parent_id: Random.uuid(),
-        }),
-        HttpStatus.NOT_FOUND,
-    )({
-        success: false,
-        assertBody: typia.createAssertEquals<ErrorCode.Comment.NotFound>(),
-    });
-};
-
-export const test_get_comment_list_when_parent_is_deleted = async (
-    connection: IConnection,
-) => {
-    const token = await get_token(connection, "user2");
-    const board_id = await Seed.getBoardId("board2");
-    const article_id = await Seed.getArticleId(board_id);
-    const parent_id = await Seed.getCommentId(article_id);
-    await APIValidator.assert(
-        test(Connection.authorize(token)(connection), board_id, article_id, {
-            parent_id,
-        }),
-        HttpStatus.NOT_FOUND,
-    )({
-        success: false,
-        assertBody: typia.createAssertEquals<ErrorCode.Comment.NotFound>(),
     });
 };
 

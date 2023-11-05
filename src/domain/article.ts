@@ -41,28 +41,6 @@ export namespace Article {
             return Result.Ok.map<IArticle.Identity>({ article_id });
         };
 
-    export const getList =
-        (tx: Prisma.TransactionClient = prisma) =>
-        (input: {
-            where?: Prisma.articlesWhereInput;
-            skip: number;
-            take: number;
-            orderBy: Prisma.articlesOrderByWithRelationInput;
-        }) =>
-            pipe(
-                input,
-                async ({ where = {}, skip, take, orderBy }) =>
-                    tx.articles.findMany({
-                        where: { ...where, deleted_at: null },
-                        skip,
-                        take,
-                        orderBy,
-                        select: ArticleJson.selectSummary(),
-                    }),
-                map(ArticleJson.mapSummary),
-                toArray,
-            );
-
     export const get =
         (tx: Prisma.TransactionClient = prisma) =>
         async (
@@ -115,6 +93,29 @@ export namespace Article {
                     : null,
             });
         };
+
+    export const getList =
+        (tx: Prisma.TransactionClient = prisma) =>
+        (input: {
+            where?: Prisma.articlesWhereInput;
+            skip: number;
+            take: number;
+            orderBy: Prisma.articlesOrderByWithRelationInput;
+        }) =>
+            pipe(
+                input,
+                async ({ where = {}, skip, take, orderBy }) =>
+                    tx.articles.findMany({
+                        where: { ...where, deleted_at: null },
+                        skip,
+                        take,
+                        orderBy,
+                        select: ArticleJson.selectSummary(),
+                    }),
+                map(ArticleJson.mapSummary),
+                toArray,
+                Result.Ok.map,
+            );
 
     export const update =
         (tx: Prisma.TransactionClient = prisma) =>

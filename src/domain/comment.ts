@@ -1,4 +1,4 @@
-import { isNull } from "@fxts/core";
+import { isNull, map, pipe, toArray } from "@fxts/core";
 
 import { prisma } from "@APP/infrastructure/DB";
 import { ErrorCode } from "@APP/types/ErrorCode";
@@ -87,6 +87,29 @@ export namespace Comment {
                     : null,
             });
         };
+
+    export const getList =
+        (tx: Prisma.TransactionClient = prisma) =>
+        async (input: {
+            where?: Prisma.commentsWhereInput;
+            skip: number;
+            take: number;
+            orderBy: Prisma.commentsOrderByWithRelationInput;
+        }) =>
+            pipe(
+                input,
+                async ({ where = {}, skip, take, orderBy }) =>
+                    tx.comments.findMany({
+                        where: { ...where, deleted_at: null },
+                        skip,
+                        take,
+                        orderBy,
+                        select: CommentJson.selectSummary(),
+                    }),
+                map(CommentJson.mapSummary),
+                toArray,
+                Result.Ok.map,
+            );
 }
 
 export namespace CommentJson {
