@@ -85,4 +85,37 @@ export namespace BoardsArticlesUsecase {
             });
             return Result.Ok.map({ data, page, size });
         };
+
+    export const get =
+        (req: Request) =>
+        async (
+            identity: IBoard.Identity & IArticle.Identity,
+        ): Promise<
+            Result<
+                IArticle,
+                | Failure.External<"Crypto.decrypt">
+                | Failure.Internal<
+                      | ErrorCode.Permission.Expired
+                      | ErrorCode.Permission.Invalid
+                      | ErrorCode.Permission.Insufficient
+                      | ErrorCode.Board.NotFound
+                      | ErrorCode.Article.NotFound
+                  >
+            >
+        > => {
+            const tx = prisma;
+            const security =
+                await Authentication.verifyOptionalUserByHttpBearer(tx)(req);
+            if (Result.Error.is(security)) return security;
+            const user = Result.Ok.flatten(security);
+            const permission = await Board.checkReadArticlePermission(tx)(
+                user,
+                identity,
+            );
+            if (Result.Error.is(permission)) return permission;
+            return Article.get(tx)({
+                id: identity.article_id,
+                board_id: identity.board_id,
+            });
+        };
 }

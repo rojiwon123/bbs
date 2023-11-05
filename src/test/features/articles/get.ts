@@ -107,8 +107,8 @@ export const test_get_article_when_board_does_not_exist = async (
 export const test_get_article_when_article_does_not_exist = async (
     connection: IConnection,
 ) => {
-    const token = await get_token(connection, "user1");
-    const board_id = await Seed.getBoardId("board3");
+    const token = await get_token(connection, "user2");
+    const board_id = await Seed.getBoardId("board2");
     await APIValidator.assert(
         test(Connection.authorize(token)(connection), board_id, Random.uuid()),
         HttpStatus.NOT_FOUND,
@@ -120,8 +120,8 @@ export const test_get_article_when_article_does_not_exist = async (
 export const test_get_article_when_article_is_deleted = async (
     connection: IConnection,
 ) => {
-    const token = await get_token(connection, "user1");
-    const board_id = await Seed.getBoardId("board3");
+    const token = await get_token(connection, "user2");
+    const board_id = await Seed.getBoardId("board2");
     const article_id = await Seed.getDeletedArticleId(board_id);
     await APIValidator.assert(
         test(Connection.authorize(token)(connection), board_id, article_id),

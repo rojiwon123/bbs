@@ -9,9 +9,9 @@ import { Omit } from "./global";
 export interface IArticle {
     id: string & typia.tags.Format<"uuid">;
     /** 게시글 제목 */
-    title: string;
+    title: string | null;
     /** 게시글 본문 */
-    body: IArticle.IBody;
+    body: IArticle.IBody | null;
     /** 작성자 정보 */
     author: IArticle.IAuthor;
     /** 소속 게시판 정보 */
@@ -50,7 +50,11 @@ export namespace IArticle {
     export type IAuthor = IDeletedAuthor | IActiveAuthor;
 
     export interface IUpdate
-        extends Pick<IArticle, "id" | "title" | "body" | "is_notice"> {}
+        extends Pick<IArticle, "id" | "is_notice">,
+            IArticle.IBody {
+        /** 게시글 제목 */
+        title: string;
+    }
 
     export interface ICreate extends Omit<IUpdate, "id"> {
         author_id: string & typia.tags.Format<"uuid">;

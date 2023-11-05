@@ -82,15 +82,40 @@ export class BoardsArticlesController {
         nest.HttpStatus.NOT_FOUND,
     )
     @core.TypedRoute.Get(":article_id")
-    get(
+    async get(
         @core.TypedParam("board_id")
         board_id: string & typia.tags.Format<"uuid">,
         @core.TypedParam("article_id")
         article_id: string & typia.tags.Format<"uuid">,
+        @nest.Request() req: Request,
     ): Promise<IArticle> {
-        board_id;
-        article_id;
-        throw Error();
+        const result = await BoardsArticlesUsecase.get(req)({
+            board_id,
+            article_id,
+        });
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        if (error instanceof Error)
+            switch (error.message) {
+                case "EXPIRED_PERMISSION":
+                case "INVALID_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.UNAUTHORIZED,
+                    );
+                case "INSUFFICIENT_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.FORBIDDEN,
+                    );
+                case "NOT_FOUND_BOARD":
+                case "NOT_FOUND_ARTICLE":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.NOT_FOUND,
+                    );
+            }
+        throw Failure.Http.fromExternal(error);
     }
 
     /**
