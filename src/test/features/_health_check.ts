@@ -3,10 +3,10 @@ import { HttpStatus } from "@nestjs/common";
 import api from "@project/api";
 import typia from "typia";
 
-import { Util } from "../internal/utils";
+import { APIValidator } from "../internal/validator";
 
 export const test_health_check = (connection: IConnection) =>
-    Util.assertResponse(
+    APIValidator.assert(
         api.functional.health.check(connection),
         HttpStatus.OK,
     )({

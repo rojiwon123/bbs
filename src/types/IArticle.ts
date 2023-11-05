@@ -1,46 +1,83 @@
 import typia from "typia";
 
 import { ArticleBodyFormat } from "../../db/edge";
+import { IBoard } from "./IBoard";
 import { IPage } from "./IPage";
-import "./IUser";
 import { IUser } from "./IUser";
+import { Omit } from "./global";
 
 export interface IArticle {
     id: string & typia.tags.Format<"uuid">;
-    author: IUser.IAuthor;
-    snapshots: IArticle.ISnapshot[] & typia.tags.MinItems<1>;
-    posted_at: string & typia.tags.Format<"date-time">;
+    /** 게시글 제목 */
+    title: string | null;
+    /** 게시글 본문 */
+    body: IArticle.IBody | null;
+    /** 작성자 정보 */
+    author: IArticle.IAuthor;
+    /** 소속 게시판 정보 */
+    board: IBoard.ISummary;
+    /** 공지 여부 */
+    is_notice: boolean;
+    created_at: string & typia.tags.Format<"date-time">;
+    updated_at: (string & typia.tags.Format<"date-time">) | null;
 }
 
 export namespace IArticle {
     export type BodyFormat = ArticleBodyFormat;
-    export interface IUpdate extends ISnapshot.ICreate {}
-    export interface ICreate extends IUpdate {}
+
+    export interface IBody {
+        url: string & typia.tags.Format<"url">;
+        format: BodyFormat;
+    }
     export interface Identity {
         article_id: string & typia.tags.Format<"uuid">;
     }
 
-    export interface ISnapshot {
-        title: string;
-        body_url: string & typia.tags.Format<"url">;
-        body_format: BodyFormat;
-        created_at: string & typia.tags.Format<"date-time">;
-    }
-
-    export namespace ISnapshot {
-        export interface ICreate
-            extends Pick<ISnapshot, "title" | "body_format" | "body_url"> {}
-    }
-
     export interface ISummary
-        extends Pick<IArticle, "id" | "author" | "posted_at">,
-            Pick<ISnapshot, "title"> {
-        updated_at: (string & typia.tags.Format<"date-time">) | null;
+        extends Pick<
+            IArticle,
+            "id" | "title" | "author" | "created_at" | "updated_at"
+        > {}
+
+    export interface IDeletedAuthor {
+        status: "deleted";
+    }
+
+    export interface IActiveAuthor extends IUser.ISummary {
+        status: "active";
+    }
+
+    export type IAuthor = IDeletedAuthor | IActiveAuthor;
+
+    export interface IUpdate extends Pick<IArticle, "id">, IArticle.IBody {
+        /** 게시글 제목 */
+        title: string;
+    }
+
+    export interface ICreate extends IUpdate {
+        /** 공지 여부 */
+        is_notice: boolean;
+        author_id: string & typia.tags.Format<"uuid">;
+        board_id: string & typia.tags.Format<"uuid">;
+    }
+
+    export interface ISetNoticeInput {
+        board_id: string & typia.tags.Format<"uuid">;
+        article_ids: (string & typia.tags.Format<"uuid">)[];
+        is_notice: boolean;
     }
 
     export interface ISearch extends IPage.ISearch {
-        /** @default desc */
-        posted_at?: IPage.SortType;
+        /** @default latest */
+        sort?: IPage.SortType;
     }
-    export interface IPaginatedResponse extends IPage.IResponse<ISummary> {}
+
+    export interface IPaginated extends IPage.IResponse<ISummary> {}
+
+    export interface IUpdateBody extends Omit<IUpdate, "id"> {}
+
+    export interface ICreateBody
+        extends Omit<ICreate, "author_id" | "board_id" | "is_notice"> {}
+
+    export interface ISetNoticeBody extends Omit<ISetNoticeInput, "board_id"> {}
 }

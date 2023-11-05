@@ -1,242 +1,680 @@
-import { range, toArray } from "@fxts/core";
+import { isNull, isUndefined } from "@fxts/core";
+import { RandomGenerator } from "@nestia/e2e";
+import assert from "assert";
+import typia from "typia";
 
 import { prisma } from "@APP/infrastructure/DB";
 import { DateMapper } from "@APP/utils/date";
 import { Random } from "@APP/utils/random";
 
+import { ArticleBodyFormat, Prisma } from "../../../db/edge";
+
 export namespace Seed {
-    export const createUser = async (name: string) => {
+    type UUID = string & typia.tags.Format<"uuid">;
+
+    const createUrl = typia.createRandom<string & typia.tags.Format<"url">>();
+    const createNullableUrl = typia.createRandom<
+        (string & typia.tags.Format<"url">) | null
+    >();
+
+    export const getMembershipId = async (name: string): Promise<UUID> => {
+        const membership = await prisma.memberships.findFirst({
+            where: { name, deleted_at: null },
+        });
+        if (isNull(membership)) throw Error("not found membership");
+        return membership.id;
+    };
+    export const getNullableMembershipId = async (
+        name: string | null,
+    ): Promise<UUID | null> => (isNull(name) ? null : getMembershipId(name));
+
+    export const getUserId = async (name: string): Promise<UUID> => {
+        const user = await prisma.users.findFirst({
+            where: { name, deleted_at: null },
+        });
+        if (isNull(user)) throw Error("not found user");
+        return user.id;
+    };
+
+    export const getBoardId = async (name: string): Promise<UUID> => {
+        const board = await prisma.boards.findFirst({
+            where: { name },
+        });
+        if (isNull(board)) throw Error("not found board");
+        return board.id;
+    };
+
+    export const getArticleId = async (board_id: UUID): Promise<UUID> => {
+        const articles = await prisma.articles.findMany({
+            where: { deleted_at: null, board_id },
+            select: {
+                id: true,
+            },
+        });
+        return RandomGenerator.pick(articles).id;
+    };
+
+    export const getUpdatedArticleId = async (
+        board_id: UUID,
+    ): Promise<UUID> => {
+        const articles = await prisma.articles.findMany({
+            where: { deleted_at: null, board_id },
+            select: {
+                id: true,
+                _count: {
+                    select: { snapshots: true },
+                },
+            },
+        });
+        return RandomGenerator.pick(
+            articles.filter(({ _count: { snapshots } }) => snapshots > 1),
+        ).id;
+    };
+
+    export const getDeletedArticleId = async (
+        board_id: string,
+    ): Promise<UUID> => {
+        const articles = await prisma.articles.findMany({
+            where: { deleted_at: { not: null }, board_id },
+        });
+        return RandomGenerator.pick(articles).id;
+    };
+
+    export const getUpdatedCommentId = async (
+        article_id: string,
+        parent_id: string | null = null,
+    ): Promise<UUID> => {
+        const articles = await prisma.comments.findMany({
+            where: { deleted_at: null, article_id, parent_id },
+            select: {
+                id: true,
+                _count: {
+                    select: { snapshots: true },
+                },
+            },
+        });
+        return RandomGenerator.pick(
+            articles.filter(({ _count: { snapshots } }) => snapshots > 1),
+        ).id;
+    };
+
+    export const getDeletedCommentId = async (
+        article_id: string,
+        parent_id: string | null = null,
+    ): Promise<UUID> => {
+        const articles = await prisma.comments.findMany({
+            where: { deleted_at: { not: null }, article_id, parent_id },
+        });
+        return RandomGenerator.pick(articles).id;
+    };
+
+    export const createMembership = async (
+        name: string,
+        rank: number,
+        is_deleted = false,
+    ) => {
+        return prisma.memberships.create({
+            data: {
+                id: Random.uuid(),
+                name,
+                rank,
+                created_at: Random.iso(),
+                image_url: createNullableUrl(),
+                deleted_at: is_deleted ? Random.iso() : null,
+            },
+        });
+    };
+
+    export const createUser = async (
+        name: string,
+        membership: string | null,
+        is_deleted = false,
+    ) => {
+        const iso = Random.iso();
         const user = await prisma.users.create({
             data: {
                 id: Random.uuid(),
                 name,
-                image_url:
-                    "https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg?w=1800&t=st=1697730676~exp=1697731276~hmac=1eadeaab4aaebf576d323a3c35216c2f28f4c776a65871d0f18918edb141d183",
-                introduction: "hello world",
-                created_at: DateMapper.toISO(),
+                created_at: Random.iso(),
+                image_url: createNullableUrl(),
+                membership_id: await getNullableMembershipId(membership),
+                deleted_at: is_deleted ? iso : null,
             },
         });
         await prisma.authentications.create({
             data: {
                 id: Random.uuid(),
-                oauth_sub: name,
+                user_id: user.id,
                 oauth_type: "github",
-                created_at: DateMapper.toISO(),
-                user_id: user.id,
+                oauth_sub: name,
+                created_at: Random.iso(),
+                deleted_at: is_deleted ? iso : null,
             },
         });
         await prisma.authentications.create({
             data: {
                 id: Random.uuid(),
-                oauth_sub: name,
-                oauth_type: "kakao",
-                created_at: DateMapper.toISO(),
                 user_id: user.id,
+                oauth_type: "kakao",
+                oauth_sub: name,
+                created_at: Random.iso(),
+                deleted_at: is_deleted ? iso : null,
             },
         });
         return user;
     };
-    export const createArticle = async (author_id: string) => {
-        const created_at = Random.iso();
-        return prisma.articles.create({
-            data: {
-                id: Random.uuid(),
-                author_id,
-                created_at,
-                snapshots: {
-                    create: {
-                        id: Random.uuid(),
-                        title: Random.string(10),
-                        body_format: "html",
-                        body_url: "http://localhost:6060",
-                        created_at,
-                    },
-                },
-            },
-        });
-    };
 
-    const createArticleSnapshot = (
-        article_id: string,
-        posted_at: Date,
-        idx: number,
+    export const createBoard = async (
+        name: string,
+        membership: {
+            read_article_list: string | null;
+            read_article: string | null;
+            read_comment_list: string | null;
+            write_article: string;
+            write_comment: string;
+            manager: string;
+        },
+        is_deleted = false,
     ) => {
-        const now = new Date(posted_at);
-        now.setHours(now.getHours() + idx);
-        return {
-            id: Random.uuid(),
-            article_id,
-            title: Random.string(10),
-            body_format: "html" as const,
-            body_url: "http://localhost:6060",
-            created_at: DateMapper.toISO(now),
-        };
-    };
-    export const createUpdatedArticle = async (author_id: string) => {
-        const article = await createArticle(author_id);
-
-        return prisma.article_snapshots.createMany({
-            data: toArray(range(1, 4)).map((idx) =>
-                createArticleSnapshot(article.id, article.created_at, idx),
-            ),
-        });
-    };
-    export const createDeletedArticle = async (author_id: string) => {
-        const now = Random.iso();
-        const deleted_at = new Date(now);
-        deleted_at.setHours(deleted_at.getHours() + 3);
-        return prisma.articles.create({
+        return prisma.boards.create({
             data: {
                 id: Random.uuid(),
-                author_id,
-                created_at: now,
-                deleted_at: DateMapper.toISO(deleted_at),
-                snapshots: {
-                    create: {
-                        id: Random.uuid(),
-                        title: Random.string(10),
-                        body_format: "html",
-                        body_url: "http://localhost:6060",
-                        created_at: now,
-                    },
-                },
+                name,
+                description: Random.string(50),
+                created_at: Random.iso(),
+                deleted_at: is_deleted ? Random.iso() : null,
+                manager_membership_id: await getMembershipId(
+                    membership.manager,
+                ),
+                read_article_list_membership_id: await getNullableMembershipId(
+                    membership.read_article_list,
+                ),
+                read_article_membership_id: await getNullableMembershipId(
+                    membership.read_article,
+                ),
+                read_comment_list_membership_id: await getNullableMembershipId(
+                    membership.read_comment_list,
+                ),
+                write_article_membership_id: await getMembershipId(
+                    membership.write_article,
+                ),
+                write_comment_membership_id: await getMembershipId(
+                    membership.write_comment,
+                ),
             },
         });
     };
-    export const createArticles = async (author_id: string) => {
-        await Promise.all([
-            ...toArray(range(3)).map(() => createArticle(author_id)),
-            ...toArray(range(3)).map(() => createDeletedArticle(author_id)),
-            ...toArray(range(4)).map(() => createUpdatedArticle(author_id)),
-            ...toArray(range(2)).map(() => createArticle(author_id)),
-        ]);
+
+    export const createArticle = async (
+        {
+            author,
+            board,
+            is_notice = false,
+        }: {
+            author: string;
+            board: string;
+            is_notice?: boolean;
+        },
+        {
+            is_updated = false,
+            is_deleted = false,
+        }: {
+            is_updated?: boolean;
+            is_deleted?: boolean;
+        },
+    ) => {
+        const created_at = Random.iso();
+
+        const article = await prisma.articles.create({
+            data: {
+                id: Random.uuid(),
+                created_at,
+                deleted_at: is_deleted ? Random.iso() : null,
+                author_id: await getUserId(author),
+                board_id: await getBoardId(board),
+                is_notice,
+            },
+        });
+        await prisma.article_snapshots.create({
+            data: {
+                id: Random.uuid(),
+                created_at,
+                title: Random.string(20),
+                body_format: typia.random<ArticleBodyFormat>(),
+                body_url: createUrl(),
+                article_id: article.id,
+            },
+        });
+        if (is_updated) {
+            const now = new Date(created_at);
+            now.setMonth(now.getMonth() + 1);
+            await prisma.article_snapshots.create({
+                data: {
+                    id: Random.uuid(),
+                    created_at: now,
+                    title: Random.string(20),
+                    body_format: typia.random<ArticleBodyFormat>(),
+                    body_url: createUrl(),
+                    article_id: article.id,
+                },
+            });
+        }
+        return article;
     };
 
     export const createComment = async (
-        article_id: string,
-        author_id: string,
+        input: {
+            author: string;
+            article_id: string;
+            parent_id: string | null;
+        },
+        {
+            is_updated = false,
+            is_deleted = false,
+        }: { is_updated?: boolean; is_deleted?: boolean },
     ) => {
         const created_at = Random.iso();
-        return prisma.comments.create({
+        const comment = await prisma.comments.create({
             data: {
                 id: Random.uuid(),
-                author_id,
-                article_id,
+                article_id: input.article_id,
+                parent_id: input.parent_id,
+                author_id: await getUserId(input.author),
                 created_at,
-                snapshots: {
-                    create: {
-                        id: Random.uuid(),
-                        body: Random.string(200),
-                        created_at,
-                    },
-                },
+                deleted_at: is_deleted ? Random.iso() : null,
             },
         });
+
+        await prisma.comment_snapshots.create({
+            data: {
+                id: Random.uuid(),
+                body: Random.string(100),
+                created_at,
+                comment_id: comment.id,
+            },
+        });
+        if (is_updated) {
+            const now = new Date(created_at);
+            now.setHours(now.getHours() + 5);
+            await prisma.comment_snapshots.create({
+                data: {
+                    id: Random.uuid(),
+                    body: Random.string(100),
+                    created_at: DateMapper.toISO(now),
+                    comment_id: comment.id,
+                },
+            });
+        }
+
+        return comment;
     };
-    const createCommentSnapshot = (
-        comment_id: string,
-        created_at: Date,
-        idx: number,
-    ) => {
-        const now = new Date(created_at);
-        now.setHours(now.getHours() + idx);
-        return {
-            id: Random.uuid(),
-            comment_id,
-            body: Random.string(100),
-            created_at: DateMapper.toISO(now),
+
+    export const deleteUser = async (name: string) => {
+        await prisma.authentications.deleteMany({ where: { user: { name } } });
+        await prisma.users.deleteMany({ where: { name } });
+    };
+
+    export const deleteBoard = async (id: string) =>
+        prisma.boards.delete({ where: { id } });
+
+    export const deleteArticle = async (id: string) => {
+        await prisma.article_attachment_snapshots.deleteMany({
+            where: { snapshot: { article_id: id } },
+        });
+        await prisma.article_snapshots.deleteMany({
+            where: { article_id: id },
+        });
+        await prisma.articles.delete({ where: { id } });
+    };
+
+    export const deleteComment = async (id: string) => {
+        await prisma.comment_snapshots.deleteMany({
+            where: { comment_id: id },
+        });
+        await prisma.comments.delete({ where: { id } });
+    };
+
+    class Size {
+        private before?: {
+            users: {
+                total: number;
+                deleted: number;
+            };
+            authentications: {
+                total: number;
+                deleted: number;
+            };
+            memberships: {
+                total: number;
+                deleted: number;
+            };
+            boards: {
+                total: number;
+                deleted: number;
+            };
+            articles: {
+                total: number;
+                deleted: number;
+            };
+            article_snapshots: {
+                total: number;
+            };
+            article_attachment_snapshots: {
+                total: number;
+            };
+            comments: {
+                total: number;
+                deleted: number;
+            };
+            comment_snapshots: {
+                total: number;
+            };
+            attachments: {
+                total: number;
+            };
         };
-    };
-    export const createUpdatedComment = async (
-        article_id: string,
-        author_id: string,
-    ) => {
-        const comment = await createComment(article_id, author_id);
-
-        return prisma.comment_snapshots.createMany({
-            data: toArray(range(1, 4)).map((idx) =>
-                createCommentSnapshot(comment.id, comment.created_at, idx),
-            ),
-        });
-    };
-    export const createDeletedComment = (
-        article_id: string,
-        author_id: string,
-    ) => {
-        const created_at = Random.iso();
-        const deleted_at = new Date(created_at);
-        deleted_at.setHours(deleted_at.getHours() + 3);
-        return prisma.comments.create({
-            data: {
-                id: Random.uuid(),
-                article_id,
-                author_id,
-                created_at,
-                deleted_at: DateMapper.toISO(deleted_at),
-                snapshots: {
-                    create: {
-                        id: Random.uuid(),
-                        body: Random.string(100),
-                        created_at,
-                    },
+        private async count() {
+            return {
+                users: {
+                    total: await prisma.users.count(),
+                    deleted: await prisma.users.count({
+                        where: { deleted_at: { not: null } },
+                    }),
                 },
-            },
+                authentications: {
+                    total: await prisma.authentications.count(),
+                    deleted: await prisma.authentications.count({
+                        where: { deleted_at: { not: null } },
+                    }),
+                },
+                memberships: {
+                    total: await prisma.memberships.count(),
+                    deleted: await prisma.memberships.count({
+                        where: { deleted_at: { not: null } },
+                    }),
+                },
+                boards: {
+                    total: await prisma.boards.count(),
+                    deleted: await prisma.boards.count({
+                        where: { deleted_at: { not: null } },
+                    }),
+                },
+                articles: {
+                    total: await prisma.articles.count(),
+                    deleted: await prisma.articles.count({
+                        where: { deleted_at: { not: null } },
+                    }),
+                },
+                article_snapshots: {
+                    total: await prisma.article_snapshots.count(),
+                },
+                article_attachment_snapshots: {
+                    total: await prisma.article_attachment_snapshots.count(),
+                },
+                comments: {
+                    total: await prisma.comments.count(),
+                    deleted: await prisma.comments.count({
+                        where: { deleted_at: { not: null } },
+                    }),
+                },
+                comment_snapshots: {
+                    total: await prisma.comment_snapshots.count(),
+                },
+                attachments: {
+                    total: await prisma.attachments.count(),
+                },
+            };
+        }
+        async init() {
+            this.before = await this.count();
+        }
+        async check(): Promise<() => void> {
+            const before = this.before;
+            if (isUndefined(before)) throw Error("Size does not initalized");
+            const after = await this.count();
+            return () =>
+                assert.deepStrictEqual(after, before, "size is changed");
+        }
+    }
+
+    export const size = new Size();
+
+    export const check_size_changed = async () => (await size.check())();
+
+    export const init = async () => {
+        await createMembership("브론즈", 1);
+        await createMembership("실버", 2);
+        await createMembership("골드", 3);
+
+        await createUser("user0", null);
+        await createUser("user1", "브론즈");
+        await createUser("user2", "실버");
+        await createUser("user3", "골드");
+
+        await createBoard("board1", {
+            read_article_list: null,
+            read_article: null,
+            read_comment_list: null,
+            write_article: "브론즈",
+            write_comment: "브론즈",
+            manager: "골드",
         });
+        await Promise.all(
+            Array.from({ length: 32 }, async (_, idx) => {
+                const article = await createArticle(
+                    {
+                        author: "user1",
+                        board: "board1",
+                        is_notice: !!+idx.toString(2).padStart(3, "0").at(-1)!,
+                    },
+                    {
+                        is_updated: !!+idx.toString(2).padStart(3, "0").at(-2)!,
+                        is_deleted: !!+idx.toString(2).padStart(3, "0").at(-3)!,
+                    },
+                );
+                await Promise.all(
+                    Array.from({ length: 8 }, async () => {
+                        const comment = await createComment(
+                            {
+                                author: "user2",
+                                article_id: article.id,
+                                parent_id: null,
+                            },
+                            {
+                                is_updated: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-1)!,
+                                is_deleted: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-2)!,
+                            },
+                        );
+                        Array.from({ length: 8 }, () =>
+                            createComment(
+                                {
+                                    author: "user3",
+                                    article_id: article.id,
+                                    parent_id: comment.id,
+                                },
+                                {
+                                    is_updated: !!+idx
+                                        .toString(2)
+                                        .padStart(3, "0")
+                                        .at(-1)!,
+                                    is_deleted: !!+idx
+                                        .toString(2)
+                                        .padStart(3, "0")
+                                        .at(-2)!,
+                                },
+                            ),
+                        );
+                    }),
+                );
+            }),
+        );
+        await createBoard("board2", {
+            read_article_list: "브론즈",
+            read_article: "브론즈",
+            read_comment_list: "브론즈",
+            write_article: "브론즈",
+            write_comment: "브론즈",
+            manager: "골드",
+        });
+        await Promise.all(
+            Array.from({ length: 32 }, async (_, idx) => {
+                const article = await createArticle(
+                    {
+                        author: "user3",
+                        board: "board2",
+                        is_notice: !!+idx.toString(2).padStart(3, "0").at(-1)!,
+                    },
+                    {
+                        is_updated: !!+idx.toString(2).padStart(3, "0").at(-2)!,
+                        is_deleted: !!+idx.toString(2).padStart(3, "0").at(-3)!,
+                    },
+                );
+                await Promise.all(
+                    Array.from({ length: 8 }, async () => {
+                        const comment = await createComment(
+                            {
+                                author: "user2",
+                                article_id: article.id,
+                                parent_id: null,
+                            },
+                            {
+                                is_updated: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-1)!,
+                                is_deleted: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-2)!,
+                            },
+                        );
+                        Array.from({ length: 8 }, () =>
+                            createComment(
+                                {
+                                    author: "user1",
+                                    article_id: article.id,
+                                    parent_id: comment.id,
+                                },
+                                {
+                                    is_updated: !!+idx
+                                        .toString(2)
+                                        .padStart(3, "0")
+                                        .at(-1)!,
+                                    is_deleted: !!+idx
+                                        .toString(2)
+                                        .padStart(3, "0")
+                                        .at(-2)!,
+                                },
+                            ),
+                        );
+                    }),
+                );
+            }),
+        );
+        await createBoard("board3", {
+            read_article_list: "브론즈",
+            read_article: "실버",
+            read_comment_list: "실버",
+            write_article: "골드",
+            write_comment: "골드",
+            manager: "골드",
+        });
+
+        await Promise.all(
+            Array.from({ length: 32 }, async (_, idx) => {
+                const article = await createArticle(
+                    {
+                        author: "user3",
+                        board: "board3",
+                        is_notice: !!+idx.toString(2).padStart(3, "0").at(-1)!,
+                    },
+                    {
+                        is_updated: !!+idx.toString(2).padStart(3, "0").at(-2)!,
+                        is_deleted: !!+idx.toString(2).padStart(3, "0").at(-3)!,
+                    },
+                );
+                await Promise.all(
+                    Array.from({ length: 8 }, async () => {
+                        const comment = await createComment(
+                            {
+                                author: "user3",
+                                article_id: article.id,
+                                parent_id: null,
+                            },
+                            {
+                                is_updated: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-1)!,
+                                is_deleted: !!+idx
+                                    .toString(2)
+                                    .padStart(3, "0")
+                                    .at(-2)!,
+                            },
+                        );
+                        Array.from({ length: 8 }, () =>
+                            createComment(
+                                {
+                                    author: "user3",
+                                    article_id: article.id,
+                                    parent_id: comment.id,
+                                },
+                                {
+                                    is_updated: !!+idx
+                                        .toString(2)
+                                        .padStart(3, "0")
+                                        .at(-1)!,
+                                    is_deleted: !!+idx
+                                        .toString(2)
+                                        .padStart(3, "0")
+                                        .at(-2)!,
+                                },
+                            ),
+                        );
+                    }),
+                );
+            }),
+        );
+
+        const board = await createBoard("deleted", {
+            read_article_list: null,
+            read_article: null,
+            read_comment_list: null,
+            write_article: "브론즈",
+            write_comment: "브론즈",
+            manager: "브론즈",
+        });
+
+        await prisma.boards.update({
+            where: { id: board.id },
+            data: { deleted_at: DateMapper.toISO() },
+        });
+
+        await size.init();
+        console.log("seed initialized");
     };
-    export const createComments = async (
-        article_id: string,
-        author_id: string,
-    ) => {
-        await Promise.all([
-            ...toArray(range(3)).map(() =>
-                createComment(article_id, author_id),
-            ),
-            ...toArray(range(4)).map(() =>
-                createUpdatedComment(article_id, author_id),
-            ),
-            ...toArray(range(3)).map(() =>
-                createDeletedComment(article_id, author_id),
-            ),
-            ...toArray(range(3)).map(() =>
-                createComment(article_id, author_id),
-            ),
+
+    export const restore = async () => {
+        const truncate = (table: string) =>
+            prisma.$queryRaw(Prisma.raw(`TRUNCATE table ${table} cascade`));
+
+        await prisma.$transaction([
+            truncate("comment_snapshots"),
+            truncate("comments"),
+            truncate("article_attachment_snapshots"),
+            truncate("article_snapshots"),
+            truncate("articles"),
+            truncate("attachments"),
+            truncate("boards"),
+            truncate("authentications"),
+            truncate("users"),
+            truncate("memberships"),
         ]);
-    };
-
-    export const run = async () => {
-        const author1 = await createUser("author1");
-        const author2 = await createUser("author2");
-        await createUser("testuser1");
-        await createUser("testuser2");
-        await createArticles(author1.id);
-        const article = await createArticle(author1.id);
-        await createComments(article.id, author2.id);
-    };
-
-    const seed_size_analyze = async (
-        name: string,
-        expected: number,
-        actual: Promise<number>,
-    ) => {
-        const changed = (await actual) - expected;
-        if (changed === 0) return;
-        console.log(`${name} size changed: ${changed}`);
-    };
-
-    export const truncate = async () => {
-        await seed_size_analyze("user", 4, prisma.users.count());
-        await seed_size_analyze("article", 13, prisma.articles.count());
-        await seed_size_analyze("comment", 13, prisma.comments.count());
-
-        await prisma.comment_snapshots.deleteMany();
-        await prisma.comments.deleteMany();
-
-        await prisma.article_snapshot_attachments.deleteMany();
-        await prisma.article_snapshots.deleteMany();
-        await prisma.articles.deleteMany();
-        await prisma.attachments.deleteMany();
-
-        await prisma.authentications.deleteMany();
-        await prisma.users.deleteMany();
     };
 }

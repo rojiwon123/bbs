@@ -1,6 +1,6 @@
 export namespace Description {
     export type Line = `/// ${string}` | `// ${string}`;
-    type Namspace = "BBS" | "User";
+    type Namspace = "User" | "Board" | "Article" | "Comment";
     export const line = (text: string): Line => `/// ${text}`;
     export const lines = (...texts: string[]): Line[] =>
         texts.flatMap((text) => [line(text), line("")]);
