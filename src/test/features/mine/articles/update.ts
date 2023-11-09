@@ -12,7 +12,7 @@ import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
 import { Random } from "@APP/utils/random";
 
-const test = api.functional.boards.articles.update;
+const test = api.functional.mine.articles.update;
 
 const createBody = typia.createRandom<IArticle.IUpdateBody>();
 
@@ -39,12 +39,7 @@ export const test_update_article_successfully = async (
     )({ success: true, assertBody: typia.createAssertEquals<IArticle>() });
 
     await APIValidator.assert(
-        test(
-            Connection.authorize(token)(connection),
-            board_id,
-            article.id,
-            body,
-        ),
+        test(Connection.authorize(token)(connection), article.id, body),
         HttpStatus.OK,
     )({
         success: true,
@@ -73,9 +68,8 @@ export const test_update_article_successfully = async (
 export const test_update_article_when_token_is_missing = async (
     connection: IConnection,
 ) => {
-    const board_id = await Seed.getBoardId("board3");
     await APIValidator.assert(
-        test(connection, board_id, Random.uuid(), createBody()),
+        test(connection, Random.uuid(), createBody()),
         HttpStatus.UNAUTHORIZED,
     )({
         success: false,
@@ -87,11 +81,9 @@ export const test_update_article_when_token_is_expired = async (
     connection: IConnection,
 ) => {
     const token = await get_expired_token(connection, "user2");
-    const board_id = await Seed.getBoardId("board3");
     await APIValidator.assert(
         test(
             Connection.authorize(token)(connection),
-            board_id,
             Random.uuid(),
             createBody(),
         ),
@@ -105,11 +97,9 @@ export const test_update_article_when_token_is_expired = async (
 export const test_update_article_when_token_is_invalid = async (
     connection: IConnection,
 ) => {
-    const board_id = await Seed.getBoardId("board3");
     await APIValidator.assert(
         test(
             Connection.authorize("invalid)adtoken")(connection),
-            board_id,
             Random.uuid(),
             createBody(),
         ),
@@ -127,12 +117,9 @@ export const test_update_article_when_user_is_invalid = async (
     await Seed.createUser(username, null);
     const token = await get_token(connection, username);
     await Seed.deleteUser(username);
-    const board_id = await Seed.getBoardId("board3");
-
     await APIValidator.assert(
         test(
             Connection.authorize(token)(connection),
-            board_id,
             Random.uuid(),
             createBody(),
         ),
@@ -152,12 +139,7 @@ export const test_update_article_when_user_is_not_author = async (
     const board_id = await Seed.getBoardId("board3");
     const article_id = await Seed.getArticleId(board_id);
     await APIValidator.assert(
-        test(
-            Connection.authorize(token)(connection),
-            board_id,
-            article_id,
-            createBody(),
-        ),
+        test(Connection.authorize(token)(connection), article_id, createBody()),
         HttpStatus.FORBIDDEN,
     )({
         success: false,
@@ -172,17 +154,10 @@ export const test_update_article_when_article_does_not_exist = async (
     connection: IConnection,
 ) => {
     const username = "user1";
-    const boardname = "board1";
     const token = await get_token(connection, username);
-    const board_id = await Seed.getBoardId(boardname);
     const body = createBody();
     await APIValidator.assert(
-        test(
-            Connection.authorize(token)(connection),
-            board_id,
-            Random.uuid(),
-            body,
-        ),
+        test(Connection.authorize(token)(connection), Random.uuid(), body),
         HttpStatus.NOT_FOUND,
     )({
         success: false,
@@ -196,7 +171,6 @@ export const test_update_article_when_article_is_deleted = async (
     const username = "user1";
     const boardname = "board1";
     const token = await get_token(connection, username);
-    const board_id = await Seed.getBoardId(boardname);
     const body = createBody();
     const article = await Seed.createArticle(
         {
@@ -208,12 +182,7 @@ export const test_update_article_when_article_is_deleted = async (
     );
 
     await APIValidator.assert(
-        test(
-            Connection.authorize(token)(connection),
-            board_id,
-            article.id,
-            body,
-        ),
+        test(Connection.authorize(token)(connection), article.id, body),
         HttpStatus.NOT_FOUND,
     )({
         success: false,

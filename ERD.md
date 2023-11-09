@@ -12,7 +12,7 @@
 
 ```mermaid
 erDiagram
-articles {
+"articles" {
     String id PK
     String author_id FK
     String board_id FK
@@ -20,7 +20,7 @@ articles {
     DateTime created_at
     DateTime deleted_at "nullable"
 }
-article_snapshots {
+"article_snapshots" {
     String id PK
     String article_id FK
     String title
@@ -28,13 +28,13 @@ article_snapshots {
     ArticleBodyFormat body_format
     DateTime created_at
 }
-article_attachment_snapshots {
+"article_attachment_snapshots" {
     String id PK
     String snapshot_id FK
     String attachment_id FK
     Int sequence
 }
-boards {
+"boards" {
     String id PK
     String name
     String description
@@ -47,7 +47,7 @@ boards {
     DateTime created_at
     DateTime deleted_at "nullable"
 }
-comments {
+"comments" {
     String id PK
     String author_id FK
     String article_id FK
@@ -55,20 +55,20 @@ comments {
     DateTime created_at
     DateTime deleted_at "nullable"
 }
-comment_snapshots {
+"comment_snapshots" {
     String id PK
     String comment_id FK
     String body
     DateTime created_at
 }
-attachments {
+"attachments" {
     String id PK
     String name
     String extension
     String url
     DateTime created_at
 }
-memberships {
+"memberships" {
     String id PK
     String name
     Int rank
@@ -77,7 +77,7 @@ memberships {
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
-authentications {
+"authentications" {
     String id PK
     String user_id FK "nullable"
     OauthType oauth_type
@@ -87,7 +87,7 @@ authentications {
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
-users {
+"users" {
     String id PK
     String membership_id FK "nullable"
     String name
@@ -96,23 +96,23 @@ users {
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
-articles }|--|| users : author
-articles }|--|| boards : board
-article_snapshots }|--|| articles : article
-article_attachment_snapshots }|--|| article_snapshots : snapshot
-article_attachment_snapshots }|--|| attachments : attachment
-boards }|--|| memberships : manager_membership
-boards }o--|| memberships : read_article_list_membership
-boards }o--|| memberships : read_article_membership
-boards }|--|| memberships : write_article_membership
-boards }o--|| memberships : read_comment_list_membership
-boards }|--|| memberships : write_comment_membership
-comments }|--|| users : author
-comments }|--|| articles : article
-comments }o--o| comments : parent
-comment_snapshots }|--|| comments : comment
-authentications }o--|| users : user
-users }o--|| memberships : membership
+"articles" }|--|| "users" : author
+"articles" }|--|| "boards" : board
+"article_snapshots" }|--|| "articles" : article
+"article_attachment_snapshots" }|--|| "article_snapshots" : snapshot
+"article_attachment_snapshots" }|--|| "attachments" : attachment
+"boards" }|--|| "memberships" : manager_membership
+"boards" }o--|| "memberships" : read_article_list_membership
+"boards" }o--|| "memberships" : read_article_membership
+"boards" }|--|| "memberships" : write_article_membership
+"boards" }o--|| "memberships" : read_comment_list_membership
+"boards" }|--|| "memberships" : write_comment_membership
+"comments" }|--|| "users" : author
+"comments" }|--|| "articles" : article
+"comments" }o--o| "comments" : parent
+"comment_snapshots" }|--|| "comments" : comment
+"authentications" }o--|| "users" : user
+"users" }o--|| "memberships" : membership
 ```
 
 ### `articles`
@@ -376,7 +376,7 @@ Root Entity of User
 
 ```mermaid
 erDiagram
-articles {
+"articles" {
     String id PK
     String author_id FK
     String board_id FK
@@ -384,7 +384,7 @@ articles {
     DateTime created_at
     DateTime deleted_at "nullable"
 }
-boards {
+"boards" {
     String id PK
     String name
     String description
@@ -397,7 +397,7 @@ boards {
     DateTime created_at
     DateTime deleted_at "nullable"
 }
-memberships {
+"memberships" {
     String id PK
     String name
     Int rank
@@ -406,7 +406,7 @@ memberships {
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
-users {
+"users" {
     String id PK
     String membership_id FK "nullable"
     String name
@@ -415,15 +415,15 @@ users {
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
-articles }|--|| users : author
-articles }|--|| boards : board
-boards }|--|| memberships : manager_membership
-boards }o--|| memberships : read_article_list_membership
-boards }o--|| memberships : read_article_membership
-boards }|--|| memberships : write_article_membership
-boards }o--|| memberships : read_comment_list_membership
-boards }|--|| memberships : write_comment_membership
-users }o--|| memberships : membership
+"articles" }|--|| "users" : author
+"articles" }|--|| "boards" : board
+"boards" }|--|| "memberships" : manager_membership
+"boards" }o--|| "memberships" : read_article_list_membership
+"boards" }o--|| "memberships" : read_article_membership
+"boards" }|--|| "memberships" : write_article_membership
+"boards" }o--|| "memberships" : read_comment_list_membership
+"boards" }|--|| "memberships" : write_comment_membership
+"users" }o--|| "memberships" : membership
 ```
 
 ### `articles`
@@ -544,7 +544,7 @@ Root Entity of User
 
 ```mermaid
 erDiagram
-articles {
+"articles" {
     String id PK
     String author_id FK
     String board_id FK
@@ -552,7 +552,7 @@ articles {
     DateTime created_at
     DateTime deleted_at "nullable"
 }
-comments {
+"comments" {
     String id PK
     String author_id FK
     String article_id FK
@@ -560,13 +560,13 @@ comments {
     DateTime created_at
     DateTime deleted_at "nullable"
 }
-comment_snapshots {
+"comment_snapshots" {
     String id PK
     String comment_id FK
     String body
     DateTime created_at
 }
-users {
+"users" {
     String id PK
     String membership_id FK "nullable"
     String name
@@ -575,11 +575,11 @@ users {
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
-articles }|--|| users : author
-comments }|--|| users : author
-comments }|--|| articles : article
-comments }o--o| comments : parent
-comment_snapshots }|--|| comments : comment
+"articles" }|--|| "users" : author
+"comments" }|--|| "users" : author
+"comments" }|--|| "articles" : article
+"comments" }o--o| "comments" : parent
+"comment_snapshots" }|--|| "comments" : comment
 ```
 
 ### `articles`
@@ -689,7 +689,7 @@ Root Entity of User
 
 ```mermaid
 erDiagram
-articles {
+"articles" {
     String id PK
     String author_id FK
     String board_id FK
@@ -697,7 +697,7 @@ articles {
     DateTime created_at
     DateTime deleted_at "nullable"
 }
-article_snapshots {
+"article_snapshots" {
     String id PK
     String article_id FK
     String title
@@ -705,13 +705,13 @@ article_snapshots {
     ArticleBodyFormat body_format
     DateTime created_at
 }
-article_attachment_snapshots {
+"article_attachment_snapshots" {
     String id PK
     String snapshot_id FK
     String attachment_id FK
     Int sequence
 }
-boards {
+"boards" {
     String id PK
     String name
     String description
@@ -724,7 +724,7 @@ boards {
     DateTime created_at
     DateTime deleted_at "nullable"
 }
-comments {
+"comments" {
     String id PK
     String author_id FK
     String article_id FK
@@ -732,14 +732,14 @@ comments {
     DateTime created_at
     DateTime deleted_at "nullable"
 }
-attachments {
+"attachments" {
     String id PK
     String name
     String extension
     String url
     DateTime created_at
 }
-users {
+"users" {
     String id PK
     String membership_id FK "nullable"
     String name
@@ -748,14 +748,14 @@ users {
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
-articles }|--|| users : author
-articles }|--|| boards : board
-article_snapshots }|--|| articles : article
-article_attachment_snapshots }|--|| article_snapshots : snapshot
-article_attachment_snapshots }|--|| attachments : attachment
-comments }|--|| users : author
-comments }|--|| articles : article
-comments }o--o| comments : parent
+"articles" }|--|| "users" : author
+"articles" }|--|| "boards" : board
+"article_snapshots" }|--|| "articles" : article
+"article_attachment_snapshots" }|--|| "article_snapshots" : snapshot
+"article_attachment_snapshots" }|--|| "attachments" : attachment
+"comments" }|--|| "users" : author
+"comments" }|--|| "articles" : article
+"comments" }o--o| "comments" : parent
 ```
 
 ### `articles`
@@ -950,7 +950,7 @@ Root Entity of User
 
 ```mermaid
 erDiagram
-memberships {
+"memberships" {
     String id PK
     String name
     Int rank
@@ -959,7 +959,7 @@ memberships {
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
-authentications {
+"authentications" {
     String id PK
     String user_id FK "nullable"
     OauthType oauth_type
@@ -969,7 +969,7 @@ authentications {
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
-users {
+"users" {
     String id PK
     String membership_id FK "nullable"
     String name
@@ -978,8 +978,8 @@ users {
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
-authentications }o--|| users : user
-users }o--|| memberships : membership
+"authentications" }o--|| "users" : user
+"users" }o--|| "memberships" : membership
 ```
 
 ### `memberships`

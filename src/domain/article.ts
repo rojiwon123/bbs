@@ -3,7 +3,6 @@ import { isNull, map, pipe, toArray } from "@fxts/core";
 import { prisma } from "@APP/infrastructure/DB";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
-import { IBoard } from "@APP/types/IBoard";
 import { IMembership } from "@APP/types/IMembership";
 import { DateMapper } from "@APP/utils/date";
 import { Failure } from "@APP/utils/failure";
@@ -117,15 +116,37 @@ export namespace Article {
                 Result.Ok.map,
             );
 
+    export const getBulkList =
+        (tx: Prisma.TransactionClient = prisma) =>
+        (input: {
+            where?: Prisma.articlesWhereInput;
+            skip: number;
+            take: number;
+            orderBy: Prisma.articlesOrderByWithRelationInput;
+        }) =>
+            pipe(
+                input,
+                async ({ where = {}, skip, take, orderBy }) =>
+                    tx.articles.findMany({
+                        where: { ...where, deleted_at: null },
+                        skip,
+                        take,
+                        orderBy,
+                        select: ArticleJson.selectBulk(),
+                    }),
+                map(ArticleJson.mapBulk),
+                toArray,
+                Result.Ok.map,
+            );
+
     export const remove =
         (tx: Prisma.TransactionClient = prisma) =>
         async (
-            identity: IArticle.Identity & IBoard.Identity,
+            identity: IArticle.Identity,
         ): Promise<Result.Ok<IArticle.Identity>> => {
             await tx.articles.updateMany({
                 where: {
                     id: identity.article_id,
-                    board_id: identity.board_id,
                     deleted_at: null,
                 },
                 data: { deleted_at: DateMapper.toISO() },
@@ -215,6 +236,18 @@ export namespace ArticleJson {
             author: { select: selectAuthor() },
         }) satisfies Prisma.articlesSelect;
 
+    export const selectBulk = () =>
+        ({
+            id: true,
+            created_at: true,
+            deleted_at: true,
+            snapshots: selectSnapshots({
+                title: true,
+                created_at: true,
+            }),
+            board: { select: selectBoard() },
+        }) satisfies Prisma.articlesSelect;
+
     export const mapAuthor = (
         user: NonNullable<
             Awaited<
@@ -243,7 +276,7 @@ export namespace ArticleJson {
                 membership,
             };
         }
-        return { status: "deleted" };
+        return { status: "deleted", id: user.id };
     };
 
     export const mapSummary = (
@@ -262,6 +295,31 @@ export namespace ArticleJson {
             id: article.id,
             title: isNull(snapshot) ? null : snapshot.title,
             author: ArticleJson.mapAuthor(article.author),
+            created_at: DateMapper.toISO(article.created_at),
+            updated_at: isNull(snapshot)
+                ? null
+                : article.created_at < snapshot.created_at
+                ? DateMapper.toISO(snapshot.created_at)
+                : null,
+        };
+    };
+
+    export const mapBulk = (
+        article: NonNullable<
+            Awaited<
+                ReturnType<
+                    typeof prisma.articles.findFirst<{
+                        select: ReturnType<typeof selectBulk>;
+                    }>
+                >
+            >
+        >,
+    ): IArticle.IBulk => {
+        const snapshot = article.snapshots.at(0) ?? null;
+        return {
+            id: article.id,
+            title: isNull(snapshot) ? null : snapshot.title,
+            board: article.board,
             created_at: DateMapper.toISO(article.created_at),
             updated_at: isNull(snapshot)
                 ? null

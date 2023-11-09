@@ -32,6 +32,7 @@ export namespace IArticle {
 
     export interface IDeletedAuthor {
         status: "deleted";
+        id: string & typia.tags.Format<"uuid">;
     }
 
     export interface IActiveAuthor extends IUser.ISummary {
@@ -81,4 +82,17 @@ export namespace IArticle {
         extends Omit<ICreate, "author_id" | "board_id" | "is_notice"> {}
 
     export interface ISetNoticeBody extends Omit<ISetNoticeInput, "board_id"> {}
+
+    export interface IBulk
+        extends Pick<
+            IArticle,
+            "id" | "title" | "board" | "created_at" | "updated_at"
+        > {}
+
+    export namespace IBulk {
+        export interface ISearch extends IArticle.ISearch {
+            board_id?: string & typia.tags.Format<"uuid">;
+        }
+        export interface IPaginated extends IPage.IResponse<IBulk> {}
+    }
 }
