@@ -16,7 +16,7 @@ const test = api.functional.mine.articles.update;
 
 const createBody = typia.createRandom<IArticle.IUpdateBody>();
 
-export const test_update_article_successfully = async (
+export const test_update_mine_article_successfully = async (
     connection: IConnection,
 ) => {
     const username = "user1";
@@ -62,7 +62,7 @@ export const test_update_article_successfully = async (
     await Seed.deleteArticle(article.id);
 };
 
-export const test_update_article_when_token_is_missing = async (
+export const test_update_mine_article_when_token_is_missing = async (
     connection: IConnection,
 ) => {
     await APIValidator.assert(
@@ -74,7 +74,7 @@ export const test_update_article_when_token_is_missing = async (
     });
 };
 
-export const test_update_article_when_token_is_expired = async (
+export const test_update_mine_article_when_token_is_expired = async (
     connection: IConnection,
 ) => {
     const token = await get_expired_token(connection, "user2");
@@ -91,7 +91,7 @@ export const test_update_article_when_token_is_expired = async (
     });
 };
 
-export const test_update_article_when_token_is_invalid = async (
+export const test_update_mine_article_when_token_is_invalid = async (
     connection: IConnection,
 ) => {
     await APIValidator.assert(
@@ -107,10 +107,10 @@ export const test_update_article_when_token_is_invalid = async (
     });
 };
 
-export const test_update_article_when_user_is_invalid = async (
+export const test_update_mine_article_when_user_is_invalid = async (
     connection: IConnection,
 ) => {
-    const username = "update_article_when_user_is_invalid";
+    const username = "update_mine_article_when_user_is_invalid";
     await Seed.createUser(username, null);
     const token = await get_token(connection, username);
     await Seed.deleteUser(username);
@@ -127,10 +127,10 @@ export const test_update_article_when_user_is_invalid = async (
     });
 };
 
-export const test_update_article_when_user_is_not_author = async (
+export const test_update_mine_article_when_user_is_not_author = async (
     connection: IConnection,
 ) => {
-    const username = "update_article_when_user_is_not_author";
+    const username = "update_mine_article_when_user_is_not_author";
     await Seed.createUser(username, "골드");
     const token = await get_token(connection, username);
     const board_id = await Seed.getBoardId("board3");
@@ -147,7 +147,7 @@ export const test_update_article_when_user_is_not_author = async (
     await Seed.deleteUser(username);
 };
 
-export const test_update_article_when_article_does_not_exist = async (
+export const test_update_mine_article_when_article_does_not_exist = async (
     connection: IConnection,
 ) => {
     const username = "user1";
@@ -162,7 +162,7 @@ export const test_update_article_when_article_does_not_exist = async (
     });
 };
 
-export const test_update_article_when_article_is_deleted = async (
+export const test_update_mine_article_when_article_is_deleted = async (
     connection: IConnection,
 ) => {
     const username = "user1";
