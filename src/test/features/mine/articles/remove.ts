@@ -19,16 +19,14 @@ export const test_remove_article_successfully = async (
     const username = "user1";
     const boardname = "board1";
     const token = await get_token(connection, username);
-    const board_id = await Seed.getBoardId(boardname);
     const article = await Seed.createArticle(
         { author: username, board: boardname, is_notice: false },
         {},
     );
 
     await APIValidator.assert(
-        api.functional.boards.articles.get(
+        api.functional.mine.articles.get(
             Connection.authorize(token)(connection),
-            board_id,
             article.id,
         ),
         HttpStatus.OK,
@@ -43,9 +41,8 @@ export const test_remove_article_successfully = async (
     });
 
     await APIValidator.assert(
-        api.functional.boards.articles.get(
+        api.functional.mine.articles.get(
             Connection.authorize(token)(connection),
-            board_id,
             article.id,
         ),
         HttpStatus.NOT_FOUND,

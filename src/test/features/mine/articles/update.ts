@@ -22,7 +22,6 @@ export const test_update_article_successfully = async (
     const username = "user1";
     const boardname = "board1";
     const token = await get_token(connection, username);
-    const board_id = await Seed.getBoardId(boardname);
     const body = createBody();
     const article = await Seed.createArticle(
         { author: username, board: boardname, is_notice: false },
@@ -30,9 +29,8 @@ export const test_update_article_successfully = async (
     );
 
     const before = await APIValidator.assert(
-        api.functional.boards.articles.get(
+        api.functional.mine.articles.get(
             Connection.authorize(token)(connection),
-            board_id,
             article.id,
         ),
         HttpStatus.OK,
@@ -47,9 +45,8 @@ export const test_update_article_successfully = async (
     });
 
     const after = await APIValidator.assert(
-        api.functional.boards.articles.get(
+        api.functional.mine.articles.get(
             Connection.authorize(token)(connection),
-            board_id,
             article.id,
         ),
         HttpStatus.OK,

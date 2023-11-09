@@ -73,6 +73,7 @@ export class MineArticlesController {
     @core.TypedException<ErrorCode.Permission.Insufficient>(
         nest.HttpStatus.FORBIDDEN,
     )
+    @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Get(":article_id")
     async get(
         @core.TypedParam("article_id")
