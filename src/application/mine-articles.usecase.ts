@@ -34,7 +34,6 @@ export namespace MineArticlesUsecase {
             const user = Result.Ok.flatten(security);
             const result = await Article.get(tx)({
                 id: identity.article_id,
-                author_id: user.id,
             });
             if (
                 Result.Ok.is(result) &&

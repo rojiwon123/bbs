@@ -98,7 +98,7 @@ export const test_get_mine_article_list_with_query = async (
     TestValidator.equals("query test")(ids)(actual);
 };
 
-export const test_remove_article_when_token_is_missing = async (
+export const test_get_mine_article_list_when_token_is_missing = async (
     connection: IConnection,
 ) => {
     await APIValidator.assert(
