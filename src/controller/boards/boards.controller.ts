@@ -12,7 +12,7 @@ import { Result } from "@APP/utils/result";
 export class BoardsController {
     /**
      * @summary 게시판 목록 조회
-     * @tag boards
+     * @tag public
      * @return 게시판 목록
      */
     @core.TypedRoute.Get()
@@ -23,7 +23,7 @@ export class BoardsController {
 
     /**
      * @summary 게시판 조회
-     * @tag boards
+     * @tag public
      * @return 게시판 상세 정보
      */
     @core.TypedException<ErrorCode.Board.NotFound>(nest.HttpStatus.NOT_FOUND)
@@ -37,21 +37,4 @@ export class BoardsController {
         const error = Result.Error.flatten(result);
         throw Failure.Http.fromInternal(error, nest.HttpStatus.NOT_FOUND);
     }
-
-    /** 서비스 관리자 API
-    @core.TypedRoute.Post()
-    create() {}
-
-    @core.TypedRoute.Put(":board_id")
-    update(
-        @core.TypedParam("board_id")
-        board_id: string & typia.tags.Format<"uuid">,
-    ) {}
-
-    @core.TypedRoute.Delete(":board_id")
-    remove(
-        @core.TypedParam("board_id")
-        board_id: string & typia.tags.Format<"uuid">,
-    ) {}
-    */
 }
