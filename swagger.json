@@ -9,7 +9,7 @@
   "info": {
     "title": "BBS Server",
     "description": "API DOC For Bulletin Board System API Server",
-    "version": "0.0.2",
+    "version": "0.0.4",
     "license": {
       "name": "UNLICENSED"
     }
