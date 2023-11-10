@@ -6,10 +6,10 @@ import typia from "typia";
 import { APIValidator } from "@APP/test/internal/validator";
 import { IMembership } from "@APP/types/IMembership";
 
-export const test_get_membership_list_successfully = (
+export const test_get_membership_list_successfully = async (
     connection: IConnection,
-) =>
-    APIValidator.assert(
+) => {
+    await APIValidator.assert(
         api.functional.memberships.getList(connection),
         HttpStatus.OK,
     )({
@@ -18,3 +18,4 @@ export const test_get_membership_list_successfully = (
             IMembership[] & typia.tags.MinItems<1>
         >(),
     });
+};

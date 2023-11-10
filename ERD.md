@@ -96,21 +96,21 @@ erDiagram
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
-"articles" }|--|| "users" : author
-"articles" }|--|| "boards" : board
-"article_snapshots" }|--|| "articles" : article
-"article_attachment_snapshots" }|--|| "article_snapshots" : snapshot
-"article_attachment_snapshots" }|--|| "attachments" : attachment
-"boards" }|--|| "memberships" : manager_membership
+"articles" }o--|| "users" : author
+"articles" }o--|| "boards" : board
+"article_snapshots" }o--|| "articles" : article
+"article_attachment_snapshots" }o--|| "article_snapshots" : snapshot
+"article_attachment_snapshots" }o--|| "attachments" : attachment
+"boards" }o--|| "memberships" : manager_membership
 "boards" }o--|| "memberships" : read_article_list_membership
 "boards" }o--|| "memberships" : read_article_membership
-"boards" }|--|| "memberships" : write_article_membership
+"boards" }o--|| "memberships" : write_article_membership
 "boards" }o--|| "memberships" : read_comment_list_membership
-"boards" }|--|| "memberships" : write_comment_membership
-"comments" }|--|| "users" : author
-"comments" }|--|| "articles" : article
+"boards" }o--|| "memberships" : write_comment_membership
+"comments" }o--|| "users" : author
+"comments" }o--|| "articles" : article
 "comments" }o--o| "comments" : parent
-"comment_snapshots" }|--|| "comments" : comment
+"comment_snapshots" }o--|| "comments" : comment
 "authentications" }o--|| "users" : user
 "users" }o--|| "memberships" : membership
 ```
@@ -415,14 +415,14 @@ erDiagram
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
-"articles" }|--|| "users" : author
-"articles" }|--|| "boards" : board
-"boards" }|--|| "memberships" : manager_membership
+"articles" }o--|| "users" : author
+"articles" }o--|| "boards" : board
+"boards" }o--|| "memberships" : manager_membership
 "boards" }o--|| "memberships" : read_article_list_membership
 "boards" }o--|| "memberships" : read_article_membership
-"boards" }|--|| "memberships" : write_article_membership
+"boards" }o--|| "memberships" : write_article_membership
 "boards" }o--|| "memberships" : read_comment_list_membership
-"boards" }|--|| "memberships" : write_comment_membership
+"boards" }o--|| "memberships" : write_comment_membership
 "users" }o--|| "memberships" : membership
 ```
 
@@ -575,11 +575,11 @@ erDiagram
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
-"articles" }|--|| "users" : author
-"comments" }|--|| "users" : author
-"comments" }|--|| "articles" : article
+"articles" }o--|| "users" : author
+"comments" }o--|| "users" : author
+"comments" }o--|| "articles" : article
 "comments" }o--o| "comments" : parent
-"comment_snapshots" }|--|| "comments" : comment
+"comment_snapshots" }o--|| "comments" : comment
 ```
 
 ### `articles`
@@ -748,13 +748,13 @@ erDiagram
     DateTime updated_at "nullable"
     DateTime deleted_at "nullable"
 }
-"articles" }|--|| "users" : author
-"articles" }|--|| "boards" : board
-"article_snapshots" }|--|| "articles" : article
-"article_attachment_snapshots" }|--|| "article_snapshots" : snapshot
-"article_attachment_snapshots" }|--|| "attachments" : attachment
-"comments" }|--|| "users" : author
-"comments" }|--|| "articles" : article
+"articles" }o--|| "users" : author
+"articles" }o--|| "boards" : board
+"article_snapshots" }o--|| "articles" : article
+"article_attachment_snapshots" }o--|| "article_snapshots" : snapshot
+"article_attachment_snapshots" }o--|| "attachments" : attachment
+"comments" }o--|| "users" : author
+"comments" }o--|| "articles" : article
 "comments" }o--o| "comments" : parent
 ```
 

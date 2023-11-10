@@ -131,6 +131,7 @@ export const test_get_mine_comment_when_comment_does_not_exist = async (
         assertBody: typia.createAssertEquals<ErrorCode.Comment.NotFound>(),
     });
 };
+
 export const test_get_mine_comment_when_comment_is_deleted = async (
     connection: IConnection,
 ) => {

@@ -54,6 +54,7 @@ export const test_get_article_when_token_is_expired = async (
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Expired>(),
     });
 };
+
 export const test_get_article_when_token_is_invalid = async (
     connection: IConnection,
 ) => {
@@ -71,6 +72,7 @@ export const test_get_article_when_token_is_invalid = async (
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Invalid>(),
     });
 };
+
 export const test_get_article_when_user_is_invalid = async (
     connection: IConnection,
 ) => {
@@ -88,6 +90,7 @@ export const test_get_article_when_user_is_invalid = async (
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Invalid>(),
     });
 };
+
 export const test_get_article_when_board_does_not_exist = async (
     connection: IConnection,
 ) => {
@@ -104,6 +107,7 @@ export const test_get_article_when_board_does_not_exist = async (
         assertBody: typia.createAssertEquals<ErrorCode.Board.NotFound>(),
     });
 };
+
 export const test_get_article_when_article_does_not_exist = async (
     connection: IConnection,
 ) => {
@@ -117,6 +121,7 @@ export const test_get_article_when_article_does_not_exist = async (
         assertBody: typia.createAssertEquals<ErrorCode.Article.NotFound>(),
     });
 };
+
 export const test_get_article_when_article_is_deleted = async (
     connection: IConnection,
 ) => {
@@ -131,6 +136,7 @@ export const test_get_article_when_article_is_deleted = async (
         assertBody: typia.createAssertEquals<ErrorCode.Article.NotFound>(),
     });
 };
+
 export const test_get_article_when_membership_is_insufficient = async (
     connection: IConnection,
 ) => {
