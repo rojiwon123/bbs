@@ -49,4 +49,17 @@ export namespace IComment {
     export interface IUpdateBody extends Omit<IUpdate, "id"> {}
     export interface ICreateBody
         extends Omit<ICreate, "article_id" | "author_id"> {}
+
+    export interface IBulk
+        extends Pick<
+            IComment,
+            "id" | "body" | "article" | "parent" | "created_at" | "updated_at"
+        > {}
+
+    export namespace IBulk {
+        export interface ISearch extends IComment.ISearch {
+            article_id?: string & typia.tags.Format<"uuid">;
+        }
+        export interface IPaginated extends IPage.IResponse<IBulk> {}
+    }
 }

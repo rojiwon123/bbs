@@ -12,9 +12,9 @@ import { Result } from "@APP/utils/result";
 @nest.Controller("mine/articles")
 export class MineArticlesController {
     /**
-     * 내가 쓴 게시글 목록 보기
+     * 작성자 권한으로 게시글 목록을 불러옵니다.
      *
-     * @summary 내가 쓴 게시글 목록 보기
+     * @summary 내가 쓴 게시글 모아 보기
      * @tag mine
      * @security bearer
      * @param query 필터링 및 정렬 조건
@@ -55,15 +55,13 @@ export class MineArticlesController {
     }
 
     /**
-     * 게시판 권한과 상관없이 내가 작성한 게시글의 상세 정보를 볼 수 있습니다.
+     * 작성자 권한으로 게시글 상세 정보를 볼 수 있습니다.
      *
-     * 게시글 id와 작성자 id를 통해서 게시글을 찾습니다.
-     *
-     * @summary 내가 쓴 게시글 상세보기
+     * @summary 게시글 상세 보기
      * @tag mine
      * @security bearer
      * @param article_id 게시글 id
-     * @return 내가 쓴 게시글 목록
+     * @return 게시글 상세 정보
      */
     @core.TypedException<
         | ErrorCode.Permission.Required
@@ -108,9 +106,9 @@ export class MineArticlesController {
     }
 
     /**
-     * 내가 쓴 게시글을 수정합니다.
+     * 작성자 권한으로 게시글을 수정합니다.
      *
-     * @summary 내가 쓴 게시글 수정
+     * @summary 게시글 수정
      * @tag mine
      * @security bearer
      * @param article_id 게시글 id
@@ -162,9 +160,9 @@ export class MineArticlesController {
     }
 
     /**
-     * 게시판 게시글을 삭제합니다.
+     * 작성자 권한으로 게시글을 삭제합니다.
      *
-     * @summary 내가 쓴 게시글 삭제
+     * @summary 게시글 삭제
      * @tag mine
      * @security bearer
      * @param article_id 게시글 id

@@ -1,5 +1,6 @@
+import { IConnection } from "@nestia/fetcher";
 import { HttpStatus } from "@nestjs/common";
-import api, { IConnection } from "@project/api";
+import api from "@project/api";
 import typia from "typia";
 
 import { Connection } from "@APP/test/internal/connection";
@@ -7,37 +8,40 @@ import { get_expired_token, get_token } from "@APP/test/internal/fragment";
 import { Seed } from "@APP/test/internal/seed";
 import { APIValidator } from "@APP/test/internal/validator";
 import { ErrorCode } from "@APP/types/ErrorCode";
-import { IArticle } from "@APP/types/IArticle";
+import { IComment } from "@APP/types/IComment";
 import { Random } from "@APP/utils/random";
 
-const test = api.functional.mine.articles.get;
+const test = api.functional.mine.comments.get;
 
-export const test_get_mine_article_when_board_membership_insufficient = async (
+export const test_get_mine_comment_when_board_membership_insufficient = async (
     connection: IConnection,
 ) => {
-    const username = "get_mine_article_test";
+    const username = "get_mine_comment_test";
     const user = await Seed.createUser(username, null);
-    const article = await Seed.createArticle(
+    const comment = await Seed.createComment(
         {
             author: username,
-            board: "board2",
-            is_notice: false,
+            article_id: await Seed.getArticleId(
+                await Seed.getBoardId("board2"),
+            ),
+            parent_id: null,
         },
         {},
     );
     const token = await get_token(connection, username);
     await APIValidator.assert(
-        test(Connection.authorize(token)(connection), article.id),
+        test(Connection.authorize(token)(connection), comment.id),
         HttpStatus.OK,
     )({
         success: true,
-        assertBody: typia.createAssertEquals<IArticle>(),
+        assertBody: typia.createAssertEquals<IComment>(),
     });
-    await Seed.deleteArticle(article.id);
+
+    await Seed.deleteComment(comment.id);
     await Seed.deleteUser(user.name);
 };
 
-export const test_get_mine_article_when_token_is_missing = async (
+export const test_get_mine_comment_when_token_is_missing = async (
     connection: IConnection,
 ) => {
     await APIValidator.assert(
@@ -49,7 +53,7 @@ export const test_get_mine_article_when_token_is_missing = async (
     });
 };
 
-export const test_get_mine_article_when_token_is_expired = async (
+export const test_get_mine_comment_when_token_is_expired = async (
     connection: IConnection,
 ) => {
     const token = await get_expired_token(connection, "user2");
@@ -62,7 +66,7 @@ export const test_get_mine_article_when_token_is_expired = async (
     });
 };
 
-export const test_get_mine_article_when_token_is_invalid = async (
+export const test_get_mine_comment_when_token_is_invalid = async (
     connection: IConnection,
 ) => {
     await APIValidator.assert(
@@ -77,10 +81,10 @@ export const test_get_mine_article_when_token_is_invalid = async (
     });
 };
 
-export const test_get_mine_article_when_user_is_invalid = async (
+export const test_get_mine_comment_when_user_is_invalid = async (
     connection: IConnection,
 ) => {
-    const username = "get_mine_article_test";
+    const username = "get_mine_comment_test";
     await Seed.createUser(username, null);
     const token = await get_token(connection, username);
     await Seed.deleteUser(username);
@@ -93,16 +97,17 @@ export const test_get_mine_article_when_user_is_invalid = async (
     });
 };
 
-export const test_get_mine_article_when_user_is_not_author = async (
+export const test_get_mine_comment_when_user_is_not_author = async (
     connection: IConnection,
 ) => {
-    const username = "get_mine_article_when_user_is_not_author";
+    const username = "get_mine_comment_when_user_is_not_author";
     await Seed.createUser(username, "골드");
     const token = await get_token(connection, username);
     const board_id = await Seed.getBoardId("board3");
     const article_id = await Seed.getArticleId(board_id);
+    const comment_id = await Seed.getCommentId(article_id);
     await APIValidator.assert(
-        test(Connection.authorize(token)(connection), article_id),
+        test(Connection.authorize(token)(connection), comment_id),
         HttpStatus.FORBIDDEN,
     )({
         success: false,
@@ -113,7 +118,7 @@ export const test_get_mine_article_when_user_is_not_author = async (
     await Seed.deleteUser(username);
 };
 
-export const test_get_mine_article_when_article_does_not_exist = async (
+export const test_get_mine_comment_when_comment_does_not_exist = async (
     connection: IConnection,
 ) => {
     const username = "user1";
@@ -123,33 +128,35 @@ export const test_get_mine_article_when_article_does_not_exist = async (
         HttpStatus.NOT_FOUND,
     )({
         success: false,
-        assertBody: typia.createAssertEquals<ErrorCode.Article.NotFound>(),
+        assertBody: typia.createAssertEquals<ErrorCode.Comment.NotFound>(),
     });
 };
-export const test_get_mine_article_when_article_is_deleted = async (
+export const test_get_mine_comment_when_comment_is_deleted = async (
     connection: IConnection,
 ) => {
     const username = "user1";
     const boardname = "board1";
     const token = await get_token(connection, username);
-    const article = await Seed.createArticle(
+    const comment = await Seed.createComment(
         {
             author: username,
-            board: boardname,
-            is_notice: false,
+            article_id: await Seed.getArticleId(
+                await Seed.getBoardId(boardname),
+            ),
+            parent_id: null,
         },
         { is_deleted: true },
     );
 
     await APIValidator.assert(
-        test(Connection.authorize(token)(connection), article.id),
+        test(Connection.authorize(token)(connection), comment.id),
         HttpStatus.NOT_FOUND,
     )({
         success: false,
-        assertBody: typia.createAssertEquals<ErrorCode.Article.NotFound>(),
+        assertBody: typia.createAssertEquals<ErrorCode.Comment.NotFound>(),
     });
 
-    await Seed.deleteArticle(article.id);
+    await Seed.deleteArticle(comment.id);
 };
 
 export const test_seed_changed = Seed.check_size_changed;

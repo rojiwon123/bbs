@@ -12,10 +12,10 @@ import { Result } from "@APP/utils/result";
 @nest.Controller("boards/:board_id/articles")
 export class BoardsArticlesController {
     /**
-     * 게시판 내 게시글 요약 목록을 요청합니다.
+     * 게시판 권한으로 게시글 목록을 불러옵니다.
      *
-     * @summary 게시판 게시글 목록 조회
-     * @tag articles
+     * @summary 게시글 목록 보기
+     * @tag boards
      * @security bearer
      * @param board_id 게시판 id
      * @param query 필터링 및 정렬 조건
@@ -63,10 +63,10 @@ export class BoardsArticlesController {
     }
 
     /**
-     * 게시판 게시글 상세 조회
+     * 게시판 권한으로 게시글 상세 정보를 볼 수 있습니다.
      *
-     * @summary 게시글 상세 조회
-     * @tag articles
+     * @summary 게시글 상세 보기
+     * @tag boards
      * @security bearer
      * @param board_id 게시판 id
      * @param article_id 게시글 id
@@ -119,10 +119,10 @@ export class BoardsArticlesController {
     }
 
     /**
-     * 게시판내 새로운 게시글을 생성합니다.
+     * 게시판 권한으로 게시글을 생성합니다.
      *
      * @summary 게시글 생성
-     * @tag articles
+     * @tag boards
      * @security bearer
      * @param board_id 게시판 id
      * @param body 게시글 생성 정보
@@ -171,62 +171,4 @@ export class BoardsArticlesController {
             }
         throw Failure.Http.fromExternal(error);
     }
-
-    /**
-     * 매니저 api는 별도로 빼자 -> 매니저 권한 API 만들 것 게시글 수정/삭제, 공지글 생성, 공지 설정 변경
-     * 
-     * 게시판 매니저 권한을 통해 게시글들의 공지 설정을 변경합니다.
-     *
-     * 전달된 식별자에 해당하는 게시글이 없어도 오류가 발생하지 않습니다.
-     *
-     * @summary 게시글 공지 설정 변경
-     * @tag articles
-     * @security bearer
-     * @param board_id 게시판 id
-     * @param body 게시글 공지 정보
-     * @return 수정된 게시글 수
-    @core.TypedException<
-        | ErrorCode.Permission.Required
-        | ErrorCode.Permission.Expired
-        | ErrorCode.Permission.Invalid
-    >(nest.HttpStatus.UNAUTHORIZED)
-    @core.TypedException<ErrorCode.Permission.Insufficient>(
-        nest.HttpStatus.FORBIDDEN,
-    )
-    @core.TypedException<ErrorCode.Board.NotFound>(nest.HttpStatus.NOT_FOUND)
-    @core.TypedRoute.Patch()
-    async setNotice(
-        @core.TypedParam("board_id")
-        board_id: string & typia.tags.Format<"uuid">,
-        @core.TypedBody() body: IArticle.ISetNoticeBody,
-        @nest.Request() req: Request,
-    ): Promise<number> {
-        const result = await BoardsArticlesUsecase.setNotice(req)({ board_id })(
-            body,
-        );
-        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
-        const error = Result.Error.flatten(result);
-        if (error instanceof Error)
-            switch (error.message) {
-                case "REQUIRED_PERMISSION":
-                case "EXPIRED_PERMISSION":
-                case "INVALID_PERMISSION":
-                    throw Failure.Http.fromInternal(
-                        error,
-                        nest.HttpStatus.UNAUTHORIZED,
-                    );
-                case "INSUFFICIENT_PERMISSION":
-                    throw Failure.Http.fromInternal(
-                        error,
-                        nest.HttpStatus.FORBIDDEN,
-                    );
-                case "NOT_FOUND_BOARD":
-                    throw Failure.Http.fromInternal(
-                        error,
-                        nest.HttpStatus.NOT_FOUND,
-                    );
-            }
-        throw Failure.Http.fromExternal(error);
-    }
-    */
 }

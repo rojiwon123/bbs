@@ -11,14 +11,16 @@ import { ErrorCode } from "@APP/types/ErrorCode";
 import { IComment } from "@APP/types/IComment";
 import { Random } from "@APP/utils/random";
 
-const test = api.functional.boards.articles.comments.remove;
+const test = api.functional.mine.comments.remove;
 
-export const test_remove_comment_successfully = async (
-    connection: IConnection,
+export const test_remove_mine_comment_successfully = async (
+    _connection: IConnection,
 ) => {
     const username = "user1";
     const boardname = "board1";
-    const token = await get_token(connection, username);
+    const connection = Connection.authorize(
+        await get_token(_connection, username),
+    )(_connection);
     const board_id = await Seed.getBoardId(boardname);
     const article_id = await Seed.getArticleId(board_id);
     const comment = await Seed.createComment(
@@ -30,22 +32,12 @@ export const test_remove_comment_successfully = async (
         {},
     );
     await APIValidator.assert(
-        api.functional.boards.articles.comments.get(
-            connection,
-            board_id,
-            article_id,
-            comment.id,
-        ),
+        api.functional.mine.comments.get(connection, comment.id),
         HttpStatus.OK,
     )({ success: true, assertBody: typia.createAssertEquals<IComment>() });
 
     await APIValidator.assert(
-        test(
-            Connection.authorize(token)(connection),
-            board_id,
-            article_id,
-            comment.id,
-        ),
+        test(connection, comment.id),
         HttpStatus.OK,
     )({
         success: true,
@@ -53,12 +45,7 @@ export const test_remove_comment_successfully = async (
     });
 
     await APIValidator.assert(
-        api.functional.boards.articles.comments.get(
-            connection,
-            board_id,
-            article_id,
-            comment.id,
-        ),
+        api.functional.mine.comments.get(connection, comment.id),
         HttpStatus.NOT_FOUND,
     )({
         success: false,
@@ -68,12 +55,11 @@ export const test_remove_comment_successfully = async (
     await Seed.deleteComment(comment.id);
 };
 
-export const test_remove_comment_when_token_is_missing = async (
+export const test_remove_mine_comment_when_token_is_missing = async (
     connection: IConnection,
 ) => {
-    const board_id = await Seed.getBoardId("board3");
     await APIValidator.assert(
-        test(connection, board_id, Random.uuid(), Random.uuid()),
+        test(connection, Random.uuid()),
         HttpStatus.UNAUTHORIZED,
     )({
         success: false,
@@ -81,18 +67,12 @@ export const test_remove_comment_when_token_is_missing = async (
     });
 };
 
-export const test_remove_comment_when_token_is_expired = async (
+export const test_remove_mine_comment_when_token_is_expired = async (
     connection: IConnection,
 ) => {
     const token = await get_expired_token(connection, "user2");
-    const board_id = await Seed.getBoardId("board3");
     await APIValidator.assert(
-        test(
-            Connection.authorize(token)(connection),
-            board_id,
-            Random.uuid(),
-            Random.uuid(),
-        ),
+        test(Connection.authorize(token)(connection), Random.uuid()),
         HttpStatus.UNAUTHORIZED,
     )({
         success: false,
@@ -100,15 +80,12 @@ export const test_remove_comment_when_token_is_expired = async (
     });
 };
 
-export const test_remove_comment_when_token_is_invalid = async (
+export const test_remove_mine_comment_when_token_is_invalid = async (
     connection: IConnection,
 ) => {
-    const board_id = await Seed.getBoardId("board3");
     await APIValidator.assert(
         test(
             Connection.authorize("invalid)adtoken")(connection),
-            board_id,
-            Random.uuid(),
             Random.uuid(),
         ),
         HttpStatus.UNAUTHORIZED,
@@ -118,22 +95,15 @@ export const test_remove_comment_when_token_is_invalid = async (
     });
 };
 
-export const test_remove_comment_when_user_is_invalid = async (
+export const test_remove_mine_comment_when_user_is_invalid = async (
     connection: IConnection,
 ) => {
-    const username = "remove_comment_when_user_is_invalid";
+    const username = "remove_mine_comment_when_user_is_invalid";
     await Seed.createUser(username, null);
     const token = await get_token(connection, username);
     await Seed.deleteUser(username);
-    const board_id = await Seed.getBoardId("board3");
-
     await APIValidator.assert(
-        test(
-            Connection.authorize(token)(connection),
-            board_id,
-            Random.uuid(),
-            Random.uuid(),
-        ),
+        test(Connection.authorize(token)(connection), Random.uuid()),
         HttpStatus.UNAUTHORIZED,
     )({
         success: false,
@@ -141,22 +111,17 @@ export const test_remove_comment_when_user_is_invalid = async (
     });
 };
 
-export const test_remove_comment_when_user_is_not_author = async (
+export const test_remove_mine_comment_when_user_is_not_author = async (
     connection: IConnection,
 ) => {
-    const username = "remove_comment_when_user_is_not_author";
+    const username = "remove_mine_comment_when_user_is_not_author";
     await Seed.createUser(username, "골드");
     const token = await get_token(connection, username);
     const board_id = await Seed.getBoardId("board3");
     const article_id = await Seed.getArticleId(board_id);
     const comment_id = await Seed.getCommentId(article_id);
     await APIValidator.assert(
-        test(
-            Connection.authorize(token)(connection),
-            board_id,
-            article_id,
-            comment_id,
-        ),
+        test(Connection.authorize(token)(connection), comment_id),
         HttpStatus.FORBIDDEN,
     )({
         success: false,
@@ -167,19 +132,12 @@ export const test_remove_comment_when_user_is_not_author = async (
     await Seed.deleteUser(username);
 };
 
-export const test_remove_comment_when_comment_does_not_exist = async (
+export const test_remove_mine_comment_when_comment_does_not_exist = async (
     connection: IConnection,
 ) => {
     const token = await get_token(connection, "user2");
-    const board_id = await Seed.getBoardId("board2");
-    const article_id = await Seed.getArticleId(board_id);
     await APIValidator.assert(
-        test(
-            Connection.authorize(token)(connection),
-            board_id,
-            article_id,
-            Random.uuid(),
-        ),
+        test(Connection.authorize(token)(connection), Random.uuid()),
         HttpStatus.NOT_FOUND,
     )({
         success: false,
@@ -187,7 +145,7 @@ export const test_remove_comment_when_comment_does_not_exist = async (
     });
 };
 
-export const test_remove_comment_when_comment_is_deleted = async (
+export const test_remove_mine_comment_when_comment_is_deleted = async (
     connection: IConnection,
 ) => {
     const token = await get_token(connection, "user2");
@@ -195,12 +153,7 @@ export const test_remove_comment_when_comment_is_deleted = async (
     const article_id = await Seed.getArticleId(board_id);
     const comment_id = await Seed.getDeletedCommentId(article_id);
     await APIValidator.assert(
-        test(
-            Connection.authorize(token)(connection),
-            board_id,
-            article_id,
-            comment_id,
-        ),
+        test(Connection.authorize(token)(connection), comment_id),
         HttpStatus.NOT_FOUND,
     )({
         success: false,
