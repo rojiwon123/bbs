@@ -1,8 +1,10 @@
-import { filter, map, pipe, toArray } from "@fxts/core";
+import { filter, isNull, map, pipe, toArray } from "@fxts/core";
 
 import { prisma } from "@APP/infrastructure/DB";
 import { ErrorCode } from "@APP/types/ErrorCode";
+import { IArticle } from "@APP/types/IArticle";
 import { IBoard } from "@APP/types/IBoard";
+import { IComment } from "@APP/types/IComment";
 import { IUser } from "@APP/types/IUser";
 import { Failure } from "@APP/utils/failure";
 import { Entity } from "@APP/utils/fx";
@@ -18,6 +20,8 @@ export namespace Board {
                 | "read_article_list_membership"
                 | "read_article_membership"
                 | "write_article_membership"
+                | "read_comment_list_membership"
+                | "write_comment_membership"
                 | "manager_membership",
         ) =>
         (tx: Prisma.TransactionClient = prisma) =>
@@ -41,8 +45,12 @@ export namespace Board {
                         action === "read_article_list_membership",
                     read_article_membership:
                         action === "read_article_membership",
+                    read_comment_list_membership:
+                        action === "read_comment_list_membership",
                     write_article_membership:
                         action === "write_article_membership",
+                    write_comment_membership:
+                        action === "write_comment_membership",
                     manager_membership: action === "manager_membership",
                 },
             });
@@ -67,9 +75,102 @@ export namespace Board {
 
     export const checkReadArticlePermission = check("read_article_membership");
 
+    export const checkReadCommentListPermission =
+        (tx: Prisma.TransactionClient = prisma) =>
+        async (
+            actor: IUser | null,
+            target: IBoard.Identity & IArticle.Identity,
+        ): Promise<
+            Result<
+                null,
+                Failure.Internal<
+                    | ErrorCode.Permission.Insufficient
+                    | ErrorCode.Board.NotFound
+                    | ErrorCode.Article.NotFound
+                >
+            >
+        > => {
+            const permission = await check("read_comment_list_membership")(tx)(
+                actor,
+                target,
+            );
+            if (Result.Error.is(permission)) return permission;
+            const article = await tx.articles.findFirst({
+                where: {
+                    id: target.article_id,
+                    board_id: target.board_id,
+                },
+                select: {
+                    deleted_at: true,
+                },
+            });
+            if (!Entity.exist(article))
+                return Result.Error.map(
+                    new Failure.Internal<ErrorCode.Article.NotFound>(
+                        "NOT_FOUND_ARTICLE",
+                    ),
+                );
+            return Result.Ok.map(null);
+        };
+
     export const checkCreateArticlePermission = check(
         "write_article_membership",
     );
+
+    export const checkCreateCommentPermission =
+        (tx: Prisma.TransactionClient = prisma) =>
+        async (
+            actor: IUser | null,
+            target: IBoard.Identity & IArticle.Identity,
+            parent: IComment.Identity | null = null,
+        ): Promise<
+            Result<
+                null,
+                Failure.Internal<
+                    | ErrorCode.Permission.Insufficient
+                    | ErrorCode.Board.NotFound
+                    | ErrorCode.Article.NotFound
+                    | ErrorCode.Comment.NotFound
+                >
+            >
+        > => {
+            const permission = await check("write_comment_membership")(tx)(
+                actor,
+                target,
+            );
+            if (Result.Error.is(permission)) return permission;
+            const article = await tx.articles.findFirst({
+                where: {
+                    id: target.article_id,
+                    board_id: target.board_id,
+                },
+                select: {
+                    deleted_at: true,
+                },
+            });
+            if (!Entity.exist(article))
+                return Result.Error.map(
+                    new Failure.Internal<ErrorCode.Article.NotFound>(
+                        "NOT_FOUND_ARTICLE",
+                    ),
+                );
+            if (!isNull(parent)) {
+                const comment = await tx.comments.findFirst({
+                    where: {
+                        id: parent.comment_id,
+                        article_id: target.article_id,
+                    },
+                    select: { deleted_at: true },
+                });
+                if (!Entity.exist(comment))
+                    return Result.Error.map(
+                        new Failure.Internal<ErrorCode.Comment.NotFound>(
+                            "NOT_FOUND_COMMENT",
+                        ),
+                    );
+            }
+            return Result.Ok.map(null);
+        };
 
     export const checkManagerPermission = check("manager_membership");
 

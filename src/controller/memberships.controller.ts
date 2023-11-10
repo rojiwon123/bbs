@@ -9,7 +9,7 @@ import { Result } from "@APP/utils/result";
 export class MembershipsController {
     /**
      * @summary 멤버십 목록 불러오기
-     * @tag memberships
+     * @tag public
      * @return 활성화된 멤버십 목록
      */
     @core.TypedRoute.Get()

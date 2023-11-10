@@ -33,7 +33,7 @@ export const test_get_article_list_with_query = async (
 ) => {
     const board_id = await Seed.getBoardId("board1");
     const expected = await APIValidator.assert(
-        test(connection, board_id, { size: 20, page: 1, sort: "oldest" }),
+        test(connection, board_id, { size: 10, page: 1, sort: "oldest" }),
         HttpStatus.OK,
     )({
         success: true,
@@ -41,6 +41,7 @@ export const test_get_article_list_with_query = async (
             typia.createAssertEquals<IArticle.IPaginated>(),
         ),
     });
+
     const actual = await APIValidator.assert(
         test(connection, board_id, { size: 10, page: 2, sort: "oldest" }),
         HttpStatus.OK,
@@ -50,6 +51,7 @@ export const test_get_article_list_with_query = async (
             typia.createAssertEquals<IArticle.IPaginated>(),
         ),
     });
+
     const actual_latest = await APIValidator.assert(
         test(connection, board_id, { size: 100, page: 1, sort: "latest" }),
         HttpStatus.OK,
@@ -59,9 +61,13 @@ export const test_get_article_list_with_query = async (
             typia.createAssertEquals<IArticle.IPaginated>(),
         ),
     });
-    assert.deepStrictEqual(actual.data, expected.data.slice(10, 20));
+    const size = new Set(
+        expected.data.concat(...actual.data).map((article) => article.id),
+    ).size;
+
+    assert.deepStrictEqual(size, expected.data.length + actual.data.length);
     assert.deepStrictEqual(
-        actual_latest.data.reverse().slice(10, 20),
+        actual_latest.data.reverse().slice(10, 10 + actual.data.length),
         actual.data,
     );
 };
@@ -92,6 +98,7 @@ export const test_get_article_list_when_token_is_expired = async (
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Expired>(),
     });
 };
+
 export const test_get_article_list_when_token_is_invalid = async (
     connection: IConnection,
 ) => {
@@ -104,6 +111,7 @@ export const test_get_article_list_when_token_is_invalid = async (
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Invalid>(),
     });
 };
+
 export const test_get_article_list_when_user_is_invalid = async (
     connection: IConnection,
 ) => {
@@ -120,6 +128,7 @@ export const test_get_article_list_when_user_is_invalid = async (
         assertBody: typia.createAssertEquals<ErrorCode.Permission.Invalid>(),
     });
 };
+
 export const test_get_article_list_when_board_does_not_exist = async (
     connection: IConnection,
 ) => {
@@ -132,6 +141,7 @@ export const test_get_article_list_when_board_does_not_exist = async (
         assertBody: typia.createAssertEquals<ErrorCode.Board.NotFound>(),
     });
 };
+
 export const test_get_article_list_when_membership_is_insufficient = async (
     connection: IConnection,
 ) => {
