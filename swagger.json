@@ -15,723 +15,6 @@
     }
   },
   "paths": {
-    "/articles": {
-      "get": {
-        "tags": [
-          "articles"
-        ],
-        "parameters": [
-          {
-            "name": "posted_at",
-            "in": "query",
-            "schema": {
-              "x-typia-jsDocTags": [
-                {
-                  "name": "default",
-                  "text": [
-                    {
-                      "text": "desc",
-                      "kind": "text"
-                    }
-                  ]
-                }
-              ],
-              "x-typia-required": true,
-              "x-typia-optional": true,
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
-            },
-            "required": false
-          },
-          {
-            "name": "skip",
-            "in": "query",
-            "schema": {
-              "x-typia-jsDocTags": [
-                {
-                  "name": "default",
-                  "text": [
-                    {
-                      "text": "0",
-                      "kind": "text"
-                    }
-                  ]
-                }
-              ],
-              "x-typia-required": true,
-              "x-typia-optional": true,
-              "type": "integer",
-              "x-typia-typeTags": [
-                {
-                  "target": "number",
-                  "name": "Type<\"uint64\">",
-                  "kind": "type",
-                  "value": "uint64",
-                  "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
-                  "exclusive": true
-                }
-              ],
-              "default": 0
-            },
-            "required": false
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "x-typia-jsDocTags": [
-                {
-                  "name": "default",
-                  "text": [
-                    {
-                      "text": "10",
-                      "kind": "text"
-                    }
-                  ]
-                }
-              ],
-              "x-typia-required": true,
-              "x-typia-optional": true,
-              "type": "integer",
-              "minimum": 10,
-              "x-typia-typeTags": [
-                {
-                  "target": "number",
-                  "name": "Type<\"uint64\">",
-                  "kind": "type",
-                  "value": "uint64",
-                  "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
-                  "exclusive": true
-                },
-                {
-                  "target": "number",
-                  "name": "Minimum<10>",
-                  "kind": "minimum",
-                  "value": 10,
-                  "validate": "10 <= $input",
-                  "exclusive": [
-                    "minimum",
-                    "exclusiveMinimum"
-                  ]
-                }
-              ],
-              "default": 10
-            },
-            "required": false
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "paginated article list",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IArticle.IPaginatedResponse"
-                }
-              }
-            },
-            "x-nestia-encrypted": false
-          }
-        },
-        "summary": "get article list",
-        "description": "get article list by filtering and sorting options.",
-        "x-nestia-namespace": "articles.getList",
-        "x-nestia-jsDocTags": [
-          {
-            "name": "summary",
-            "text": [
-              {
-                "text": "get article list",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "tag",
-            "text": [
-              {
-                "text": "articles",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "param",
-            "text": [
-              {
-                "text": "query",
-                "kind": "parameterName"
-              },
-              {
-                "text": " ",
-                "kind": "space"
-              },
-              {
-                "text": "filtering and sorting options",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "return",
-            "text": [
-              {
-                "text": "paginated article list",
-                "kind": "text"
-              }
-            ]
-          }
-        ],
-        "x-nestia-method": "GET"
-      },
-      "post": {
-        "tags": [
-          "articles"
-        ],
-        "parameters": [],
-        "requestBody": {
-          "description": "article content",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IArticle.ICreate"
-              }
-            }
-          },
-          "required": true,
-          "x-nestia-encrypted": false
-        },
-        "responses": {
-          "201": {
-            "description": "created article",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IArticle.Identity"
-                }
-              }
-            },
-            "x-nestia-encrypted": false
-          },
-          "401": {
-            "description": "PERMISSION DENIED",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "REQUIRED_PERMISSION",
-                    "EXPIRED_PERMISSION",
-                    "INVALID_PERMISSION"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "summary": "create a new article",
-        "description": "create a new article, the article have one snapshot.",
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "x-nestia-namespace": "articles.create",
-        "x-nestia-jsDocTags": [
-          {
-            "name": "summary",
-            "text": [
-              {
-                "text": "create a new article",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "tag",
-            "text": [
-              {
-                "text": "articles",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "security",
-            "text": [
-              {
-                "text": "bearer",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "param",
-            "text": [
-              {
-                "text": "body",
-                "kind": "parameterName"
-              },
-              {
-                "text": " ",
-                "kind": "space"
-              },
-              {
-                "text": "article content",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "return",
-            "text": [
-              {
-                "text": "created article",
-                "kind": "text"
-              }
-            ]
-          }
-        ],
-        "x-nestia-method": "POST"
-      }
-    },
-    "/articles/{article_id}": {
-      "get": {
-        "tags": [
-          "articles"
-        ],
-        "parameters": [
-          {
-            "name": "article_id",
-            "in": "path",
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "x-typia-typeTags": [
-                {
-                  "target": "string",
-                  "name": "Format<\"uuid\">",
-                  "kind": "format",
-                  "value": "uuid",
-                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
-                  "exclusive": [
-                    "format",
-                    "pattern"
-                  ]
-                }
-              ]
-            },
-            "description": "identity of article",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "found article",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IArticle"
-                }
-              }
-            },
-            "x-nestia-encrypted": false
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "NOT_FOUND_ARTICLE"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "summary": "get a article",
-        "description": "get a specific article by article id",
-        "x-nestia-namespace": "articles.get",
-        "x-nestia-jsDocTags": [
-          {
-            "name": "summary",
-            "text": [
-              {
-                "text": "get a article",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "tag",
-            "text": [
-              {
-                "text": "articles",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "param",
-            "text": [
-              {
-                "text": "article_id",
-                "kind": "parameterName"
-              },
-              {
-                "text": " ",
-                "kind": "space"
-              },
-              {
-                "text": "identity of article",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "return",
-            "text": [
-              {
-                "text": "found article",
-                "kind": "text"
-              }
-            ]
-          }
-        ],
-        "x-nestia-method": "GET"
-      },
-      "put": {
-        "tags": [
-          "articles"
-        ],
-        "parameters": [
-          {
-            "name": "article_id",
-            "in": "path",
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "x-typia-typeTags": [
-                {
-                  "target": "string",
-                  "name": "Format<\"uuid\">",
-                  "kind": "format",
-                  "value": "uuid",
-                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
-                  "exclusive": [
-                    "format",
-                    "pattern"
-                  ]
-                }
-              ]
-            },
-            "description": "identity of article",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "description": "update content of article",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IArticle.ICreate"
-              }
-            }
-          },
-          "required": true,
-          "x-nestia-encrypted": false
-        },
-        "responses": {
-          "201": {
-            "description": "updated article",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IArticle.Identity"
-                }
-              }
-            },
-            "x-nestia-encrypted": false
-          },
-          "401": {
-            "description": "PERMISSION DENIED",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "REQUIRED_PERMISSION",
-                    "EXPIRED_PERMISSION",
-                    "INVALID_PERMISSION"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "INSUFFICIENT_PERMISSION"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "NOT_FOUND_ARTICLE"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "summary": "update a article",
-        "description": "update a specific article found by article id\n\nonly the author can update the article",
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "x-nestia-namespace": "articles.update",
-        "x-nestia-jsDocTags": [
-          {
-            "name": "summary",
-            "text": [
-              {
-                "text": "update a article",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "tag",
-            "text": [
-              {
-                "text": "articles",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "security",
-            "text": [
-              {
-                "text": "bearer",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "param",
-            "text": [
-              {
-                "text": "article_id",
-                "kind": "parameterName"
-              },
-              {
-                "text": " ",
-                "kind": "space"
-              },
-              {
-                "text": "identity of article",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "param",
-            "text": [
-              {
-                "text": "body",
-                "kind": "parameterName"
-              },
-              {
-                "text": " ",
-                "kind": "space"
-              },
-              {
-                "text": "update content of article",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "return",
-            "text": [
-              {
-                "text": "updated article",
-                "kind": "text"
-              }
-            ]
-          }
-        ],
-        "x-nestia-method": "PUT"
-      },
-      "delete": {
-        "tags": [
-          "articles"
-        ],
-        "parameters": [
-          {
-            "name": "article_id",
-            "in": "path",
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "x-typia-typeTags": [
-                {
-                  "target": "string",
-                  "name": "Format<\"uuid\">",
-                  "kind": "format",
-                  "value": "uuid",
-                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
-                  "exclusive": [
-                    "format",
-                    "pattern"
-                  ]
-                }
-              ]
-            },
-            "description": "identity of article",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "none",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IArticle.Identity"
-                }
-              }
-            },
-            "x-nestia-encrypted": false
-          },
-          "401": {
-            "description": "PERMISSION DENIED",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "REQUIRED_PERMISSION",
-                    "EXPIRED_PERMISSION",
-                    "INVALID_PERMISSION"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "INSUFFICIENT_PERMISSION"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "NOT_FOUND_ARTICLE"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "summary": "delete a article",
-        "description": "delete a specific article found by article id\n\nonly the author can delete the article",
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "x-nestia-namespace": "articles.remove",
-        "x-nestia-jsDocTags": [
-          {
-            "name": "summary",
-            "text": [
-              {
-                "text": "delete a article",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "tag",
-            "text": [
-              {
-                "text": "articles",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "security",
-            "text": [
-              {
-                "text": "bearer",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "param",
-            "text": [
-              {
-                "text": "article_id",
-                "kind": "parameterName"
-              },
-              {
-                "text": " ",
-                "kind": "space"
-              },
-              {
-                "text": "identity of article",
-                "kind": "text"
-              }
-            ]
-          },
-          {
-            "name": "return",
-            "text": [
-              {
-                "text": "none",
-                "kind": "text"
-              }
-            ]
-          }
-        ],
-        "x-nestia-method": "DELETE"
-      }
-    },
     "/auth/oauth/urls": {
       "get": {
         "tags": [
@@ -786,7 +69,7 @@
         "x-nestia-method": "GET"
       }
     },
-    "/auth/oauth/authorize": {
+    "/auth/oauth/sign-in": {
       "post": {
         "tags": [
           "auth"
@@ -817,7 +100,7 @@
             "x-nestia-encrypted": false
           },
           "401": {
-            "description": "인증 실패",
+            "description": "Oauth 인증 실패",
             "content": {
               "application/json": {
                 "schema": {
@@ -828,17 +111,30 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "NOT_FOUND_USER"
+                  ]
+                }
+              }
+            }
           }
         },
-        "summary": "oauth 인증",
-        "description": "oauth 인증을 통해 사용자 권한이 인가된 토큰을 응답",
-        "x-nestia-namespace": "auth.oauth.authorize.authorize",
+        "summary": "소셜 로그인 API",
+        "description": "Oauth 인증을 통해 사용자 권한을 부여한 인증 토큰을 발급받습니다.\n\n활성화된 인증 정보에 활성화된 사용자 정보가 연동되어 있어야 합니다.",
+        "x-nestia-namespace": "auth.oauth.sign-in.signInByOauth",
         "x-nestia-jsDocTags": [
           {
             "name": "summary",
             "text": [
               {
-                "text": "oauth 인증",
+                "text": "소셜 로그인 API",
                 "kind": "text"
               }
             ]
@@ -882,14 +178,159 @@
         "x-nestia-method": "POST"
       }
     },
-    "/comments": {
+    "/auth/oauth/sign-up": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "description": "oauth 유형과 code 정보를 전달",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IAuthentication.IOauthInput"
+              }
+            }
+          },
+          "required": true,
+          "x-nestia-encrypted": false
+        },
+        "responses": {
+          "201": {
+            "description": "권한 토큰",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAuthentication"
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "Oauth 인증 실패",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "AUTHENTICATION_FAIL"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "소셜 간편가입 API",
+        "description": "Oauth 인증을 통해 사용자 정보를 생성하고 인증 토큰을 발급합니다.\n\n활성화된 인증정보가 존재하고",
+        "x-nestia-namespace": "auth.oauth.sign-up.signUpByOauth",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "소셜 간편가입 API",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "auth",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "body",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "oauth 유형과 code 정보를 전달",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "권한 토큰",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "POST"
+      }
+    },
+    "/boards/{board_id}/articles": {
       "get": {
         "tags": [
-          "comments"
+          "boards"
         ],
         "parameters": [
           {
-            "name": "skip",
+            "name": "board_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "게시판 id",
+            "required": true
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "x-typia-jsDocTags": [
+                {
+                  "name": "default",
+                  "text": [
+                    {
+                      "text": "latest",
+                      "kind": "text"
+                    }
+                  ]
+                }
+              ],
+              "x-typia-required": true,
+              "x-typia-optional": true,
+              "type": "string",
+              "enum": [
+                "latest",
+                "oldest"
+              ],
+              "default": "latest"
+            },
+            "required": false
+          },
+          {
+            "name": "page",
             "in": "query",
             "schema": {
               "x-typia-jsDocTags": [
@@ -921,7 +362,7 @@
             "required": false
           },
           {
-            "name": "limit",
+            "name": "size",
             "in": "query",
             "schema": {
               "x-typia-jsDocTags": [
@@ -963,43 +404,46 @@
               "default": 10
             },
             "required": false
-          },
-          {
-            "name": "article_id",
-            "in": "query",
-            "schema": {
-              "x-typia-required": true,
-              "x-typia-optional": false,
-              "type": "string",
-              "format": "uuid",
-              "x-typia-typeTags": [
-                {
-                  "target": "string",
-                  "name": "Format<\"uuid\">",
-                  "kind": "format",
-                  "value": "uuid",
-                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
-                  "exclusive": [
-                    "format",
-                    "pattern"
-                  ]
-                }
-              ]
-            },
-            "required": true
           }
         ],
         "responses": {
           "200": {
-            "description": "paginated comment list",
+            "description": "게시글 목록",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IComment.IPaginatedResponse"
+                  "$ref": "#/components/schemas/IArticle.IPaginated"
                 }
               }
             },
             "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "INSUFFICIENT_PERMISSION"
+                  ]
+                }
+              }
+            }
           },
           "404": {
             "description": "",
@@ -1008,22 +452,27 @@
                 "schema": {
                   "type": "string",
                   "enum": [
-                    "NOT_FOUND_ARTICLE"
+                    "NOT_FOUND_BOARD"
                   ]
                 }
               }
             }
           }
         },
-        "summary": "get comment list",
-        "description": "get comment list by filtering and sorting options.",
-        "x-nestia-namespace": "comments.getList",
+        "summary": "게시글 목록 보기",
+        "description": "게시판 권한으로 게시글 목록을 불러옵니다.",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "x-nestia-namespace": "boards.articles.getList",
         "x-nestia-jsDocTags": [
           {
             "name": "summary",
             "text": [
               {
-                "text": "get comment list",
+                "text": "게시글 목록 보기",
                 "kind": "text"
               }
             ]
@@ -1032,7 +481,33 @@
             "name": "tag",
             "text": [
               {
-                "text": "comments",
+                "text": "boards",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "security",
+            "text": [
+              {
+                "text": "bearer",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "board_id",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "게시판 id",
                 "kind": "text"
               }
             ]
@@ -1049,7 +524,7 @@
                 "kind": "space"
               },
               {
-                "text": "filtering and sorting options",
+                "text": "필터링 및 정렬 조건",
                 "kind": "text"
               }
             ]
@@ -1058,7 +533,7 @@
             "name": "return",
             "text": [
               {
-                "text": "paginated comment list",
+                "text": "게시글 목록",
                 "kind": "text"
               }
             ]
@@ -1068,15 +543,39 @@
       },
       "post": {
         "tags": [
-          "comments"
+          "boards"
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "게시판 id",
+            "required": true
+          }
+        ],
         "requestBody": {
-          "description": "comment content",
+          "description": "게시글 생성 정보",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/IComment.ICreate"
+                "$ref": "#/components/schemas/IArticle.ICreateBody"
               }
             }
           },
@@ -1085,7 +584,718 @@
         },
         "responses": {
           "201": {
-            "description": "created comment",
+            "description": "생성된 게시글 식별자",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IArticle.Identity"
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION",
+                    "REQUIRED_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "INSUFFICIENT_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "NOT_FOUND_BOARD"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "게시글 생성",
+        "description": "게시판 권한으로 게시글을 생성합니다.",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "x-nestia-namespace": "boards.articles.create",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "게시글 생성",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "boards",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "security",
+            "text": [
+              {
+                "text": "bearer",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "board_id",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "게시판 id",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "body",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "게시글 생성 정보",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "생성된 게시글 식별자",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "POST"
+      }
+    },
+    "/boards/{board_id}/articles/{article_id}": {
+      "get": {
+        "tags": [
+          "boards"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "게시판 id",
+            "required": true
+          },
+          {
+            "name": "article_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "게시글 id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "게시글 상세 정보",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IArticle"
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "INSUFFICIENT_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "NOT_FOUND_BOARD",
+                    "NOT_FOUND_ARTICLE"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "게시글 상세 보기",
+        "description": "게시판 권한으로 게시글 상세 정보를 볼 수 있습니다.",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "x-nestia-namespace": "boards.articles.get",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "게시글 상세 보기",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "boards",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "security",
+            "text": [
+              {
+                "text": "bearer",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "board_id",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "게시판 id",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "article_id",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "게시글 id",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "게시글 상세 정보",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "GET"
+      }
+    },
+    "/boards/{board_id}/articles/{article_id}/comments": {
+      "get": {
+        "tags": [
+          "boards"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "게시판 id",
+            "required": true
+          },
+          {
+            "name": "article_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "게시글 id",
+            "required": true
+          },
+          {
+            "name": "parent_id",
+            "in": "query",
+            "schema": {
+              "x-typia-required": true,
+              "x-typia-optional": true,
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "required": false
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "x-typia-required": true,
+              "x-typia-optional": true,
+              "type": "string",
+              "enum": [
+                "latest",
+                "oldest"
+              ]
+            },
+            "required": false
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "x-typia-jsDocTags": [
+                {
+                  "name": "default",
+                  "text": [
+                    {
+                      "text": "0",
+                      "kind": "text"
+                    }
+                  ]
+                }
+              ],
+              "x-typia-required": true,
+              "x-typia-optional": true,
+              "type": "integer",
+              "x-typia-typeTags": [
+                {
+                  "target": "number",
+                  "name": "Type<\"uint64\">",
+                  "kind": "type",
+                  "value": "uint64",
+                  "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                  "exclusive": true
+                }
+              ],
+              "default": 0
+            },
+            "required": false
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "x-typia-jsDocTags": [
+                {
+                  "name": "default",
+                  "text": [
+                    {
+                      "text": "10",
+                      "kind": "text"
+                    }
+                  ]
+                }
+              ],
+              "x-typia-required": true,
+              "x-typia-optional": true,
+              "type": "integer",
+              "minimum": 10,
+              "x-typia-typeTags": [
+                {
+                  "target": "number",
+                  "name": "Type<\"uint64\">",
+                  "kind": "type",
+                  "value": "uint64",
+                  "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                  "exclusive": true
+                },
+                {
+                  "target": "number",
+                  "name": "Minimum<10>",
+                  "kind": "minimum",
+                  "value": 10,
+                  "validate": "10 <= $input",
+                  "exclusive": [
+                    "minimum",
+                    "exclusiveMinimum"
+                  ]
+                }
+              ],
+              "default": 10
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "댓글 목록",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IComment.IPaginated"
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "INSUFFICIENT_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "NOT_FOUND_BOARD",
+                    "NOT_FOUND_ARTICLE"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "댓글 목록 보기",
+        "description": "게시판 권한으로 댓글 목록을 불러옵니다.\n\n만약 쿼리로 parent_id를 추가하면 해당 댓글의 답글만 불러옵니다.",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "x-nestia-namespace": "boards.articles.comments.getList",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "댓글 목록 보기",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "boards",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "security",
+            "text": [
+              {
+                "text": "bearer",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "board_id",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "게시판 id",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "article_id",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "게시글 id",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "query",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "필터링 및 정렬 조건",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "댓글 목록",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "GET"
+      },
+      "post": {
+        "tags": [
+          "boards"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "게시판 id",
+            "required": true
+          },
+          {
+            "name": "article_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "게시글 id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "description": "댓글 생성 정보",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IComment.ICreateBody"
+              }
+            }
+          },
+          "required": true,
+          "x-nestia-encrypted": false
+        },
+        "responses": {
+          "201": {
+            "description": "생성된 댓글 식별자",
             "content": {
               "application/json": {
                 "schema": {
@@ -1096,15 +1306,883 @@
             "x-nestia-encrypted": false
           },
           "401": {
-            "description": "PERMISSION DENIED",
+            "description": "",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "string",
                   "enum": [
-                    "REQUIRED_PERMISSION",
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION",
+                    "REQUIRED_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "INSUFFICIENT_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "NOT_FOUND_BOARD",
+                    "NOT_FOUND_ARTICLE"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "댓글 생성",
+        "description": "게시판 권한으로 댓글을 생성합니다.",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "x-nestia-namespace": "boards.articles.comments.create",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "댓글 생성",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "boards",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "security",
+            "text": [
+              {
+                "text": "bearer",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "board_id",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "게시판 id",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "article_id",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "게시글 id",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "body",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "댓글 생성 정보",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "생성된 댓글 식별자",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "POST"
+      }
+    },
+    "/boards/{board_id}/articles/{article_id}/comments/{comment_id}": {
+      "get": {
+        "tags": [
+          "boards"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "게시판 id",
+            "required": true
+          },
+          {
+            "name": "article_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "게시글 id",
+            "required": true
+          },
+          {
+            "name": "comment_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "댓글 id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "댓글 상세 정보",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IComment"
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
                     "EXPIRED_PERMISSION",
                     "INVALID_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "INSUFFICIENT_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "NOT_FOUND_BOARD",
+                    "NOT_FOUND_ARTICLE",
+                    "NOT_FOUND_COMMENT"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "댓글 상세 보기",
+        "description": "게시판 권한으로 댓글 상세 정보를 볼 수 있습니다.",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "x-nestia-namespace": "boards.articles.comments.get",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "댓글 상세 보기",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "boards",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "security",
+            "text": [
+              {
+                "text": "bearer",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "board_id",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "게시판 id",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "article_id",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "게시글 id",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "comment_id",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "댓글 id",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "댓글 상세 정보",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "GET"
+      }
+    },
+    "/boards": {
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "게시판 목록",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IBoard.ISummary"
+                  }
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          }
+        },
+        "x-nestia-namespace": "boards.getList",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "게시판 목록 조회",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "public",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "게시판 목록",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "GET"
+      }
+    },
+    "/boards/{board_id}": {
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "게시판 상세 정보",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IBoard"
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "NOT_FOUND_BOARD"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-nestia-namespace": "boards.get",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "게시판 조회",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "public",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "게시판 상세 정보",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "GET"
+      }
+    },
+    "/memberships": {
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "활성화된 멤버십 목록",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IMembership"
+                  }
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          }
+        },
+        "x-nestia-namespace": "memberships.getList",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "멤버십 목록 불러오기",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "public",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "활성화된 멤버십 목록",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "GET"
+      }
+    },
+    "/mine/articles": {
+      "get": {
+        "tags": [
+          "mine"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "query",
+            "schema": {
+              "x-typia-required": true,
+              "x-typia-optional": true,
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "required": false
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "x-typia-jsDocTags": [
+                {
+                  "name": "default",
+                  "text": [
+                    {
+                      "text": "latest",
+                      "kind": "text"
+                    }
+                  ]
+                }
+              ],
+              "x-typia-required": true,
+              "x-typia-optional": true,
+              "type": "string",
+              "enum": [
+                "latest",
+                "oldest"
+              ],
+              "default": "latest"
+            },
+            "required": false
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "x-typia-jsDocTags": [
+                {
+                  "name": "default",
+                  "text": [
+                    {
+                      "text": "0",
+                      "kind": "text"
+                    }
+                  ]
+                }
+              ],
+              "x-typia-required": true,
+              "x-typia-optional": true,
+              "type": "integer",
+              "x-typia-typeTags": [
+                {
+                  "target": "number",
+                  "name": "Type<\"uint64\">",
+                  "kind": "type",
+                  "value": "uint64",
+                  "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                  "exclusive": true
+                }
+              ],
+              "default": 0
+            },
+            "required": false
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "x-typia-jsDocTags": [
+                {
+                  "name": "default",
+                  "text": [
+                    {
+                      "text": "10",
+                      "kind": "text"
+                    }
+                  ]
+                }
+              ],
+              "x-typia-required": true,
+              "x-typia-optional": true,
+              "type": "integer",
+              "minimum": 10,
+              "x-typia-typeTags": [
+                {
+                  "target": "number",
+                  "name": "Type<\"uint64\">",
+                  "kind": "type",
+                  "value": "uint64",
+                  "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                  "exclusive": true
+                },
+                {
+                  "target": "number",
+                  "name": "Minimum<10>",
+                  "kind": "minimum",
+                  "value": 10,
+                  "validate": "10 <= $input",
+                  "exclusive": [
+                    "minimum",
+                    "exclusiveMinimum"
+                  ]
+                }
+              ],
+              "default": 10
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "내가 쓴 게시글 목록",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IArticle.IBulk.IPaginated"
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION",
+                    "REQUIRED_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "INSUFFICIENT_PERMISSION"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "내가 쓴 게시글 모아 보기",
+        "description": "작성자 권한으로 게시글 목록을 불러옵니다.",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "x-nestia-namespace": "mine.articles.getList",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "내가 쓴 게시글 모아 보기",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "mine",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "security",
+            "text": [
+              {
+                "text": "bearer",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "query",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "필터링 및 정렬 조건",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "내가 쓴 게시글 목록",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "GET"
+      }
+    },
+    "/mine/articles/{article_id}": {
+      "get": {
+        "tags": [
+          "mine"
+        ],
+        "parameters": [
+          {
+            "name": "article_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "게시글 id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "게시글 상세 정보",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IArticle"
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION",
+                    "REQUIRED_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "INSUFFICIENT_PERMISSION"
                   ]
                 }
               }
@@ -1124,20 +2202,20 @@
             }
           }
         },
-        "summary": "create a new comment",
-        "description": "create a new comment, the comment have one snapshot.",
+        "summary": "게시글 상세 보기",
+        "description": "작성자 권한으로 게시글 상세 정보를 볼 수 있습니다.",
         "security": [
           {
             "bearer": []
           }
         ],
-        "x-nestia-namespace": "comments.create",
+        "x-nestia-namespace": "mine.articles.get",
         "x-nestia-jsDocTags": [
           {
             "name": "summary",
             "text": [
               {
-                "text": "create a new comment",
+                "text": "게시글 상세 보기",
                 "kind": "text"
               }
             ]
@@ -1146,7 +2224,7 @@
             "name": "tag",
             "text": [
               {
-                "text": "comments",
+                "text": "mine",
                 "kind": "text"
               }
             ]
@@ -1164,7 +2242,7 @@
             "name": "param",
             "text": [
               {
-                "text": "body",
+                "text": "article_id",
                 "kind": "parameterName"
               },
               {
@@ -1172,7 +2250,7 @@
                 "kind": "space"
               },
               {
-                "text": "comment content",
+                "text": "게시글 id",
                 "kind": "text"
               }
             ]
@@ -1181,23 +2259,21 @@
             "name": "return",
             "text": [
               {
-                "text": "created comment",
+                "text": "게시글 상세 정보",
                 "kind": "text"
               }
             ]
           }
         ],
-        "x-nestia-method": "POST"
-      }
-    },
-    "/comments/{comment_id}": {
+        "x-nestia-method": "GET"
+      },
       "put": {
         "tags": [
-          "comments"
+          "mine"
         ],
         "parameters": [
           {
-            "name": "comment_id",
+            "name": "article_id",
             "in": "path",
             "schema": {
               "type": "string",
@@ -1216,16 +2292,16 @@
                 }
               ]
             },
-            "description": "identity of comment",
+            "description": "게시글 id",
             "required": true
           }
         ],
         "requestBody": {
-          "description": "update content of comment",
+          "description": "게시글 수정 사항",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/IComment.IUpdate"
+                "$ref": "#/components/schemas/IArticle.IUpdateBody"
               }
             }
           },
@@ -1234,26 +2310,26 @@
         },
         "responses": {
           "201": {
-            "description": "updated comment",
+            "description": "수정된 게시글 식별자",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IComment.Identity"
+                  "$ref": "#/components/schemas/IArticle.Identity"
                 }
               }
             },
             "x-nestia-encrypted": false
           },
           "401": {
-            "description": "PERMISSION DENIED",
+            "description": "",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "string",
                   "enum": [
-                    "REQUIRED_PERMISSION",
                     "EXPIRED_PERMISSION",
-                    "INVALID_PERMISSION"
+                    "INVALID_PERMISSION",
+                    "REQUIRED_PERMISSION"
                   ]
                 }
               }
@@ -1279,27 +2355,27 @@
                 "schema": {
                   "type": "string",
                   "enum": [
-                    "NOT_FOUND_COMMENT"
+                    "NOT_FOUND_ARTICLE"
                   ]
                 }
               }
             }
           }
         },
-        "summary": "update a comment",
-        "description": "update a specific comment found by comment id\n\nonly the author can update the comment",
+        "summary": "게시글 수정",
+        "description": "작성자 권한으로 게시글을 수정합니다.",
         "security": [
           {
             "bearer": []
           }
         ],
-        "x-nestia-namespace": "comments.update",
+        "x-nestia-namespace": "mine.articles.update",
         "x-nestia-jsDocTags": [
           {
             "name": "summary",
             "text": [
               {
-                "text": "update a comment",
+                "text": "게시글 수정",
                 "kind": "text"
               }
             ]
@@ -1308,7 +2384,7 @@
             "name": "tag",
             "text": [
               {
-                "text": "comments",
+                "text": "mine",
                 "kind": "text"
               }
             ]
@@ -1326,7 +2402,7 @@
             "name": "param",
             "text": [
               {
-                "text": "comment_id",
+                "text": "article_id",
                 "kind": "parameterName"
               },
               {
@@ -1334,7 +2410,7 @@
                 "kind": "space"
               },
               {
-                "text": "identity of comment",
+                "text": "게시글 id",
                 "kind": "text"
               }
             ]
@@ -1351,7 +2427,7 @@
                 "kind": "space"
               },
               {
-                "text": "update content of comment",
+                "text": "게시글 수정 사항",
                 "kind": "text"
               }
             ]
@@ -1360,7 +2436,7 @@
             "name": "return",
             "text": [
               {
-                "text": "updated comment",
+                "text": "수정된 게시글 식별자",
                 "kind": "text"
               }
             ]
@@ -1370,7 +2446,409 @@
       },
       "delete": {
         "tags": [
-          "comments"
+          "mine"
+        ],
+        "parameters": [
+          {
+            "name": "article_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "게시글 id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "삭제된 게시글 식별자",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IArticle.Identity"
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION",
+                    "REQUIRED_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "INSUFFICIENT_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "NOT_FOUND_ARTICLE"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "게시글 삭제",
+        "description": "작성자 권한으로 게시글을 삭제합니다.",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "x-nestia-namespace": "mine.articles.remove",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "게시글 삭제",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "mine",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "security",
+            "text": [
+              {
+                "text": "bearer",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "article_id",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "게시글 id",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "삭제된 게시글 식별자",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "DELETE"
+      }
+    },
+    "/mine/comments": {
+      "get": {
+        "tags": [
+          "mine"
+        ],
+        "parameters": [
+          {
+            "name": "article_id",
+            "in": "query",
+            "schema": {
+              "x-typia-required": true,
+              "x-typia-optional": true,
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "required": false
+          },
+          {
+            "name": "parent_id",
+            "in": "query",
+            "schema": {
+              "x-typia-required": true,
+              "x-typia-optional": true,
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "required": false
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "x-typia-required": true,
+              "x-typia-optional": true,
+              "type": "string",
+              "enum": [
+                "latest",
+                "oldest"
+              ]
+            },
+            "required": false
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "x-typia-jsDocTags": [
+                {
+                  "name": "default",
+                  "text": [
+                    {
+                      "text": "0",
+                      "kind": "text"
+                    }
+                  ]
+                }
+              ],
+              "x-typia-required": true,
+              "x-typia-optional": true,
+              "type": "integer",
+              "x-typia-typeTags": [
+                {
+                  "target": "number",
+                  "name": "Type<\"uint64\">",
+                  "kind": "type",
+                  "value": "uint64",
+                  "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                  "exclusive": true
+                }
+              ],
+              "default": 0
+            },
+            "required": false
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "x-typia-jsDocTags": [
+                {
+                  "name": "default",
+                  "text": [
+                    {
+                      "text": "10",
+                      "kind": "text"
+                    }
+                  ]
+                }
+              ],
+              "x-typia-required": true,
+              "x-typia-optional": true,
+              "type": "integer",
+              "minimum": 10,
+              "x-typia-typeTags": [
+                {
+                  "target": "number",
+                  "name": "Type<\"uint64\">",
+                  "kind": "type",
+                  "value": "uint64",
+                  "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                  "exclusive": true
+                },
+                {
+                  "target": "number",
+                  "name": "Minimum<10>",
+                  "kind": "minimum",
+                  "value": 10,
+                  "validate": "10 <= $input",
+                  "exclusive": [
+                    "minimum",
+                    "exclusiveMinimum"
+                  ]
+                }
+              ],
+              "default": 10
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "내가 쓴 댓글 목록",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IComment.IBulk.IPaginated"
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION",
+                    "REQUIRED_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "INSUFFICIENT_PERMISSION"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "내가 쓴 댓글 모아 보기",
+        "description": "작성자 권한으로 댓글 목록을 불러옵니다.",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "x-nestia-namespace": "mine.comments.getList",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "내가 쓴 댓글 모아 보기",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "mine",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "security",
+            "text": [
+              {
+                "text": "bearer",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "query",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "필터링 및 정렬 조건",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "내가 쓴 댓글 목록",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "GET"
+      }
+    },
+    "/mine/comments/{comment_id}": {
+      "get": {
+        "tags": [
+          "mine"
         ],
         "parameters": [
           {
@@ -1393,32 +2871,32 @@
                 }
               ]
             },
-            "description": "identity of comment",
+            "description": "댓글 id",
             "required": true
           }
         ],
         "responses": {
           "200": {
-            "description": "none",
+            "description": "댓글 상세 정보",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IComment.Identity"
+                  "$ref": "#/components/schemas/IComment"
                 }
               }
             },
             "x-nestia-encrypted": false
           },
           "401": {
-            "description": "PERMISSION DENIED",
+            "description": "",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "string",
                   "enum": [
-                    "REQUIRED_PERMISSION",
                     "EXPIRED_PERMISSION",
-                    "INVALID_PERMISSION"
+                    "INVALID_PERMISSION",
+                    "REQUIRED_PERMISSION"
                   ]
                 }
               }
@@ -1451,20 +2929,20 @@
             }
           }
         },
-        "summary": "delete a comment",
-        "description": "delete a specific comment found by comment id\n\nonly the author can delete the comment",
+        "summary": "댓글 상세 보기",
+        "description": "작성자 권한으로 댓글 상세 정보를 볼 수 있습니다.",
         "security": [
           {
             "bearer": []
           }
         ],
-        "x-nestia-namespace": "comments.remove",
+        "x-nestia-namespace": "mine.comments.get",
         "x-nestia-jsDocTags": [
           {
             "name": "summary",
             "text": [
               {
-                "text": "delete a comment",
+                "text": "댓글 상세 보기",
                 "kind": "text"
               }
             ]
@@ -1473,7 +2951,7 @@
             "name": "tag",
             "text": [
               {
-                "text": "comments",
+                "text": "mine",
                 "kind": "text"
               }
             ]
@@ -1499,7 +2977,7 @@
                 "kind": "space"
               },
               {
-                "text": "identity of comment",
+                "text": "댓글 id",
                 "kind": "text"
               }
             ]
@@ -1508,7 +2986,332 @@
             "name": "return",
             "text": [
               {
-                "text": "none",
+                "text": "댓글 상세 정보",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "GET"
+      },
+      "put": {
+        "tags": [
+          "mine"
+        ],
+        "parameters": [
+          {
+            "name": "comment_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "댓글 id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "description": "댓글 수정 사항",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IComment.IUpdateBody"
+              }
+            }
+          },
+          "required": true,
+          "x-nestia-encrypted": false
+        },
+        "responses": {
+          "201": {
+            "description": "수정된 댓글 식별자",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IComment.Identity"
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION",
+                    "REQUIRED_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "INSUFFICIENT_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "NOT_FOUND_COMMENT"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "댓글 수정",
+        "description": "작성자 권한으로 게시글을 수정합니다.",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "x-nestia-namespace": "mine.comments.update",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "댓글 수정",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "mine",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "security",
+            "text": [
+              {
+                "text": "bearer",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "comment_id",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "댓글 id",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "body",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "댓글 수정 사항",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "수정된 댓글 식별자",
+                "kind": "text"
+              }
+            ]
+          }
+        ],
+        "x-nestia-method": "PUT"
+      },
+      "delete": {
+        "tags": [
+          "mine"
+        ],
+        "parameters": [
+          {
+            "name": "comment_id",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
+            },
+            "description": "게시글 id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "삭제된 댓글 식별자",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IComment.Identity"
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "EXPIRED_PERMISSION",
+                    "INVALID_PERMISSION",
+                    "REQUIRED_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "INSUFFICIENT_PERMISSION"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "NOT_FOUND_COMMENT"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "게시글 삭제",
+        "description": "작성자 권한으로 댓글을 삭제합니다.",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "x-nestia-namespace": "mine.comments.remove",
+        "x-nestia-jsDocTags": [
+          {
+            "name": "summary",
+            "text": [
+              {
+                "text": "게시글 삭제",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "tag",
+            "text": [
+              {
+                "text": "mine",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "security",
+            "text": [
+              {
+                "text": "bearer",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "param",
+            "text": [
+              {
+                "text": "comment_id",
+                "kind": "parameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "게시글 id",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "return",
+            "text": [
+              {
+                "text": "삭제된 댓글 식별자",
                 "kind": "text"
               }
             ]
@@ -1577,540 +3380,6 @@
   },
   "components": {
     "schemas": {
-      "IArticle.ISearch": {
-        "type": "object",
-        "properties": {
-          "posted_at": {
-            "x-typia-jsDocTags": [
-              {
-                "name": "default",
-                "text": [
-                  {
-                    "text": "desc",
-                    "kind": "text"
-                  }
-                ]
-              }
-            ],
-            "x-typia-required": true,
-            "x-typia-optional": true,
-            "type": "string",
-            "enum": [
-              "asc",
-              "desc"
-            ],
-            "default": "desc"
-          },
-          "skip": {
-            "x-typia-jsDocTags": [
-              {
-                "name": "default",
-                "text": [
-                  {
-                    "text": "0",
-                    "kind": "text"
-                  }
-                ]
-              }
-            ],
-            "x-typia-required": true,
-            "x-typia-optional": true,
-            "type": "integer",
-            "x-typia-typeTags": [
-              {
-                "target": "number",
-                "name": "Type<\"uint64\">",
-                "kind": "type",
-                "value": "uint64",
-                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
-                "exclusive": true
-              }
-            ],
-            "default": 0
-          },
-          "limit": {
-            "x-typia-jsDocTags": [
-              {
-                "name": "default",
-                "text": [
-                  {
-                    "text": "10",
-                    "kind": "text"
-                  }
-                ]
-              }
-            ],
-            "x-typia-required": true,
-            "x-typia-optional": true,
-            "type": "integer",
-            "minimum": 10,
-            "x-typia-typeTags": [
-              {
-                "target": "number",
-                "name": "Type<\"uint64\">",
-                "kind": "type",
-                "value": "uint64",
-                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
-                "exclusive": true
-              },
-              {
-                "target": "number",
-                "name": "Minimum<10>",
-                "kind": "minimum",
-                "value": 10,
-                "validate": "10 <= $input",
-                "exclusive": [
-                  "minimum",
-                  "exclusiveMinimum"
-                ]
-              }
-            ],
-            "default": 10
-          }
-        },
-        "nullable": false,
-        "x-typia-jsDocTags": []
-      },
-      "IArticle.IPaginatedResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/IArticle.ISummary"
-            }
-          },
-          "skip": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "integer",
-            "x-typia-typeTags": [
-              {
-                "target": "number",
-                "name": "Type<\"uint64\">",
-                "kind": "type",
-                "value": "uint64",
-                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
-                "exclusive": true
-              }
-            ]
-          },
-          "limit": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "integer",
-            "minimum": 10,
-            "x-typia-typeTags": [
-              {
-                "target": "number",
-                "name": "Type<\"uint64\">",
-                "kind": "type",
-                "value": "uint64",
-                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
-                "exclusive": true
-              },
-              {
-                "target": "number",
-                "name": "Minimum<10>",
-                "kind": "minimum",
-                "value": 10,
-                "validate": "10 <= $input",
-                "exclusive": [
-                  "minimum",
-                  "exclusiveMinimum"
-                ]
-              }
-            ]
-          }
-        },
-        "nullable": false,
-        "required": [
-          "data",
-          "skip",
-          "limit"
-        ],
-        "x-typia-jsDocTags": []
-      },
-      "IArticle.ISummary": {
-        "type": "object",
-        "properties": {
-          "updated_at": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "date-time",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"date-time\">",
-                "kind": "format",
-                "value": "date-time",
-                "validate": "!isNaN(new Date($input).getTime())",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ],
-            "nullable": true
-          },
-          "id": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "uuid",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"uuid\">",
-                "kind": "format",
-                "value": "uuid",
-                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ]
-          },
-          "author": {
-            "$ref": "#/components/schemas/IUser.IAuthor"
-          },
-          "posted_at": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "date-time",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"date-time\">",
-                "kind": "format",
-                "value": "date-time",
-                "validate": "!isNaN(new Date($input).getTime())",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ]
-          },
-          "title": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string"
-          }
-        },
-        "nullable": false,
-        "required": [
-          "updated_at",
-          "id",
-          "author",
-          "posted_at",
-          "title"
-        ],
-        "x-typia-jsDocTags": []
-      },
-      "IUser.IAuthor": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/IUser.IDeletedAuthor"
-          },
-          {
-            "$ref": "#/components/schemas/IUser.IActiveAuthor"
-          }
-        ]
-      },
-      "IUser.IDeletedAuthor": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "enum": [
-              "deleted"
-            ]
-          }
-        },
-        "nullable": false,
-        "required": [
-          "status"
-        ],
-        "x-typia-jsDocTags": []
-      },
-      "IUser.IActiveAuthor": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "enum": [
-              "active"
-            ]
-          },
-          "id": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "uuid",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"uuid\">",
-                "kind": "format",
-                "value": "uuid",
-                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ]
-          },
-          "name": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string"
-          },
-          "image_url": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "url",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"url\">",
-                "kind": "format",
-                "value": "url",
-                "validate": "/^[a-zA-Z0-9]+:\\/\\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test($input)",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ],
-            "nullable": true
-          }
-        },
-        "nullable": false,
-        "required": [
-          "status",
-          "id",
-          "name",
-          "image_url"
-        ],
-        "x-typia-jsDocTags": []
-      },
-      "IArticle.ICreate": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string"
-          },
-          "body_format": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "enum": [
-              "html",
-              "md",
-              "txt"
-            ]
-          },
-          "body_url": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "url",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"url\">",
-                "kind": "format",
-                "value": "url",
-                "validate": "/^[a-zA-Z0-9]+:\\/\\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test($input)",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ]
-          }
-        },
-        "nullable": false,
-        "required": [
-          "title",
-          "body_format",
-          "body_url"
-        ],
-        "x-typia-jsDocTags": []
-      },
-      "IArticle.Identity": {
-        "type": "object",
-        "properties": {
-          "article_id": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "uuid",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"uuid\">",
-                "kind": "format",
-                "value": "uuid",
-                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ]
-          }
-        },
-        "nullable": false,
-        "required": [
-          "article_id"
-        ],
-        "x-typia-jsDocTags": []
-      },
-      "IArticle": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "uuid",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"uuid\">",
-                "kind": "format",
-                "value": "uuid",
-                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ]
-          },
-          "author": {
-            "$ref": "#/components/schemas/IUser.IAuthor"
-          },
-          "snapshots": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/IArticle.ISnapshot"
-            },
-            "minItems": 1
-          },
-          "posted_at": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "date-time",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"date-time\">",
-                "kind": "format",
-                "value": "date-time",
-                "validate": "!isNaN(new Date($input).getTime())",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ]
-          }
-        },
-        "nullable": false,
-        "required": [
-          "id",
-          "author",
-          "snapshots",
-          "posted_at"
-        ],
-        "x-typia-jsDocTags": []
-      },
-      "IArticle.ISnapshot": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string"
-          },
-          "body_url": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "url",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"url\">",
-                "kind": "format",
-                "value": "url",
-                "validate": "/^[a-zA-Z0-9]+:\\/\\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test($input)",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ]
-          },
-          "body_format": {
-            "$ref": "#/components/schemas/ArticleBodyFormat"
-          },
-          "created_at": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "date-time",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"date-time\">",
-                "kind": "format",
-                "value": "date-time",
-                "validate": "!isNaN(new Date($input).getTime())",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ]
-          }
-        },
-        "nullable": false,
-        "required": [
-          "title",
-          "body_url",
-          "body_format",
-          "created_at"
-        ],
-        "x-typia-jsDocTags": []
-      },
-      "ArticleBodyFormat": {
-        "type": "string",
-        "enum": [
-          "html",
-          "md",
-          "txt"
-        ]
-      },
       "IAuthentication.IOauthUrls": {
         "type": "object",
         "properties": {
@@ -2243,10 +3512,31 @@
         ],
         "x-typia-jsDocTags": []
       },
-      "IComment.ISearch": {
+      "IArticle.ISearch": {
         "type": "object",
         "properties": {
-          "skip": {
+          "sort": {
+            "x-typia-jsDocTags": [
+              {
+                "name": "default",
+                "text": [
+                  {
+                    "text": "latest",
+                    "kind": "text"
+                  }
+                ]
+              }
+            ],
+            "x-typia-required": true,
+            "x-typia-optional": true,
+            "type": "string",
+            "enum": [
+              "latest",
+              "oldest"
+            ],
+            "default": "latest"
+          },
+          "page": {
             "x-typia-jsDocTags": [
               {
                 "name": "default",
@@ -2273,7 +3563,7 @@
             ],
             "default": 0
           },
-          "limit": {
+          "size": {
             "x-typia-jsDocTags": [
               {
                 "name": "default",
@@ -2311,34 +3601,12 @@
               }
             ],
             "default": 10
-          },
-          "article_id": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "uuid",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"uuid\">",
-                "kind": "format",
-                "value": "uuid",
-                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ]
           }
         },
         "nullable": false,
-        "required": [
-          "article_id"
-        ],
         "x-typia-jsDocTags": []
       },
-      "IComment.IPaginatedResponse": {
+      "IArticle.IPaginated": {
         "type": "object",
         "properties": {
           "data": {
@@ -2346,10 +3614,10 @@
             "x-typia-optional": false,
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/IComment"
+              "$ref": "#/components/schemas/IArticle.ISummary"
             }
           },
-          "skip": {
+          "page": {
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "integer",
@@ -2364,7 +3632,7 @@
               }
             ]
           },
-          "limit": {
+          "size": {
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "integer",
@@ -2395,8 +3663,779 @@
         "nullable": false,
         "required": [
           "data",
-          "skip",
-          "limit"
+          "page",
+          "size"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IArticle.ISummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "title": {
+            "description": "게시글 제목",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "nullable": true
+          },
+          "author": {
+            "$ref": "#/components/schemas/IArticle.IAuthor"
+          },
+          "created_at": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"date-time\">",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "updated_at": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"date-time\">",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "nullable": false,
+        "required": [
+          "id",
+          "title",
+          "author",
+          "created_at",
+          "updated_at"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IArticle.IAuthor": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/IArticle.IDeletedAuthor"
+          },
+          {
+            "$ref": "#/components/schemas/IArticle.IActiveAuthor"
+          }
+        ]
+      },
+      "IArticle.IDeletedAuthor": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "enum": [
+              "deleted"
+            ]
+          },
+          "id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          }
+        },
+        "nullable": false,
+        "required": [
+          "status",
+          "id"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IArticle.IActiveAuthor": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "enum": [
+              "active"
+            ]
+          },
+          "id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "name": {
+            "description": "사용자명",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
+          },
+          "image_url": {
+            "description": "프로필 이미지 주소",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "url",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"url\">",
+                "kind": "format",
+                "value": "url",
+                "validate": "/^[a-zA-Z0-9]+:\\/\\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ],
+            "nullable": true
+          },
+          "membership": {
+            "$ref": "#/components/schemas/IMembership.Nullable"
+          }
+        },
+        "nullable": false,
+        "required": [
+          "status",
+          "id",
+          "name",
+          "image_url",
+          "membership"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IMembership.Nullable": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "name": {
+            "description": "멤버십 등급명",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
+          },
+          "image_url": {
+            "description": "멤버십 등급 대표 이미지 주소",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "url",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"url\">",
+                "kind": "format",
+                "value": "url",
+                "validate": "/^[a-zA-Z0-9]+:\\/\\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ],
+            "nullable": true
+          },
+          "rank": {
+            "description": "멤버십 등급 단계\n\n계층형 멤버십 등급을 비교하기 위해 사용되는 값",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "integer",
+            "x-typia-typeTags": [
+              {
+                "target": "number",
+                "name": "Type<\"uint64\">",
+                "kind": "type",
+                "value": "uint64",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                "exclusive": true
+              }
+            ]
+          }
+        },
+        "nullable": true,
+        "required": [
+          "id",
+          "name",
+          "image_url",
+          "rank"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IArticle": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "title": {
+            "description": "게시글 제목",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "nullable": true
+          },
+          "body": {
+            "$ref": "#/components/schemas/IArticle.IBody.Nullable"
+          },
+          "author": {
+            "$ref": "#/components/schemas/IArticle.IAuthor"
+          },
+          "board": {
+            "$ref": "#/components/schemas/IBoard.ISummary"
+          },
+          "is_notice": {
+            "description": "공지 여부",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "boolean"
+          },
+          "created_at": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"date-time\">",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "updated_at": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"date-time\">",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "nullable": false,
+        "required": [
+          "id",
+          "title",
+          "body",
+          "author",
+          "board",
+          "is_notice",
+          "created_at",
+          "updated_at"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IArticle.IBody.Nullable": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "url",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"url\">",
+                "kind": "format",
+                "value": "url",
+                "validate": "/^[a-zA-Z0-9]+:\\/\\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "format": {
+            "$ref": "#/components/schemas/ArticleBodyFormat"
+          }
+        },
+        "nullable": true,
+        "required": [
+          "url",
+          "format"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "ArticleBodyFormat": {
+        "type": "string",
+        "enum": [
+          "html",
+          "md",
+          "txt"
+        ]
+      },
+      "IBoard.ISummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "name": {
+            "description": "게시판 이름",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
+          }
+        },
+        "nullable": false,
+        "required": [
+          "id",
+          "name"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IArticle.ICreateBody": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "url",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"url\">",
+                "kind": "format",
+                "value": "url",
+                "validate": "/^[a-zA-Z0-9]+:\\/\\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "format": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "enum": [
+              "html",
+              "md",
+              "txt"
+            ]
+          },
+          "title": {
+            "description": "게시글 제목",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
+          }
+        },
+        "nullable": false,
+        "required": [
+          "url",
+          "format",
+          "title"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IArticle.Identity": {
+        "type": "object",
+        "properties": {
+          "article_id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          }
+        },
+        "nullable": false,
+        "required": [
+          "article_id"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IComment.ISearch": {
+        "type": "object",
+        "properties": {
+          "parent_id": {
+            "x-typia-required": true,
+            "x-typia-optional": true,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "sort": {
+            "x-typia-required": true,
+            "x-typia-optional": true,
+            "type": "string",
+            "enum": [
+              "latest",
+              "oldest"
+            ]
+          },
+          "page": {
+            "x-typia-jsDocTags": [
+              {
+                "name": "default",
+                "text": [
+                  {
+                    "text": "0",
+                    "kind": "text"
+                  }
+                ]
+              }
+            ],
+            "x-typia-required": true,
+            "x-typia-optional": true,
+            "type": "integer",
+            "x-typia-typeTags": [
+              {
+                "target": "number",
+                "name": "Type<\"uint64\">",
+                "kind": "type",
+                "value": "uint64",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                "exclusive": true
+              }
+            ],
+            "default": 0
+          },
+          "size": {
+            "x-typia-jsDocTags": [
+              {
+                "name": "default",
+                "text": [
+                  {
+                    "text": "10",
+                    "kind": "text"
+                  }
+                ]
+              }
+            ],
+            "x-typia-required": true,
+            "x-typia-optional": true,
+            "type": "integer",
+            "minimum": 10,
+            "x-typia-typeTags": [
+              {
+                "target": "number",
+                "name": "Type<\"uint64\">",
+                "kind": "type",
+                "value": "uint64",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                "exclusive": true
+              },
+              {
+                "target": "number",
+                "name": "Minimum<10>",
+                "kind": "minimum",
+                "value": 10,
+                "validate": "10 <= $input",
+                "exclusive": [
+                  "minimum",
+                  "exclusiveMinimum"
+                ]
+              }
+            ],
+            "default": 10
+          }
+        },
+        "nullable": false,
+        "x-typia-jsDocTags": []
+      },
+      "IComment.IPaginated": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IComment.ISummary"
+            }
+          },
+          "page": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "integer",
+            "x-typia-typeTags": [
+              {
+                "target": "number",
+                "name": "Type<\"uint64\">",
+                "kind": "type",
+                "value": "uint64",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                "exclusive": true
+              }
+            ]
+          },
+          "size": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "integer",
+            "minimum": 10,
+            "x-typia-typeTags": [
+              {
+                "target": "number",
+                "name": "Type<\"uint64\">",
+                "kind": "type",
+                "value": "uint64",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                "exclusive": true
+              },
+              {
+                "target": "number",
+                "name": "Minimum<10>",
+                "kind": "minimum",
+                "value": 10,
+                "validate": "10 <= $input",
+                "exclusive": [
+                  "minimum",
+                  "exclusiveMinimum"
+                ]
+              }
+            ]
+          }
+        },
+        "nullable": false,
+        "required": [
+          "data",
+          "page",
+          "size"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IComment.ISummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "author": {
+            "$ref": "#/components/schemas/IArticle.IAuthor"
+          },
+          "created_at": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"date-time\">",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "updated_at": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"date-time\">",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ],
+            "nullable": true
+          },
+          "body": {
+            "description": "댓글 본문",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "nullable": false,
+        "required": [
+          "id",
+          "author",
+          "created_at",
+          "updated_at",
+          "body"
         ],
         "x-typia-jsDocTags": []
       },
@@ -2422,17 +4461,21 @@
               }
             ]
           },
-          "author": {
-            "$ref": "#/components/schemas/IUser.IAuthor"
-          },
-          "snapshots": {
+          "body": {
+            "description": "댓글 본문",
             "x-typia-required": true,
             "x-typia-optional": false,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/IComment.ISnapshot"
-            },
-            "minItems": 1
+            "type": "string",
+            "nullable": true
+          },
+          "author": {
+            "$ref": "#/components/schemas/IArticle.IAuthor"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/IComment.ISummary.Nullable"
+          },
+          "article": {
+            "$ref": "#/components/schemas/IArticle.ISummary"
           },
           "created_at": {
             "x-typia-required": true,
@@ -2452,61 +4495,44 @@
                 ]
               }
             ]
+          },
+          "updated_at": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"date-time\">",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ],
+            "nullable": true
           }
         },
         "nullable": false,
         "required": [
           "id",
-          "author",
-          "snapshots",
-          "created_at"
-        ],
-        "x-typia-jsDocTags": []
-      },
-      "IComment.ISnapshot": {
-        "type": "object",
-        "properties": {
-          "body": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string"
-          },
-          "created_at": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string",
-            "format": "date-time",
-            "x-typia-typeTags": [
-              {
-                "target": "string",
-                "name": "Format<\"date-time\">",
-                "kind": "format",
-                "value": "date-time",
-                "validate": "!isNaN(new Date($input).getTime())",
-                "exclusive": [
-                  "format",
-                  "pattern"
-                ]
-              }
-            ]
-          }
-        },
-        "nullable": false,
-        "required": [
           "body",
-          "created_at"
+          "author",
+          "parent",
+          "article",
+          "created_at",
+          "updated_at"
         ],
         "x-typia-jsDocTags": []
       },
-      "IComment.ICreate": {
+      "IComment.ISummary.Nullable": {
         "type": "object",
         "properties": {
-          "body": {
-            "x-typia-required": true,
-            "x-typia-optional": false,
-            "type": "string"
-          },
-          "article_id": {
+          "id": {
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
@@ -2524,12 +4550,101 @@
                 ]
               }
             ]
+          },
+          "author": {
+            "$ref": "#/components/schemas/IArticle.IAuthor"
+          },
+          "created_at": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"date-time\">",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "updated_at": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"date-time\">",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ],
+            "nullable": true
+          },
+          "body": {
+            "description": "댓글 본문",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "nullable": true,
+        "required": [
+          "id",
+          "author",
+          "created_at",
+          "updated_at",
+          "body"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IComment.ICreateBody": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "description": "댓글 본문",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
+          },
+          "parent_id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ],
+            "nullable": true
           }
         },
         "nullable": false,
         "required": [
           "body",
-          "article_id"
+          "parent_id"
         ],
         "x-typia-jsDocTags": []
       },
@@ -2562,10 +4677,725 @@
         ],
         "x-typia-jsDocTags": []
       },
-      "IComment.IUpdate": {
+      "IBoard": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "name": {
+            "description": "게시판 이름",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
+          },
+          "description": {
+            "description": "게시판 소개글",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
+          },
+          "read_article_list_membership": {
+            "$ref": "#/components/schemas/IMembership.Nullable"
+          },
+          "read_article_membership": {
+            "$ref": "#/components/schemas/IMembership.Nullable"
+          },
+          "read_comment_list_membership": {
+            "$ref": "#/components/schemas/IMembership.Nullable"
+          },
+          "write_article_membership": {
+            "$ref": "#/components/schemas/IMembership"
+          },
+          "write_comment_membership": {
+            "$ref": "#/components/schemas/IMembership"
+          },
+          "manager_membership": {
+            "$ref": "#/components/schemas/IMembership"
+          }
+        },
+        "nullable": false,
+        "required": [
+          "id",
+          "name",
+          "description",
+          "read_article_list_membership",
+          "read_article_membership",
+          "read_comment_list_membership",
+          "write_article_membership",
+          "write_comment_membership",
+          "manager_membership"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IMembership": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "name": {
+            "description": "멤버십 등급명",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
+          },
+          "image_url": {
+            "description": "멤버십 등급 대표 이미지 주소",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "url",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"url\">",
+                "kind": "format",
+                "value": "url",
+                "validate": "/^[a-zA-Z0-9]+:\\/\\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ],
+            "nullable": true
+          },
+          "rank": {
+            "description": "멤버십 등급 단계\n\n계층형 멤버십 등급을 비교하기 위해 사용되는 값",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "integer",
+            "x-typia-typeTags": [
+              {
+                "target": "number",
+                "name": "Type<\"uint64\">",
+                "kind": "type",
+                "value": "uint64",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                "exclusive": true
+              }
+            ]
+          }
+        },
+        "nullable": false,
+        "required": [
+          "id",
+          "name",
+          "image_url",
+          "rank"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IArticle.IBulk.ISearch": {
+        "type": "object",
+        "properties": {
+          "board_id": {
+            "x-typia-required": true,
+            "x-typia-optional": true,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "sort": {
+            "x-typia-jsDocTags": [
+              {
+                "name": "default",
+                "text": [
+                  {
+                    "text": "latest",
+                    "kind": "text"
+                  }
+                ]
+              }
+            ],
+            "x-typia-required": true,
+            "x-typia-optional": true,
+            "type": "string",
+            "enum": [
+              "latest",
+              "oldest"
+            ],
+            "default": "latest"
+          },
+          "page": {
+            "x-typia-jsDocTags": [
+              {
+                "name": "default",
+                "text": [
+                  {
+                    "text": "0",
+                    "kind": "text"
+                  }
+                ]
+              }
+            ],
+            "x-typia-required": true,
+            "x-typia-optional": true,
+            "type": "integer",
+            "x-typia-typeTags": [
+              {
+                "target": "number",
+                "name": "Type<\"uint64\">",
+                "kind": "type",
+                "value": "uint64",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                "exclusive": true
+              }
+            ],
+            "default": 0
+          },
+          "size": {
+            "x-typia-jsDocTags": [
+              {
+                "name": "default",
+                "text": [
+                  {
+                    "text": "10",
+                    "kind": "text"
+                  }
+                ]
+              }
+            ],
+            "x-typia-required": true,
+            "x-typia-optional": true,
+            "type": "integer",
+            "minimum": 10,
+            "x-typia-typeTags": [
+              {
+                "target": "number",
+                "name": "Type<\"uint64\">",
+                "kind": "type",
+                "value": "uint64",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                "exclusive": true
+              },
+              {
+                "target": "number",
+                "name": "Minimum<10>",
+                "kind": "minimum",
+                "value": 10,
+                "validate": "10 <= $input",
+                "exclusive": [
+                  "minimum",
+                  "exclusiveMinimum"
+                ]
+              }
+            ],
+            "default": 10
+          }
+        },
+        "nullable": false,
+        "x-typia-jsDocTags": []
+      },
+      "IArticle.IBulk.IPaginated": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IArticle.IBulk"
+            }
+          },
+          "page": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "integer",
+            "x-typia-typeTags": [
+              {
+                "target": "number",
+                "name": "Type<\"uint64\">",
+                "kind": "type",
+                "value": "uint64",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                "exclusive": true
+              }
+            ]
+          },
+          "size": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "integer",
+            "minimum": 10,
+            "x-typia-typeTags": [
+              {
+                "target": "number",
+                "name": "Type<\"uint64\">",
+                "kind": "type",
+                "value": "uint64",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                "exclusive": true
+              },
+              {
+                "target": "number",
+                "name": "Minimum<10>",
+                "kind": "minimum",
+                "value": 10,
+                "validate": "10 <= $input",
+                "exclusive": [
+                  "minimum",
+                  "exclusiveMinimum"
+                ]
+              }
+            ]
+          }
+        },
+        "nullable": false,
+        "required": [
+          "data",
+          "page",
+          "size"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IArticle.IBulk": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "title": {
+            "description": "게시글 제목",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"date-time\">",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "updated_at": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"date-time\">",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ],
+            "nullable": true
+          },
+          "board": {
+            "$ref": "#/components/schemas/IBoard.ISummary"
+          }
+        },
+        "nullable": false,
+        "required": [
+          "id",
+          "title",
+          "created_at",
+          "updated_at",
+          "board"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IArticle.IUpdateBody": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "url",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"url\">",
+                "kind": "format",
+                "value": "url",
+                "validate": "/^[a-zA-Z0-9]+:\\/\\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "format": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "enum": [
+              "html",
+              "md",
+              "txt"
+            ]
+          },
+          "title": {
+            "description": "게시글 제목",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string"
+          }
+        },
+        "nullable": false,
+        "required": [
+          "url",
+          "format",
+          "title"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IComment.IBulk.ISearch": {
+        "type": "object",
+        "properties": {
+          "article_id": {
+            "x-typia-required": true,
+            "x-typia-optional": true,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "parent_id": {
+            "x-typia-required": true,
+            "x-typia-optional": true,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "sort": {
+            "x-typia-required": true,
+            "x-typia-optional": true,
+            "type": "string",
+            "enum": [
+              "latest",
+              "oldest"
+            ]
+          },
+          "page": {
+            "x-typia-jsDocTags": [
+              {
+                "name": "default",
+                "text": [
+                  {
+                    "text": "0",
+                    "kind": "text"
+                  }
+                ]
+              }
+            ],
+            "x-typia-required": true,
+            "x-typia-optional": true,
+            "type": "integer",
+            "x-typia-typeTags": [
+              {
+                "target": "number",
+                "name": "Type<\"uint64\">",
+                "kind": "type",
+                "value": "uint64",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                "exclusive": true
+              }
+            ],
+            "default": 0
+          },
+          "size": {
+            "x-typia-jsDocTags": [
+              {
+                "name": "default",
+                "text": [
+                  {
+                    "text": "10",
+                    "kind": "text"
+                  }
+                ]
+              }
+            ],
+            "x-typia-required": true,
+            "x-typia-optional": true,
+            "type": "integer",
+            "minimum": 10,
+            "x-typia-typeTags": [
+              {
+                "target": "number",
+                "name": "Type<\"uint64\">",
+                "kind": "type",
+                "value": "uint64",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                "exclusive": true
+              },
+              {
+                "target": "number",
+                "name": "Minimum<10>",
+                "kind": "minimum",
+                "value": 10,
+                "validate": "10 <= $input",
+                "exclusive": [
+                  "minimum",
+                  "exclusiveMinimum"
+                ]
+              }
+            ],
+            "default": 10
+          }
+        },
+        "nullable": false,
+        "x-typia-jsDocTags": []
+      },
+      "IComment.IBulk.IPaginated": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IComment.IBulk"
+            }
+          },
+          "page": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "integer",
+            "x-typia-typeTags": [
+              {
+                "target": "number",
+                "name": "Type<\"uint64\">",
+                "kind": "type",
+                "value": "uint64",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                "exclusive": true
+              }
+            ]
+          },
+          "size": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "integer",
+            "minimum": 10,
+            "x-typia-typeTags": [
+              {
+                "target": "number",
+                "name": "Type<\"uint64\">",
+                "kind": "type",
+                "value": "uint64",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 18446744073709551615",
+                "exclusive": true
+              },
+              {
+                "target": "number",
+                "name": "Minimum<10>",
+                "kind": "minimum",
+                "value": 10,
+                "validate": "10 <= $input",
+                "exclusive": [
+                  "minimum",
+                  "exclusiveMinimum"
+                ]
+              }
+            ]
+          }
+        },
+        "nullable": false,
+        "required": [
+          "data",
+          "page",
+          "size"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IComment.IBulk": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"uuid\">",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "created_at": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"date-time\">",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ]
+          },
+          "updated_at": {
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "target": "string",
+                "name": "Format<\"date-time\">",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": [
+                  "format",
+                  "pattern"
+                ]
+              }
+            ],
+            "nullable": true
+          },
+          "body": {
+            "description": "댓글 본문",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "type": "string",
+            "nullable": true
+          },
+          "article": {
+            "$ref": "#/components/schemas/IArticle.ISummary"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/IComment.ISummary.Nullable"
+          }
+        },
+        "nullable": false,
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "body",
+          "article",
+          "parent"
+        ],
+        "x-typia-jsDocTags": []
+      },
+      "IComment.IUpdateBody": {
         "type": "object",
         "properties": {
           "body": {
+            "description": "댓글 본문",
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string"
