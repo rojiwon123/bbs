@@ -11,6 +11,8 @@ import { Result } from "@APP/utils/result";
 @nest.Controller("boards")
 export class BoardsController {
     /**
+     * 게시판 목록 조회
+     *
      * @summary 게시판 목록 조회
      * @tag public
      * @return 게시판 목록
@@ -22,6 +24,8 @@ export class BoardsController {
     }
 
     /**
+     * 게시판 조회
+     *
      * @summary 게시판 조회
      * @tag public
      * @return 게시판 상세 정보
