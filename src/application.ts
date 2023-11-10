@@ -16,7 +16,7 @@ export namespace Backend {
         await prisma.$connect();
 
         const app = await NestFactory.create(
-            await DynamicModule.mount(`${__dirname}/controllers`, {
+            await DynamicModule.mount(`${__dirname}/controller`, {
                 imports: [InfraModule],
             }),
             options,

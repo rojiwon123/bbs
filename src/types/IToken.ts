@@ -9,7 +9,7 @@ export namespace IToken {
         /** 토큰 만료일자 */
         expired_at: string & typia.tags.Format<"date-time">;
     }
-    export type IInput = Pick<IPayload, "user_id">;
+    export interface ICreate extends Pick<IPayload, "user_id"> {}
     export interface IOutput {
         token: string;
         /** 토큰 만료일자 */
