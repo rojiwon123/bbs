@@ -50,7 +50,6 @@ export const test_get_mine_comment_list_with_query = async (
         test(Connection.authorize(token)(connection), {
             size: 10,
             page: 2,
-            sort: "latest",
         }),
         HttpStatus.OK,
     )({
@@ -61,7 +60,7 @@ export const test_get_mine_comment_list_with_query = async (
     });
     const total = await APIValidator.assert(
         test(Connection.authorize(token)(connection), {
-            size: 100,
+            size: 1000,
             page: 1,
             sort: "oldest",
         }),
@@ -77,7 +76,6 @@ export const test_get_mine_comment_list_with_query = async (
         test(Connection.authorize(token)(connection), {
             size: 100,
             page: 1,
-            sort: "oldest",
             article_id,
         }),
         HttpStatus.OK,
@@ -94,11 +92,10 @@ export const test_get_mine_comment_list_with_query = async (
             .map(pick("id"))
             .every((id) => id === article_id),
     )(true);
-    const ids = page1.data
-        .map(pick("id"))
-        .concat(...page2.data.map(pick("id")));
-    const actual = total.data.map(pick("id")).reverse().slice(0, ids.length);
-    TestValidator.equals("query test")(ids)(actual);
+
+    const expected = page1.data.concat(...page2.data);
+    const actual = total.data.reverse().slice(0, expected.length);
+    TestValidator.equals("query test")(actual)(expected);
 };
 
 export const test_get_mine_comment_list_when_token_is_missing = async (

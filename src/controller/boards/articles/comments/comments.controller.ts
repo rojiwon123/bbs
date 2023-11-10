@@ -3,7 +3,7 @@ import * as nest from "@nestjs/common";
 import { Request } from "express";
 import typia from "typia";
 
-import { BoardsArticlesCommentsUsecase } from "@APP/application/boards-articles-comments.usecase";
+import { BoardsCommentsUsecase } from "@APP/application/boards/comments.usecase";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IComment } from "@APP/types/IComment";
 import { Failure } from "@APP/utils/failure";
@@ -42,7 +42,7 @@ export class BoardsArticlesCommentsController {
         @core.TypedQuery() query: IComment.ISearch,
         @nest.Request() req: Request,
     ): Promise<IComment.IPaginated> {
-        const result = await BoardsArticlesCommentsUsecase.getList(req)({
+        const result = await BoardsCommentsUsecase.getList(req)({
             board_id,
             article_id,
         })(query);
@@ -103,7 +103,7 @@ export class BoardsArticlesCommentsController {
         comment_id: string & typia.tags.Format<"uuid">,
         @nest.Request() req: Request,
     ): Promise<IComment> {
-        const result = await BoardsArticlesCommentsUsecase.get(req)({
+        const result = await BoardsCommentsUsecase.get(req)({
             board_id,
             article_id,
             comment_id,
@@ -165,7 +165,7 @@ export class BoardsArticlesCommentsController {
         @core.TypedBody() body: IComment.ICreateBody,
         @nest.Request() req: Request,
     ): Promise<IComment.Identity> {
-        const result = await BoardsArticlesCommentsUsecase.create(req)({
+        const result = await BoardsCommentsUsecase.create(req)({
             board_id,
             article_id,
         })(body);

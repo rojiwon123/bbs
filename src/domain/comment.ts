@@ -2,7 +2,6 @@ import { isNull, map, pipe, toArray } from "@fxts/core";
 
 import { prisma } from "@APP/infrastructure/DB";
 import { ErrorCode } from "@APP/types/ErrorCode";
-import { IArticle } from "@APP/types/IArticle";
 import { IComment } from "@APP/types/IComment";
 import { DateMapper } from "@APP/utils/date";
 import { Failure } from "@APP/utils/failure";
@@ -112,15 +111,37 @@ export namespace Comment {
                 Result.Ok.map,
             );
 
+    export const getBulkList =
+        (tx: Prisma.TransactionClient = prisma) =>
+        async (input: {
+            where?: Prisma.commentsWhereInput;
+            skip: number;
+            take: number;
+            orderBy: Prisma.commentsOrderByWithRelationInput;
+        }) =>
+            pipe(
+                input,
+                async ({ where = {}, skip, take, orderBy }) =>
+                    tx.comments.findMany({
+                        where: { ...where, deleted_at: null },
+                        skip,
+                        take,
+                        orderBy,
+                        select: CommentJson.selectBulk(),
+                    }),
+                map(CommentJson.mapBulk),
+                toArray,
+                Result.Ok.map,
+            );
+
     export const remove =
         (tx: Prisma.TransactionClient = prisma) =>
         async (
-            identity: IArticle.Identity & IComment.Identity,
+            identity: IComment.Identity,
         ): Promise<Result.Ok<IComment.Identity>> => {
             await tx.comments.updateMany({
                 where: {
                     id: identity.comment_id,
-                    article_id: identity.article_id,
                     deleted_at: null,
                 },
                 data: { deleted_at: DateMapper.toISO() },
@@ -165,6 +186,17 @@ export namespace CommentJson {
             }),
             author: { select: ArticleJson.selectAuthor() },
         }) satisfies Prisma.commentsSelect;
+
+    export const selectBulk = () =>
+        ({
+            id: true,
+            created_at: true,
+            deleted_at: true,
+            snapshots: selectSnapshots({ body: true, created_at: true }),
+            article: { select: ArticleJson.selectSummary() },
+            parent: { select: selectSummary() },
+        }) satisfies Prisma.commentsSelect;
+
     export const mapSummary = (
         comment: NonNullable<
             Awaited<
@@ -185,6 +217,34 @@ export namespace CommentJson {
             updated_at: isNull(snapshot)
                 ? null
                 : comment.created_at < snapshot.created_at
+                ? DateMapper.toISO(snapshot.created_at)
+                : null,
+        };
+    };
+
+    export const mapBulk = (
+        comments: NonNullable<
+            Awaited<
+                ReturnType<
+                    typeof prisma.comments.findFirst<{
+                        select: ReturnType<typeof selectBulk>;
+                    }>
+                >
+            >
+        >,
+    ): IComment.IBulk => {
+        const snapshot = comments.snapshots.at(0) ?? null;
+        return {
+            id: comments.id,
+            body: isNull(snapshot) ? null : snapshot.body,
+            article: ArticleJson.mapSummary(comments.article),
+            parent: isNull(comments.parent)
+                ? null
+                : mapSummary(comments.parent),
+            created_at: DateMapper.toISO(comments.created_at),
+            updated_at: isNull(snapshot)
+                ? null
+                : comments.created_at < snapshot.created_at
                 ? DateMapper.toISO(snapshot.created_at)
                 : null,
         };

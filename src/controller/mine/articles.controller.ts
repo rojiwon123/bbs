@@ -3,7 +3,7 @@ import * as nest from "@nestjs/common";
 import { Request } from "express";
 import typia from "typia";
 
-import { MineArticlesUsecase } from "@APP/application/mine-articles.usecase";
+import { MineArticlesUsecase } from "@APP/application/mine/articles.usecase";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
 import { Failure } from "@APP/utils/failure";

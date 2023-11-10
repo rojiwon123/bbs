@@ -156,7 +156,7 @@ export const test_get_mine_comment_when_comment_is_deleted = async (
         assertBody: typia.createAssertEquals<ErrorCode.Comment.NotFound>(),
     });
 
-    await Seed.deleteArticle(comment.id);
+    await Seed.deleteComment(comment.id);
 };
 
 export const test_seed_changed = Seed.check_size_changed;

@@ -3,8 +3,11 @@ import * as nest from "@nestjs/common";
 import { Request } from "express";
 import typia from "typia";
 
+import { MineCommentsUsecase } from "@APP/application/mine/comments.usecase";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IComment } from "@APP/types/IComment";
+import { Failure } from "@APP/utils/failure";
+import { Result } from "@APP/utils/result";
 
 @nest.Controller("mine/comments")
 export class MineCommentsController {
@@ -30,9 +33,25 @@ export class MineCommentsController {
         @core.TypedQuery() query: IComment.IBulk.ISearch,
         @nest.Request() req: Request,
     ): Promise<IComment.IBulk.IPaginated> {
-        query;
-        req;
-        throw Error();
+        const result = await MineCommentsUsecase.getList(req)(query);
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        if (error instanceof Error)
+            switch (error.message) {
+                case "REQUIRED_PERMISSION":
+                case "EXPIRED_PERMISSION":
+                case "INVALID_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.UNAUTHORIZED,
+                    );
+                case "INSUFFICIENT_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.FORBIDDEN,
+                    );
+            }
+        throw Failure.Http.fromExternal(error);
     }
 
     /**
@@ -59,9 +78,30 @@ export class MineCommentsController {
         comment_id: string & typia.tags.Format<"uuid">,
         @nest.Request() req: Request,
     ): Promise<IComment> {
-        comment_id;
-        req;
-        throw Error();
+        const result = await MineCommentsUsecase.get(req)({ comment_id });
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        if (error instanceof Error)
+            switch (error.message) {
+                case "REQUIRED_PERMISSION":
+                case "EXPIRED_PERMISSION":
+                case "INVALID_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.UNAUTHORIZED,
+                    );
+                case "INSUFFICIENT_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.FORBIDDEN,
+                    );
+                case "NOT_FOUND_COMMENT":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.NOT_FOUND,
+                    );
+            }
+        throw Failure.Http.fromExternal(error);
     }
 
     /**
@@ -90,10 +130,32 @@ export class MineCommentsController {
         @core.TypedBody() body: IComment.IUpdateBody,
         @nest.Request() req: Request,
     ): Promise<IComment.Identity> {
-        comment_id;
-        body;
-        req;
-        throw Error("");
+        const result = await MineCommentsUsecase.update(req)({ comment_id })(
+            body,
+        );
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        if (error instanceof Error)
+            switch (error.message) {
+                case "REQUIRED_PERMISSION":
+                case "EXPIRED_PERMISSION":
+                case "INVALID_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.UNAUTHORIZED,
+                    );
+                case "INSUFFICIENT_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.FORBIDDEN,
+                    );
+                case "NOT_FOUND_COMMENT":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.NOT_FOUND,
+                    );
+            }
+        throw Failure.Http.fromExternal(error);
     }
 
     /**
@@ -120,8 +182,29 @@ export class MineCommentsController {
         comment_id: string & typia.tags.Format<"uuid">,
         @nest.Request() req: Request,
     ): Promise<IComment.Identity> {
-        comment_id;
-        req;
-        throw Error();
+        const result = await MineCommentsUsecase.remove(req)({ comment_id });
+        if (Result.Ok.is(result)) return Result.Ok.flatten(result);
+        const error = Result.Error.flatten(result);
+        if (error instanceof Error)
+            switch (error.message) {
+                case "REQUIRED_PERMISSION":
+                case "EXPIRED_PERMISSION":
+                case "INVALID_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.UNAUTHORIZED,
+                    );
+                case "INSUFFICIENT_PERMISSION":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.FORBIDDEN,
+                    );
+                case "NOT_FOUND_COMMENT":
+                    throw Failure.Http.fromInternal(
+                        error,
+                        nest.HttpStatus.NOT_FOUND,
+                    );
+            }
+        throw Failure.Http.fromExternal(error);
     }
 }

@@ -2,7 +2,7 @@ import core from "@nestia/core";
 import * as nest from "@nestjs/common";
 import typia from "typia";
 
-import { BoardsUsecase } from "@APP/application/boards.usecase";
+import { BoardsUsecase } from "@APP/application/boards/boards.usecase";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IBoard } from "@APP/types/IBoard";
 import { Failure } from "@APP/utils/failure";
