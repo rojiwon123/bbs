@@ -3,14 +3,13 @@ import { HttpStatus } from "@nestjs/common";
 import api from "@project/api";
 import typia from "typia";
 
-import { APIValidator } from "../internal/validator";
+import { Util } from "../internal/utils";
 
-export const test_health_check = async (connection: IConnection) => {
-    await APIValidator.assert(
+export const test_health_check = (connection: IConnection) =>
+    Util.assertResponse(
         api.functional.health.check(connection),
         HttpStatus.OK,
     )({
         success: true,
         assertBody: typia.createAssertEquals<"hello world">(),
     });
-};

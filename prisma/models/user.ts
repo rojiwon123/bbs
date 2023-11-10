@@ -2,15 +2,11 @@ import { OauthType } from "../enums";
 import { Description } from "../util/description";
 import { Table } from "../util/table";
 
+const tags = [Description.namespace("User"), Description.author()];
+
 Table.create({
     tableName: "authentications",
-    comments: Description.lines(
-        "Authentication Entity of User",
-        "combination of `oauth_sub` and `oauth_type` is unique",
-        Description.namespace(),
-        Description.namespace("User"),
-        Description.author(),
-    ),
+    comments: Description.lines("Authentication Entity of User", ...tags),
 })(
     Table.addId(),
     Table.addRelationalString("user", { optional: true })("users"),
@@ -27,34 +23,26 @@ Table.create({
     Table.setCreatable,
     Table.setUpdatable,
     Table.setDeletable,
-    Table.addColumn("unique")({ fields: ["oauth_sub", "oauth_type"] }),
 );
 
 Table.create({
     tableName: "users",
     comments: Description.lines(
-        "Root Entity of User",
-        Description.namespace(),
-        Description.namespace("Article"),
-        Description.namespace("Comment"),
-        Description.namespace("Board"),
-        Description.namespace("User"),
-        Description.author(),
+        "Root Entity of User Profile",
+        Description.namespace("BBS"),
+        ...tags,
     ),
 })(
     Table.addId(),
-    Table.addRelationalString("membership", {
-        optional: true,
-        comments: Description.lines(
-            "If null, user membership is same with unauthorized user",
-        ),
-    })("memberships"),
     Table.addColumn("string")("name", {
         comments: Description.lines("displayed name of user"),
     }),
     Table.addColumn("string")("image_url", {
         optional: true,
         comments: Description.lines("url of user profile image"),
+    }),
+    Table.addColumn("string")("introduction", {
+        comments: Description.lines("user introduction"),
     }),
     Table.setCreatable,
     Table.setUpdatable,

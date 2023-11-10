@@ -155,7 +155,7 @@ export namespace Report {
                 `| ${result.count} | ${result.count} | 0 | ${result.time} ms |`,
             );
             write();
-            write("## Details");
+            write("## Detail");
             write();
             result.passed.forEach((group) => {
                 write("<details>");
