@@ -57,8 +57,6 @@ export namespace IArticle {
     export interface IUpdate extends Pick<IArticle, "id">, IArticle.IBody {
         /** 게시글 제목 */
         title: string;
-        attachment_ids: (string & typia.tags.Format<"uuid">)[] &
-            typia.tags.MaxItems<10>;
     }
 
     export interface ICreate extends Omit<IUpdate, "id"> {
@@ -74,6 +72,12 @@ export namespace IArticle {
         is_notice: boolean;
     }
 
+    export interface IAttach {
+        article_id: string & typia.tags.Format<"uuid">;
+        attachment_ids: (string & typia.tags.Format<"uuid">)[] &
+            typia.tags.MaxItems<10>;
+    }
+
     export interface ISearch extends IPage.ISearch {
         /** @default latest */
         sort?: IPage.SortType;
@@ -87,6 +91,8 @@ export namespace IArticle {
         extends Omit<ICreate, "author_id" | "board_id" | "is_notice"> {}
 
     export interface ISetNoticeBody extends Omit<ISetNoticeInput, "board_id"> {}
+
+    export interface IAttachBody extends Omit<IAttach, "article_id"> {}
 
     export interface IBulk
         extends Pick<

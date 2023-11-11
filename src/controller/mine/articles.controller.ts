@@ -6,6 +6,7 @@ import typia from "typia";
 import { MineArticlesUsecase } from "@APP/application/mine/articles.usecase";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
+import { IAttachment } from "@APP/types/IAttachment";
 import { Failure } from "@APP/utils/failure";
 import { Result } from "@APP/utils/result";
 
@@ -157,6 +158,44 @@ export class MineArticlesController {
                     );
             }
         throw Failure.Http.fromExternal(error);
+    }
+
+    /**
+     * 작성자 권한으로 게시글에 파일을 첨부합니다.
+     *
+     * 게시글 첨부 파일 목록에서 첨부된 파일을 확인할 수 있습니다.
+     *
+     * 한 게시글당 최대 10개의 파일을 첨부할 수 있습니다.
+     *
+     * @summary 파일 첨부
+     * @tag mine
+     * @security bearer
+     * @param article_id 게시글 id
+     * @param body 첨부 파일 id 전체 목록
+     * @return 첨부 파일 목록
+     */
+    @core.TypedException<
+        | ErrorCode.Permission.Expired
+        | ErrorCode.Permission.Invalid
+        | ErrorCode.Permission.Required
+    >(nest.HttpStatus.UNAUTHORIZED)
+    @core.TypedException<ErrorCode.Permission.Insufficient>(
+        nest.HttpStatus.FORBIDDEN,
+    )
+    @core.TypedException<
+        ErrorCode.Article.NotFound | ErrorCode.Attachment.NotFound
+    >(nest.HttpStatus.NOT_FOUND)
+    @core.TypedRoute.Patch(":article_id/attachments")
+    async attach(
+        @core.TypedParam("article_id")
+        article_id: string & typia.tags.Format<"uuid">,
+        @core.TypedBody() body: IArticle.IAttachBody,
+        @nest.Request() req: Request,
+    ): Promise<IAttachment[]> {
+        article_id;
+        body;
+        req;
+        throw Error();
     }
 
     /**

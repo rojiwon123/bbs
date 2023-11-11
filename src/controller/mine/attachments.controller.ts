@@ -13,7 +13,8 @@ export class MineAttachmentsController {
      *
      * @summary 첨부 파일 정보 생성
      * @tag mine
-     * @param body
+     * @security bearer
+     * @param body 첨부 파일 생성 정보
      * @return 미리 서명된 정보
      */
     @core.TypedRoute.Post()
