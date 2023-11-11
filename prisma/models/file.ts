@@ -12,6 +12,11 @@ Table.create({
     ),
 })(
     Table.addId(),
+    Table.addRelationalString("owner")("users", {
+        comments: Description.lines(
+            "`attachment` file can only be attached by the owner",
+        ),
+    }),
     Table.addColumn("string")("name", {
         comments: Description.lines("name of attachment resource"),
     }),
@@ -24,8 +29,10 @@ Table.create({
         comments: Description.lines("URL path of real resource"),
     }),
     Table.setCreatable,
+    Table.setDeletable,
     Table.addRelation({
-        tableName: "article_attachment_snapshots",
+        tableName: "article_attachments",
+        fieldName: "articles",
         options: { list: true },
     }),
 );

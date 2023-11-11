@@ -40,32 +40,33 @@ model articles {
   /// 
   /// `uuid` type
   /// 
-  id         String              @id @database.Uuid
+  id          String                @id @database.Uuid
   /// referenced in `users`
   /// 
   /// `uuid` type
   /// 
-  author_id  String              @database.Uuid
-  author     users               @relation(fields: [author_id], references: [id])
+  author_id   String                @database.Uuid
+  author      users                 @relation(fields: [author_id], references: [id])
   /// referenced in `boards`
   /// 
   /// `uuid` type
   /// 
-  board_id   String              @database.Uuid
-  board      boards              @relation(fields: [board_id], references: [id])
+  board_id    String                @database.Uuid
+  board       boards                @relation(fields: [board_id], references: [id])
   /// If true, a article is notification.
   /// 
-  is_notice  Boolean
+  is_notice   Boolean
   /// creation time of record
   /// 
-  created_at DateTime            @database.Timestamptz
+  created_at  DateTime              @database.Timestamptz
   /// deletion time of record
   /// 
   /// if null, a record is soft-deleted
   /// 
-  deleted_at DateTime?           @database.Timestamptz
-  snapshots  article_snapshots[]
-  comments   comments[]
+  deleted_at  DateTime?             @database.Timestamptz
+  snapshots   article_snapshots[]
+  comments    comments[]
+  attachments article_attachments[]
 }
 
 /// Snapshot of Article
@@ -85,33 +86,32 @@ model article_snapshots {
   /// 
   /// `uuid` type
   /// 
-  id                   String                         @id @database.Uuid
+  id          String            @id @database.Uuid
   /// referenced in `articles`
   /// 
   /// `uuid` type
   /// 
-  article_id           String                         @database.Uuid
-  article              articles                       @relation(fields: [article_id], references: [id])
+  article_id  String            @database.Uuid
+  article     articles          @relation(fields: [article_id], references: [id])
   /// title of article
   /// 
-  title                String
+  title       String
   /// URL path of article body resource
   /// 
-  body_url             String
+  body_url    String
   /// one of `html`, `md`, `txt`
   /// 
-  body_format          ArticleBodyFormat
+  body_format ArticleBodyFormat
   /// creation time of record
   /// 
-  created_at           DateTime                       @database.Timestamptz
-  attachment_snapshots article_attachment_snapshots[]
+  created_at  DateTime          @database.Timestamptz
 }
 
-/// Attachment Snapshot for Article
+/// Attachment for Article
 /// 
-/// an `article_attachment_snapshots` entity connects an `article_snapshots` record with an `attachments` record.
+/// an `article_attachments` entity connects an `articles` record with an `attachments` record.
 /// 
-/// If author add attachment to an article, a new record of `article_attachment_snapshots` is created.
+/// If author add attachment to an article, a new record of `article_attachments` is created.
 /// 
 /// @namespace All
 /// 
@@ -119,27 +119,24 @@ model article_snapshots {
 /// 
 /// @author industriously
 /// 
-model article_attachment_snapshots {
+model article_attachments {
   /// record identity
   /// 
   /// `uuid` type
   /// 
-  id            String            @id @database.Uuid
-  /// referenced in `article_snapshots`
+  id            String      @id @database.Uuid
+  /// referenced in `articles`
   /// 
   /// `uuid` type
   /// 
-  snapshot_id   String            @database.Uuid
-  snapshot      article_snapshots @relation(fields: [snapshot_id], references: [id])
+  article_id    String      @database.Uuid
+  article       articles    @relation(fields: [article_id], references: [id])
   /// referenced in `attachments`
   /// 
   /// `uuid` type
   /// 
-  attachment_id String            @database.Uuid
-  attachment    attachments       @relation(fields: [attachment_id], references: [id])
-  /// `sequence` is used to distinguish each individual `attachment`.
-  /// 
-  sequence      Int
+  attachment_id String      @database.Uuid
+  attachment    attachments @relation(fields: [attachment_id], references: [id])
 }
 
 /// Root Entity of Board
@@ -300,20 +297,33 @@ model attachments {
   /// 
   /// `uuid` type
   /// 
-  id                           String                         @id @database.Uuid
+  id         String                @id @database.Uuid
+  /// referenced in `users`
+  /// 
+  /// `uuid` type
+  /// 
+  owner_id   String                @database.Uuid
+  /// `attachment` file can only be attached by the owner
+  /// 
+  owner      users                 @relation(fields: [owner_id], references: [id])
   /// name of attachment resource
   /// 
-  name                         String
+  name       String
   /// extension of resource like `md`, `html`, `jpeg`...
   /// 
-  extension                    String
+  extension  String
   /// URL path of real resource
   /// 
-  url                          String
+  url        String
   /// creation time of record
   /// 
-  created_at                   DateTime                       @database.Timestamptz
-  article_attachment_snapshots article_attachment_snapshots[]
+  created_at DateTime              @database.Timestamptz
+  /// deletion time of record
+  /// 
+  /// if null, a record is soft-deleted
+  /// 
+  deleted_at DateTime?             @database.Timestamptz
+  articles   article_attachments[]
 }
 
 /// Membership Entity
@@ -453,4 +463,5 @@ model users {
   authentications authentications[]
   articles        articles[]
   comments        comments[]
+  attachments     attachments[]
 }

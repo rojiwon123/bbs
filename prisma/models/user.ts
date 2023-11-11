@@ -70,4 +70,8 @@ Table.create({
         tableName: "comments",
         options: { list: true },
     }),
+    Table.addRelation({
+        tableName: "attachments",
+        options: { list: true },
+    }),
 );

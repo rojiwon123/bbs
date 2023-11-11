@@ -28,11 +28,10 @@ erDiagram
     ArticleBodyFormat body_format
     DateTime created_at
 }
-"article_attachment_snapshots" {
+"article_attachments" {
     String id PK
-    String snapshot_id FK
+    String article_id FK
     String attachment_id FK
-    Int sequence
 }
 "boards" {
     String id PK
@@ -63,10 +62,12 @@ erDiagram
 }
 "attachments" {
     String id PK
+    String owner_id FK
     String name
     String extension
     String url
     DateTime created_at
+    DateTime deleted_at "nullable"
 }
 "memberships" {
     String id PK
@@ -99,8 +100,8 @@ erDiagram
 "articles" }o--|| "users" : author
 "articles" }o--|| "boards" : board
 "article_snapshots" }o--|| "articles" : article
-"article_attachment_snapshots" }o--|| "article_snapshots" : snapshot
-"article_attachment_snapshots" }o--|| "attachments" : attachment
+"article_attachments" }o--|| "articles" : article
+"article_attachments" }o--|| "attachments" : attachment
 "boards" }o--|| "memberships" : manager_membership
 "boards" }o--|| "memberships" : read_article_list_membership
 "boards" }o--|| "memberships" : read_article_membership
@@ -111,6 +112,7 @@ erDiagram
 "comments" }o--|| "articles" : article
 "comments" }o--o| "comments" : parent
 "comment_snapshots" }o--|| "comments" : comment
+"attachments" }o--|| "users" : owner
 "authentications" }o--|| "users" : user
 "users" }o--|| "memberships" : membership
 ```
@@ -163,13 +165,13 @@ When a user edit an article, a new snapshot record is created, and readers will 
 -   `body_format`: one of `html`, `md`, `txt`
 -   `created_at`: creation time of record
 
-### `article_attachment_snapshots`
+### `article_attachments`
 
-Attachment Snapshot for Article
+Attachment for Article
 
-an `article_attachment_snapshots` entity connects an `article_snapshots` record with an `attachments` record.
+an `article_attachments` entity connects an `articles` record with an `attachments` record.
 
-If author add attachment to an article, a new record of `article_attachment_snapshots` is created.
+If author add attachment to an article, a new record of `article_attachments` is created.
 
 **Properties**
 
@@ -177,15 +179,14 @@ If author add attachment to an article, a new record of `article_attachment_snap
     > record identity
     >
     > `uuid` type
--   `snapshot_id`
-    > referenced in `article_snapshots`
+-   `article_id`
+    > referenced in `articles`
     >
     > `uuid` type
 -   `attachment_id`
     > referenced in `attachments`
     >
     > `uuid` type
--   `sequence`: `sequence` is used to distinguish each individual `attachment`.
 
 ### `boards`
 
@@ -294,10 +295,18 @@ All the attachment resources managed in the BBS
     > record identity
     >
     > `uuid` type
+-   `owner_id`
+    > referenced in `users`
+    >
+    > `uuid` type
 -   `name`: name of attachment resource
 -   `extension`: extension of resource like `md`, `html`, `jpeg`...
 -   `url`: URL path of real resource
 -   `created_at`: creation time of record
+-   `deleted_at`
+    > deletion time of record
+    >
+    > if null, a record is soft-deleted
 
 ### `memberships`
 
@@ -537,11 +546,10 @@ erDiagram
     ArticleBodyFormat body_format
     DateTime created_at
 }
-"article_attachment_snapshots" {
+"article_attachments" {
     String id PK
-    String snapshot_id FK
+    String article_id FK
     String attachment_id FK
-    Int sequence
 }
 "boards" {
     String id PK
@@ -558,10 +566,12 @@ erDiagram
 }
 "attachments" {
     String id PK
+    String owner_id FK
     String name
     String extension
     String url
     DateTime created_at
+    DateTime deleted_at "nullable"
 }
 "users" {
     String id PK
@@ -575,8 +585,9 @@ erDiagram
 "articles" }o--|| "users" : author
 "articles" }o--|| "boards" : board
 "article_snapshots" }o--|| "articles" : article
-"article_attachment_snapshots" }o--|| "article_snapshots" : snapshot
-"article_attachment_snapshots" }o--|| "attachments" : attachment
+"article_attachments" }o--|| "articles" : article
+"article_attachments" }o--|| "attachments" : attachment
+"attachments" }o--|| "users" : owner
 ```
 
 ### `articles`
@@ -627,13 +638,13 @@ When a user edit an article, a new snapshot record is created, and readers will 
 -   `body_format`: one of `html`, `md`, `txt`
 -   `created_at`: creation time of record
 
-### `article_attachment_snapshots`
+### `article_attachments`
 
-Attachment Snapshot for Article
+Attachment for Article
 
-an `article_attachment_snapshots` entity connects an `article_snapshots` record with an `attachments` record.
+an `article_attachments` entity connects an `articles` record with an `attachments` record.
 
-If author add attachment to an article, a new record of `article_attachment_snapshots` is created.
+If author add attachment to an article, a new record of `article_attachments` is created.
 
 **Properties**
 
@@ -641,15 +652,14 @@ If author add attachment to an article, a new record of `article_attachment_snap
     > record identity
     >
     > `uuid` type
--   `snapshot_id`
-    > referenced in `article_snapshots`
+-   `article_id`
+    > referenced in `articles`
     >
     > `uuid` type
 -   `attachment_id`
     > referenced in `attachments`
     >
     > `uuid` type
--   `sequence`: `sequence` is used to distinguish each individual `attachment`.
 
 ### `boards`
 
@@ -705,10 +715,18 @@ All the attachment resources managed in the BBS
     > record identity
     >
     > `uuid` type
+-   `owner_id`
+    > referenced in `users`
+    >
+    > `uuid` type
 -   `name`: name of attachment resource
 -   `extension`: extension of resource like `md`, `html`, `jpeg`...
 -   `url`: URL path of real resource
 -   `created_at`: creation time of record
+-   `deleted_at`
+    > deletion time of record
+    >
+    > if null, a record is soft-deleted
 
 ### `users`
 
