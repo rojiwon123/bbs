@@ -7,7 +7,6 @@ Table.create({
         "Root Entity of Comment",
         "a user can comment short text on article or other comment",
         Description.namespace(),
-        Description.namespace("Article"),
         Description.namespace("Comment"),
         Description.author(),
     ),

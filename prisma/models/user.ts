@@ -37,7 +37,6 @@ Table.create({
         Description.namespace(),
         Description.namespace("Article"),
         Description.namespace("Comment"),
-        Description.namespace("Board"),
         Description.namespace("User"),
         Description.author(),
     ),

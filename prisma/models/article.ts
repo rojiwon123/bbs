@@ -7,7 +7,6 @@ Table.create({
     comments: Description.lines(
         "Root Entity of Article",
         Description.namespace(),
-        Description.namespace("Board"),
         Description.namespace("Comment"),
         Description.namespace("Article"),
         Description.author(),

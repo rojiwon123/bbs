@@ -29,8 +29,6 @@ enum ArticleBodyFormat {
 /// 
 /// @namespace All
 /// 
-/// @namespace Board
-/// 
 /// @namespace Comment
 /// 
 /// @namespace Article
@@ -214,8 +212,6 @@ model boards {
 /// a user can comment short text on article or other comment
 /// 
 /// @namespace All
-/// 
-/// @namespace Article
 /// 
 /// @namespace Comment
 /// 
@@ -418,8 +414,6 @@ model authentications {
 /// @namespace Article
 /// 
 /// @namespace Comment
-/// 
-/// @namespace Board
 /// 
 /// @namespace User
 /// 
