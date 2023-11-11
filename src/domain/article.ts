@@ -84,6 +84,7 @@ export namespace Article {
                     : { format: snapshot.body_format, url: snapshot.body_url },
                 is_notice: article.is_notice,
                 board: { id: article.board.id, name: article.board.name },
+                attachments: [],
                 created_at: DateMapper.toISO(article.created_at),
                 updated_at: isNull(snapshot)
                     ? null

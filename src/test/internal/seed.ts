@@ -346,8 +346,8 @@ export namespace Seed {
         prisma.boards.delete({ where: { id } });
 
     export const deleteArticle = async (id: string) => {
-        await prisma.article_attachment_snapshots.deleteMany({
-            where: { snapshot: { article_id: id } },
+        await prisma.article_attachments.deleteMany({
+            where: { article_id: id },
         });
         await prisma.article_snapshots.deleteMany({
             where: { article_id: id },
@@ -387,7 +387,7 @@ export namespace Seed {
             article_snapshots: {
                 total: number;
             };
-            article_attachment_snapshots: {
+            article_attachments: {
                 total: number;
             };
             comments: {
@@ -436,8 +436,8 @@ export namespace Seed {
                 article_snapshots: {
                     total: await prisma.article_snapshots.count(),
                 },
-                article_attachment_snapshots: {
-                    total: await prisma.article_attachment_snapshots.count(),
+                article_attachments: {
+                    total: await prisma.article_attachments.count(),
                 },
                 comments: {
                     total: await prisma.comments.count(),
@@ -765,7 +765,7 @@ export namespace Seed {
         await prisma.$transaction([
             truncate("comment_snapshots"),
             truncate("comments"),
-            truncate("article_attachment_snapshots"),
+            truncate("article_attachments"),
             truncate("article_snapshots"),
             truncate("articles"),
             truncate("attachments"),

@@ -1,6 +1,7 @@
 import typia from "typia";
 
 import { ArticleBodyFormat } from "../../db/edge";
+import { IAttachment } from "./IAttachment";
 import { IBoard } from "./IBoard";
 import { IPage } from "./IPage";
 import { IUser } from "./IUser";
@@ -18,6 +19,8 @@ export interface IArticle {
     board: IBoard.ISummary;
     /** 공지 여부 */
     is_notice: boolean;
+    /** 첨부파일 목록 */
+    attachments: IAttachment[];
     created_at: string & typia.tags.Format<"date-time">;
     updated_at: (string & typia.tags.Format<"date-time">) | null;
 }
@@ -54,6 +57,8 @@ export namespace IArticle {
     export interface IUpdate extends Pick<IArticle, "id">, IArticle.IBody {
         /** 게시글 제목 */
         title: string;
+        attachment_ids: (string & typia.tags.Format<"uuid">)[] &
+            typia.tags.MaxItems<10>;
     }
 
     export interface ICreate extends Omit<IUpdate, "id"> {
