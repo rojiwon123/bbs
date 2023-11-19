@@ -1,6 +1,5 @@
 import { IOauth } from "@APP/types/IOauth";
 import { Failure } from "@APP/utils/failure";
-import { assertModule } from "@APP/utils/fx";
 import { Result } from "@APP/utils/result";
 
 import { GithubSDK } from "./github";
@@ -74,6 +73,3 @@ export namespace Oauth {
         };
     }
 }
-
-assertModule<Oauth>(Oauth.Kakao);
-assertModule<Oauth>(Oauth.Github);
