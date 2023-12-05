@@ -40,14 +40,10 @@ jobs:
             - name: Checkout 🛎️
               uses: actions/checkout@main
 
-            - name: Setup NodeJS
-              uses: actions/setup-node@main
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  registry-url: https://npm.pkg.github.com
-                  scope: "@rojiwon123"
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Setup Registry
+              run: |
+                  echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+                  echo "@rojiwon123:registry=https://npm.pkg.github.com" >> ~/.npmrc
 
             - name: Install
               run: npm ci && npm run build:prisma && npm run build:sdk
