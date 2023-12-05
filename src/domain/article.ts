@@ -1,3 +1,4 @@
+import { Prisma } from "@PRISMA";
 import { isNull, map, pipe, toArray } from "@fxts/core";
 
 import { prisma } from "@APP/infrastructure/DB";
@@ -10,20 +11,34 @@ import { Entity } from "@APP/utils/fx";
 import { Random } from "@APP/utils/random";
 import { Result } from "@APP/utils/result";
 
-import { Prisma } from "../../db/edge";
-
 export namespace Article {
     export const create =
         (tx: Prisma.TransactionClient = prisma) =>
-        async (input: IArticle.ICreate) => {
+        async (
+            input: IArticle.ICreate,
+        ): Promise<
+            Result<
+                IArticle.Identity,
+                Failure.Internal<ErrorCode.Attachment.NotFound>
+            >
+        > => {
             const created_at = DateMapper.toISO();
             const article_id = Random.uuid();
+            const attachment_ids = Array.from(new Set(input.attachment_ids));
+            const attachment_count = await tx.attachments.count({
+                where: { id: { in: attachment_ids } },
+            });
+            if (attachment_count !== attachment_ids.length)
+                return Result.Error.map(
+                    new Failure.Internal("NOT_FOUND_ATTACHMENT"),
+                );
+
             await tx.articles.create({
                 data: {
                     id: article_id,
                     board_id: input.board_id,
                     author_id: input.author_id,
-                    is_notice: false,
+                    notice: false,
                     created_at,
                     deleted_at: null,
                     snapshots: {
@@ -33,6 +48,17 @@ export namespace Article {
                             body_format: input.format,
                             body_url: input.url,
                             created_at,
+                            article_attachment_snapshots: {
+                                createMany: {
+                                    data: attachment_ids.map(
+                                        (attachment_id, sequence) => ({
+                                            id: Random.uuid(),
+                                            attachment_id,
+                                            sequence,
+                                        }),
+                                    ),
+                                },
+                            },
                         },
                     },
                 },
@@ -61,7 +87,7 @@ export namespace Article {
                         body_url: true,
                     }),
                     board: { select: ArticleJson.selectBoard() },
-                    is_notice: true,
+                    notice: true,
                     created_at: true,
                     deleted_at: true,
                 },
@@ -82,15 +108,15 @@ export namespace Article {
                 body: isNull(snapshot)
                     ? null
                     : { format: snapshot.body_format, url: snapshot.body_url },
-                is_notice: article.is_notice,
+                notice: article.notice,
                 board: { id: article.board.id, name: article.board.name },
                 attachments: [],
                 created_at: DateMapper.toISO(article.created_at),
                 updated_at: isNull(snapshot)
                     ? null
                     : article.created_at < snapshot.created_at
-                    ? DateMapper.toISO(snapshot.created_at)
-                    : null,
+                      ? DateMapper.toISO(snapshot.created_at)
+                      : null,
             });
         };
 
@@ -159,7 +185,20 @@ export namespace Article {
         (tx: Prisma.TransactionClient = prisma) =>
         async (
             input: IArticle.IUpdate,
-        ): Promise<Result.Ok<IArticle.Identity>> => {
+        ): Promise<
+            Result<
+                IArticle.Identity,
+                Failure.Internal<ErrorCode.Attachment.NotFound>
+            >
+        > => {
+            const attachment_ids = Array.from(new Set(input.attachment_ids));
+            const attachment_count = await tx.attachments.count({
+                where: { id: { in: attachment_ids } },
+            });
+            if (attachment_count !== attachment_ids.length)
+                return Result.Error.map(
+                    new Failure.Internal("NOT_FOUND_ATTACHMENT"),
+                );
             await tx.article_snapshots.create({
                 data: {
                     id: Random.uuid(),
@@ -168,6 +207,17 @@ export namespace Article {
                     body_format: input.format,
                     body_url: input.url,
                     created_at: DateMapper.toISO(),
+                    article_attachment_snapshots: {
+                        createMany: {
+                            data: attachment_ids.map(
+                                (attachment_id, sequence) => ({
+                                    id: Random.uuid(),
+                                    attachment_id,
+                                    sequence,
+                                }),
+                            ),
+                        },
+                    },
                 },
             });
             return Result.Ok.map({ article_id: input.id });
@@ -178,7 +228,7 @@ export namespace Article {
         async ({
             board_id,
             article_ids,
-            is_notice,
+            notice,
         }: IArticle.ISetNoticeInput): Promise<Result.Ok<number>> => {
             const { count } = await tx.articles.updateMany({
                 where: {
@@ -186,7 +236,7 @@ export namespace Article {
                     board_id,
                     deleted_at: null,
                 },
-                data: { is_notice },
+                data: { notice },
             });
             return Result.Ok.map(count);
         };
@@ -300,8 +350,8 @@ export namespace ArticleJson {
             updated_at: isNull(snapshot)
                 ? null
                 : article.created_at < snapshot.created_at
-                ? DateMapper.toISO(snapshot.created_at)
-                : null,
+                  ? DateMapper.toISO(snapshot.created_at)
+                  : null,
         };
     };
 
@@ -325,8 +375,8 @@ export namespace ArticleJson {
             updated_at: isNull(snapshot)
                 ? null
                 : article.created_at < snapshot.created_at
-                ? DateMapper.toISO(snapshot.created_at)
-                : null,
+                  ? DateMapper.toISO(snapshot.created_at)
+                  : null,
         };
     };
 }

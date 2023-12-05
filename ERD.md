@@ -28,10 +28,11 @@ erDiagram
     ArticleBodyFormat body_format
     DateTime created_at
 }
-"article_attachments" {
+"article_attachment_snapshots" {
     String id PK
-    String article_id FK
+    String article_snapshot_id FK
     String attachment_id FK
+    Int sequence
 }
 "boards" {
     String id PK
@@ -100,8 +101,8 @@ erDiagram
 "articles" }o--|| "users" : author
 "articles" }o--|| "boards" : board
 "article_snapshots" }o--|| "articles" : article
-"article_attachments" }o--|| "articles" : article
-"article_attachments" }o--|| "attachments" : attachment
+"article_attachment_snapshots" }o--|| "article_snapshots" : article_snapshot
+"article_attachment_snapshots" }o--|| "attachments" : attachment
 "boards" }o--|| "memberships" : manager_membership
 "boards" }o--|| "memberships" : read_article_list_membership
 "boards" }o--|| "memberships" : read_article_membership
@@ -156,25 +157,26 @@ When a user edit an article, a new snapshot record is created, and readers will 
 -   `body_format`: one of `html`, `md`, `txt`
 -   `created_at`: creation time of record
 
-### `article_attachments`
+### `article_attachment_snapshots`
 
-Attachment for Article
+Attachment Snapshot for Article
 
-an `article_attachments` entity connects an `articles` record with an `attachments` record.
+an `article_attachment_snapshots` entity connects an `article_snapshots` record with an `attachments` record.
 
-If author add attachment to an article, a new record of `article_attachments` is created.
+If author add attachment to an article, a new record of `article_attachment_snapshots` is created.
 
 **Properties**
 
 -   `id`: `uuid` string
--   `article_id`
-    > referenced in `articles`
+-   `article_snapshot_id`
+    > referenced in `article_snapshots`
     >
     > `uuid` string
 -   `attachment_id`
     > referenced in `attachments`
     >
     > `uuid` string
+-   `sequence`:
 
 ### `boards`
 
@@ -476,10 +478,11 @@ erDiagram
     ArticleBodyFormat body_format
     DateTime created_at
 }
-"article_attachments" {
+"article_attachment_snapshots" {
     String id PK
-    String article_id FK
+    String article_snapshot_id FK
     String attachment_id FK
+    Int sequence
 }
 "boards" {
     String id PK
@@ -515,8 +518,8 @@ erDiagram
 "articles" }o--|| "users" : author
 "articles" }o--|| "boards" : board
 "article_snapshots" }o--|| "articles" : article
-"article_attachments" }o--|| "articles" : article
-"article_attachments" }o--|| "attachments" : attachment
+"article_attachment_snapshots" }o--|| "article_snapshots" : article_snapshot
+"article_attachment_snapshots" }o--|| "attachments" : attachment
 "attachments" }o--|| "users" : owner
 ```
 
@@ -559,25 +562,26 @@ When a user edit an article, a new snapshot record is created, and readers will 
 -   `body_format`: one of `html`, `md`, `txt`
 -   `created_at`: creation time of record
 
-### `article_attachments`
+### `article_attachment_snapshots`
 
-Attachment for Article
+Attachment Snapshot for Article
 
-an `article_attachments` entity connects an `articles` record with an `attachments` record.
+an `article_attachment_snapshots` entity connects an `article_snapshots` record with an `attachments` record.
 
-If author add attachment to an article, a new record of `article_attachments` is created.
+If author add attachment to an article, a new record of `article_attachment_snapshots` is created.
 
 **Properties**
 
 -   `id`: `uuid` string
--   `article_id`
-    > referenced in `articles`
+-   `article_snapshot_id`
+    > referenced in `article_snapshots`
     >
     > `uuid` string
 -   `attachment_id`
     > referenced in `attachments`
     >
     > `uuid` string
+-   `sequence`:
 
 ### `boards`
 

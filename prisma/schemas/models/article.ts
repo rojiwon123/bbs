@@ -28,10 +28,6 @@ psg.Model("articles", {
     psg.Field.relation("comments", {
         constraint: "list",
     }),
-    psg.Field.relation("attachments", {
-        constraint: "list",
-        model: "article_attachments",
-    }),
 );
 
 psg.Model("article_snapshots", {
@@ -55,19 +51,23 @@ psg.Model("article_snapshots", {
         comments: ["one of `html`, `md`, `txt`"],
     }),
     DateTime.createdAt(),
+    psg.Field.relation("article_attachment_snapshots", {
+        constraint: "list",
+    }),
 );
 
-psg.Model("article_attachments", {
+psg.Model("article_attachment_snapshots", {
     comments: [
-        "Attachment for Article",
-        `an \`article_attachments\` entity connects an \`articles\` record with an \`attachments\` record.`,
-        `If author add attachment to an article, a new record of \`article_attachments\` is created.`,
+        "Attachment Snapshot for Article",
+        `an \`article_attachment_snapshots\` entity connects an \`article_snapshots\` record with an \`attachments\` record.`,
+        `If author add attachment to an article, a new record of \`article_attachment_snapshots\` is created.`,
         Tag.namespace(),
         Tag.namespace("Article"),
         Tag.author(),
     ],
 })(
     Id.uuid(),
-    ...Relation.uuid("article", { model: "articles" }),
+    ...Relation.uuid("article_snapshot", { model: "article_snapshots" }),
     ...Relation.uuid("attachment", { model: "attachments" }),
+    psg.Field.int("sequence"),
 );

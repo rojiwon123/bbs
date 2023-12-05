@@ -38,31 +38,30 @@ enum ArticleBodyFormat {
 model articles {
   ///  `uuid` string
   ///
-  id          String                @id @database.Uuid
+  id         String              @id @database.Uuid
   ///  referenced in `users`
   ///
   ///  `uuid` string
   ///
-  author_id   String                @database.Uuid
-  author      users                 @relation(fields: [author_id], references: [id])
+  author_id  String              @database.Uuid
+  author     users               @relation(fields: [author_id], references: [id])
   ///  referenced in `boards`
   ///
   ///  `uuid` string
   ///
-  board_id    String                @database.Uuid
-  board       boards                @relation(fields: [board_id], references: [id])
+  board_id   String              @database.Uuid
+  board      boards              @relation(fields: [board_id], references: [id])
   ///  Indicate whether a article is notification.
   ///
-  notice      Boolean              
+  notice     Boolean            
   ///  creation time of record
   ///
-  created_at  DateTime              @database.Timestamptz
+  created_at DateTime            @database.Timestamptz
   ///  deletion time of record
   ///
-  deleted_at  DateTime?             @database.Timestamptz
-  snapshots   article_snapshots[]  
-  comments    comments[]           
-  attachments article_attachments[]
+  deleted_at DateTime?           @database.Timestamptz
+  snapshots  article_snapshots[]
+  comments   comments[]         
 
   @@index([created_at])
 }
@@ -82,32 +81,33 @@ model articles {
 model article_snapshots {
   ///  `uuid` string
   ///
-  id          String            @id @database.Uuid
+  id                           String                         @id @database.Uuid
   ///  referenced in `articles`
   ///
   ///  `uuid` string
   ///
-  article_id  String            @database.Uuid
-  article     articles          @relation(fields: [article_id], references: [id])
+  article_id                   String                         @database.Uuid
+  article                      articles                       @relation(fields: [article_id], references: [id])
   ///  title of article
   ///
-  title       String           
+  title                        String                        
   ///  URL path of article body resource
   ///
-  body_url    String           
+  body_url                     String                        
   ///  one of `html`, `md`, `txt`
   ///
-  body_format ArticleBodyFormat
+  body_format                  ArticleBodyFormat             
   ///  creation time of record
   ///
-  created_at  DateTime          @database.Timestamptz
+  created_at                   DateTime                       @database.Timestamptz
+  article_attachment_snapshots article_attachment_snapshots[]
 }
 
-///  Attachment for Article
+///  Attachment Snapshot for Article
 ///
-///  an `article_attachments` entity connects an `articles` record with an `attachments` record.
+///  an `article_attachment_snapshots` entity connects an `article_snapshots` record with an `attachments` record.
 ///
-///  If author add attachment to an article, a new record of `article_attachments` is created.
+///  If author add attachment to an article, a new record of `article_attachment_snapshots` is created.
 ///
 ///  @namespace All
 ///
@@ -115,22 +115,23 @@ model article_snapshots {
 ///
 ///  @author rojiwon
 ///
-model article_attachments {
+model article_attachment_snapshots {
   ///  `uuid` string
   ///
-  id            String      @id @database.Uuid
-  ///  referenced in `articles`
+  id                  String            @id @database.Uuid
+  ///  referenced in `article_snapshots`
   ///
   ///  `uuid` string
   ///
-  article_id    String      @database.Uuid
-  article       articles    @relation(fields: [article_id], references: [id])
+  article_snapshot_id String            @database.Uuid
+  article_snapshot    article_snapshots @relation(fields: [article_snapshot_id], references: [id])
   ///  referenced in `attachments`
   ///
   ///  `uuid` string
   ///
-  attachment_id String      @database.Uuid
-  attachment    attachments @relation(fields: [attachment_id], references: [id])
+  attachment_id       String            @database.Uuid
+  attachment          attachments       @relation(fields: [attachment_id], references: [id])
+  sequence            Int              
 }
 
 ///  Root Entity of Board
@@ -281,31 +282,31 @@ model comment_snapshots {
 model attachments {
   ///  `uuid` string
   ///
-  id         String                @id @database.Uuid
+  id                           String                         @id @database.Uuid
   ///  `attachment` file can only be attached by the owner
   ///
   ///  referenced in `users`
   ///
   ///  `uuid` string
   ///
-  owner_id   String                @database.Uuid
-  owner      users                 @relation(fields: [owner_id], references: [id])
+  owner_id                     String                         @database.Uuid
+  owner                        users                          @relation(fields: [owner_id], references: [id])
   ///  name of attachment resource
   ///
-  name       String               
+  name                         String                        
   ///  extension of resource like `md`, `html`, `jpeg`...
   ///
-  extension  String               
+  extension                    String                        
   ///  URL path of real resource
   ///
-  url        String               
+  url                          String                        
   ///  creation time of record
   ///
-  created_at DateTime              @database.Timestamptz
+  created_at                   DateTime                       @database.Timestamptz
   ///  deletion time of record
   ///
-  deleted_at DateTime?             @database.Timestamptz
-  articles   article_attachments[]
+  deleted_at                   DateTime?                      @database.Timestamptz
+  article_attachment_snapshots article_attachment_snapshots[]
 }
 
 ///  Membership Entity

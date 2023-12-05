@@ -11,7 +11,7 @@ CREATE TABLE "articles" (
     "board_id" UUID NOT NULL,
     "notice" BOOLEAN NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
-    "delete_at" TIMESTAMPTZ,
+    "deleted_at" TIMESTAMPTZ,
 
     CONSTRAINT "articles_pkey" PRIMARY KEY ("id")
 );
@@ -29,12 +29,13 @@ CREATE TABLE "article_snapshots" (
 );
 
 -- CreateTable
-CREATE TABLE "article_attachments" (
+CREATE TABLE "article_attachment_snapshots" (
     "id" UUID NOT NULL,
-    "article_id" UUID NOT NULL,
+    "article_snapshot_id" UUID NOT NULL,
     "attachment_id" UUID NOT NULL,
+    "sequence" INTEGER NOT NULL,
 
-    CONSTRAINT "article_attachments_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "article_attachment_snapshots_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -49,7 +50,7 @@ CREATE TABLE "boards" (
     "read_comment_list_membership_id" UUID,
     "write_comment_membership_id" UUID NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
-    "delete_at" TIMESTAMPTZ,
+    "deleted_at" TIMESTAMPTZ,
 
     CONSTRAINT "boards_pkey" PRIMARY KEY ("id")
 );
@@ -61,7 +62,7 @@ CREATE TABLE "comments" (
     "article_id" UUID NOT NULL,
     "parent_id" UUID,
     "created_at" TIMESTAMPTZ NOT NULL,
-    "delete_at" TIMESTAMPTZ,
+    "deleted_at" TIMESTAMPTZ,
 
     CONSTRAINT "comments_pkey" PRIMARY KEY ("id")
 );
@@ -84,7 +85,7 @@ CREATE TABLE "attachments" (
     "extension" TEXT NOT NULL,
     "url" TEXT NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
-    "delete_at" TIMESTAMPTZ,
+    "deleted_at" TIMESTAMPTZ,
 
     CONSTRAINT "attachments_pkey" PRIMARY KEY ("id")
 );
@@ -97,7 +98,7 @@ CREATE TABLE "memberships" (
     "image_url" TEXT,
     "created_at" TIMESTAMPTZ NOT NULL,
     "updated_at" TIMESTAMPTZ,
-    "delete_at" TIMESTAMPTZ,
+    "deleted_at" TIMESTAMPTZ,
 
     CONSTRAINT "memberships_pkey" PRIMARY KEY ("id")
 );
@@ -111,7 +112,7 @@ CREATE TABLE "authentications" (
     "email" TEXT,
     "created_at" TIMESTAMPTZ NOT NULL,
     "updated_at" TIMESTAMPTZ,
-    "delete_at" TIMESTAMPTZ,
+    "deleted_at" TIMESTAMPTZ,
 
     CONSTRAINT "authentications_pkey" PRIMARY KEY ("id")
 );
@@ -124,7 +125,7 @@ CREATE TABLE "users" (
     "image_url" TEXT,
     "created_at" TIMESTAMPTZ NOT NULL,
     "updated_at" TIMESTAMPTZ,
-    "delete_at" TIMESTAMPTZ,
+    "deleted_at" TIMESTAMPTZ,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -148,10 +149,10 @@ ALTER TABLE "articles" ADD CONSTRAINT "articles_board_id_fkey" FOREIGN KEY ("boa
 ALTER TABLE "article_snapshots" ADD CONSTRAINT "article_snapshots_article_id_fkey" FOREIGN KEY ("article_id") REFERENCES "articles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "article_attachments" ADD CONSTRAINT "article_attachments_article_id_fkey" FOREIGN KEY ("article_id") REFERENCES "articles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "article_attachment_snapshots" ADD CONSTRAINT "article_attachment_snapshots_article_snapshot_id_fkey" FOREIGN KEY ("article_snapshot_id") REFERENCES "article_snapshots"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "article_attachments" ADD CONSTRAINT "article_attachments_attachment_id_fkey" FOREIGN KEY ("attachment_id") REFERENCES "attachments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "article_attachment_snapshots" ADD CONSTRAINT "article_attachment_snapshots_attachment_id_fkey" FOREIGN KEY ("attachment_id") REFERENCES "attachments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "boards" ADD CONSTRAINT "boards_manager_membership_id_fkey" FOREIGN KEY ("manager_membership_id") REFERENCES "memberships"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

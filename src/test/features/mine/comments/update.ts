@@ -179,7 +179,7 @@ export const test_update_mine_comment_when_comment_is_deleted = async (
         {
             author: username,
             board: boardname,
-            is_notice: false,
+            notice: false,
         },
         { is_deleted: true },
     );

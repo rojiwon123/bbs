@@ -20,7 +20,7 @@ export const test_remove_mine_article_successfully = async (
     const boardname = "board1";
     const token = await get_token(connection, username);
     const article = await Seed.createArticle(
-        { author: username, board: boardname, is_notice: false },
+        { author: username, board: boardname, notice: false },
         {},
     );
 
@@ -154,7 +154,7 @@ export const test_remove_mine_article_when_article_is_deleted = async (
         {
             author: username,
             board: boardname,
-            is_notice: false,
+            notice: false,
         },
         { is_deleted: true },
     );

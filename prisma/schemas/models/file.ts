@@ -28,8 +28,7 @@ psg.Model("attachments", {
     }),
     DateTime.createdAt(),
     DateTime.deletedAt(),
-    psg.Field.relation("articles", {
-        model: "article_attachments",
+    psg.Field.relation("article_attachment_snapshots", {
         constraint: "list",
     }),
 );

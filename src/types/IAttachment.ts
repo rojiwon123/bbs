@@ -1,7 +1,7 @@
-import typia from "typia";
+import { Omit, Regex } from "./global";
 
 export interface IAttachment {
-    id: string & typia.tags.Format<"uuid">;
+    id: Regex.UUID;
     /**
      * 파일명
      *
@@ -23,15 +23,21 @@ export interface IAttachment {
      *
      * 예를 들어, 리소스 접근 권한이 필요한 경우 해당 권한이 부여된 url을 받게 될 것이다.
      */
-    url: string & typia.tags.Format<"url">;
-    created_at: string & typia.tags.Format<"date-time">;
+    url: Regex.URL;
+    created_at: Regex.DateTime;
 }
 
 export namespace IAttachment {
-    export interface ICreate extends Pick<IAttachment, "name" | "extension"> {}
-    export interface IPresigned {
-        attachment_id: string & typia.tags.Format<"uuid">;
-        presigned_url: string & typia.tags.Format<"url">;
+    export interface Identity {
+        attachment_id: Regex.UUID;
     }
-    export interface ICreateBody extends ICreate {}
+    export interface ICreate
+        extends Pick<IAttachment, "name" | "extension" | "url"> {
+        owner_id: Regex.UUID;
+    }
+    export interface IPresigned {
+        attachment_id: Regex.UUID;
+        presigned_url: Regex.URL;
+    }
+    export interface ICreateBody extends Omit<ICreate, "owner_id" | "url"> {}
 }

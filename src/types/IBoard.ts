@@ -1,10 +1,8 @@
-import typia from "typia";
-
 import { IMembership } from "./IMembership";
-import { Omit } from "./global";
+import { Omit, Regex } from "./global";
 
 export interface IBoard {
-    id: string & typia.tags.Format<"uuid">;
+    id: Regex.UUID;
     /** 게시판 이름 */
     name: string;
     /** 게시판 소개글 */
@@ -28,24 +26,20 @@ export interface IBoard {
 
 export namespace IBoard {
     export interface Identity {
-        board_id: string & typia.tags.Format<"uuid">;
+        board_id: Regex.UUID;
     }
     export interface ISummary extends Pick<IBoard, "id" | "name"> {}
 
     export interface IUpdate
         extends Pick<IBoard, "id" | "name" | "description"> {
-        read_article_list_membership_id:
-            | (string & typia.tags.Format<"uuid">)
-            | null;
-        read_article_membership_id: (string & typia.tags.Format<"uuid">) | null;
-        read_comment_list_membership_id:
-            | (string & typia.tags.Format<"uuid">)
-            | null;
+        read_article_list_membership_id: Regex.UUID | null;
+        read_article_membership_id: Regex.UUID | null;
+        read_comment_list_membership_id: Regex.UUID | null;
 
-        write_article_membership_id: string & typia.tags.Format<"uuid">;
-        write_comment_membership_id: string & typia.tags.Format<"uuid">;
+        write_article_membership_id: Regex.UUID;
+        write_comment_membership_id: Regex.UUID;
 
-        manager_membership_id: string & typia.tags.Format<"uuid">;
+        manager_membership_id: Regex.UUID;
     }
     export interface ICreate extends Omit<IUpdate, "id"> {}
 
