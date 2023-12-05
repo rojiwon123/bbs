@@ -9,9 +9,9 @@ CREATE TABLE "articles" (
     "id" UUID NOT NULL,
     "author_id" UUID NOT NULL,
     "board_id" UUID NOT NULL,
-    "is_notice" BOOLEAN NOT NULL,
+    "notice" BOOLEAN NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
-    "deleted_at" TIMESTAMPTZ,
+    "delete_at" TIMESTAMPTZ,
 
     CONSTRAINT "articles_pkey" PRIMARY KEY ("id")
 );
@@ -49,7 +49,7 @@ CREATE TABLE "boards" (
     "read_comment_list_membership_id" UUID,
     "write_comment_membership_id" UUID NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
-    "deleted_at" TIMESTAMPTZ,
+    "delete_at" TIMESTAMPTZ,
 
     CONSTRAINT "boards_pkey" PRIMARY KEY ("id")
 );
@@ -61,7 +61,7 @@ CREATE TABLE "comments" (
     "article_id" UUID NOT NULL,
     "parent_id" UUID,
     "created_at" TIMESTAMPTZ NOT NULL,
-    "deleted_at" TIMESTAMPTZ,
+    "delete_at" TIMESTAMPTZ,
 
     CONSTRAINT "comments_pkey" PRIMARY KEY ("id")
 );
@@ -84,7 +84,7 @@ CREATE TABLE "attachments" (
     "extension" TEXT NOT NULL,
     "url" TEXT NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
-    "deleted_at" TIMESTAMPTZ,
+    "delete_at" TIMESTAMPTZ,
 
     CONSTRAINT "attachments_pkey" PRIMARY KEY ("id")
 );
@@ -97,7 +97,7 @@ CREATE TABLE "memberships" (
     "image_url" TEXT,
     "created_at" TIMESTAMPTZ NOT NULL,
     "updated_at" TIMESTAMPTZ,
-    "deleted_at" TIMESTAMPTZ,
+    "delete_at" TIMESTAMPTZ,
 
     CONSTRAINT "memberships_pkey" PRIMARY KEY ("id")
 );
@@ -111,7 +111,7 @@ CREATE TABLE "authentications" (
     "email" TEXT,
     "created_at" TIMESTAMPTZ NOT NULL,
     "updated_at" TIMESTAMPTZ,
-    "deleted_at" TIMESTAMPTZ,
+    "delete_at" TIMESTAMPTZ,
 
     CONSTRAINT "authentications_pkey" PRIMARY KEY ("id")
 );
@@ -124,10 +124,16 @@ CREATE TABLE "users" (
     "image_url" TEXT,
     "created_at" TIMESTAMPTZ NOT NULL,
     "updated_at" TIMESTAMPTZ,
-    "deleted_at" TIMESTAMPTZ,
+    "delete_at" TIMESTAMPTZ,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE INDEX "articles_created_at_idx" ON "articles"("created_at");
+
+-- CreateIndex
+CREATE INDEX "comments_created_at_idx" ON "comments"("created_at");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "authentications_oauth_sub_oauth_type_key" ON "authentications"("oauth_sub", "oauth_type");

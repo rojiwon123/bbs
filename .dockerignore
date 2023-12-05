@@ -31,3 +31,4 @@ tsconfig.test.json
 .gitignore
 .prettierignore
 prettier.config.js
+.npmrc
