@@ -9,17 +9,18 @@ import { Seed } from "@APP/test/internal/seed";
 import { APIValidator } from "@APP/test/internal/validator";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
+import { Regex } from "@APP/types/global";
 import { Random } from "@APP/utils/random";
 
 const test = (
     connection: IConnection,
     board_id: string & typia.tags.Format<"uuid">,
+    attachment_ids: Regex.UUID[] = [],
 ) =>
-    api.functional.boards.articles.create(
-        connection,
-        board_id,
-        typia.random<IArticle.ICreateBody>(),
-    );
+    api.functional.boards.articles.create(connection, board_id, {
+        ...typia.random<IArticle.ICreateBody>(),
+        attachment_ids,
+    });
 
 export const test_create_article_successfully = async (
     connection: IConnection,

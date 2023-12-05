@@ -1,3 +1,4 @@
+import { Prisma } from "@PRISMA";
 import { filter, isNull, map, negate, pipe, toArray } from "@fxts/core";
 
 import { prisma } from "@APP/infrastructure/DB";
@@ -6,8 +7,6 @@ import { IMembership } from "@APP/types/IMembership";
 import { Failure } from "@APP/utils/failure";
 import { Entity } from "@APP/utils/fx";
 import { Result } from "@APP/utils/result";
-
-import { Prisma } from "../../db/edge";
 
 export namespace Membership {
     export const compare = (

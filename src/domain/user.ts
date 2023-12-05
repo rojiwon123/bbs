@@ -1,3 +1,4 @@
+import { Prisma } from "@PRISMA";
 import { isNull, pipe } from "@fxts/core";
 
 import { prisma } from "@APP/infrastructure/DB";
@@ -8,8 +9,6 @@ import { Failure } from "@APP/utils/failure";
 import { Entity } from "@APP/utils/fx";
 import { Random } from "@APP/utils/random";
 import { Result } from "@APP/utils/result";
-
-import { Prisma } from "../../db/edge";
 
 export namespace User {
     export const get =

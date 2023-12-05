@@ -9,7 +9,7 @@ CREATE TABLE "articles" (
     "id" UUID NOT NULL,
     "author_id" UUID NOT NULL,
     "board_id" UUID NOT NULL,
-    "is_notice" BOOLEAN NOT NULL,
+    "notice" BOOLEAN NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
     "deleted_at" TIMESTAMPTZ,
 
@@ -31,7 +31,7 @@ CREATE TABLE "article_snapshots" (
 -- CreateTable
 CREATE TABLE "article_attachment_snapshots" (
     "id" UUID NOT NULL,
-    "snapshot_id" UUID NOT NULL,
+    "article_snapshot_id" UUID NOT NULL,
     "attachment_id" UUID NOT NULL,
     "sequence" INTEGER NOT NULL,
 
@@ -80,10 +80,12 @@ CREATE TABLE "comment_snapshots" (
 -- CreateTable
 CREATE TABLE "attachments" (
     "id" UUID NOT NULL,
+    "owner_id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "extension" TEXT NOT NULL,
     "url" TEXT NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
+    "deleted_at" TIMESTAMPTZ,
 
     CONSTRAINT "attachments_pkey" PRIMARY KEY ("id")
 );
@@ -129,6 +131,12 @@ CREATE TABLE "users" (
 );
 
 -- CreateIndex
+CREATE INDEX "articles_created_at_idx" ON "articles"("created_at");
+
+-- CreateIndex
+CREATE INDEX "comments_created_at_idx" ON "comments"("created_at");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "authentications_oauth_sub_oauth_type_key" ON "authentications"("oauth_sub", "oauth_type");
 
 -- AddForeignKey
@@ -141,7 +149,7 @@ ALTER TABLE "articles" ADD CONSTRAINT "articles_board_id_fkey" FOREIGN KEY ("boa
 ALTER TABLE "article_snapshots" ADD CONSTRAINT "article_snapshots_article_id_fkey" FOREIGN KEY ("article_id") REFERENCES "articles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "article_attachment_snapshots" ADD CONSTRAINT "article_attachment_snapshots_snapshot_id_fkey" FOREIGN KEY ("snapshot_id") REFERENCES "article_snapshots"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "article_attachment_snapshots" ADD CONSTRAINT "article_attachment_snapshots_article_snapshot_id_fkey" FOREIGN KEY ("article_snapshot_id") REFERENCES "article_snapshots"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "article_attachment_snapshots" ADD CONSTRAINT "article_attachment_snapshots_attachment_id_fkey" FOREIGN KEY ("attachment_id") REFERENCES "attachments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -175,6 +183,9 @@ ALTER TABLE "comments" ADD CONSTRAINT "comments_parent_id_fkey" FOREIGN KEY ("pa
 
 -- AddForeignKey
 ALTER TABLE "comment_snapshots" ADD CONSTRAINT "comment_snapshots_comment_id_fkey" FOREIGN KEY ("comment_id") REFERENCES "comments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "attachments" ADD CONSTRAINT "attachments_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "authentications" ADD CONSTRAINT "authentications_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;

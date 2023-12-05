@@ -16,7 +16,7 @@ erDiagram
     String id PK
     String author_id FK
     String board_id FK
-    Boolean is_notice
+    Boolean notice
     DateTime created_at
     DateTime deleted_at "nullable"
 }
@@ -30,7 +30,7 @@ erDiagram
 }
 "article_attachment_snapshots" {
     String id PK
-    String snapshot_id FK
+    String article_snapshot_id FK
     String attachment_id FK
     Int sequence
 }
@@ -63,10 +63,12 @@ erDiagram
 }
 "attachments" {
     String id PK
+    String owner_id FK
     String name
     String extension
     String url
     DateTime created_at
+    DateTime deleted_at "nullable"
 }
 "memberships" {
     String id PK
@@ -99,7 +101,7 @@ erDiagram
 "articles" }o--|| "users" : author
 "articles" }o--|| "boards" : board
 "article_snapshots" }o--|| "articles" : article
-"article_attachment_snapshots" }o--|| "article_snapshots" : snapshot
+"article_attachment_snapshots" }o--|| "article_snapshots" : article_snapshot
 "article_attachment_snapshots" }o--|| "attachments" : attachment
 "boards" }o--|| "memberships" : manager_membership
 "boards" }o--|| "memberships" : read_article_list_membership
@@ -111,6 +113,7 @@ erDiagram
 "comments" }o--|| "articles" : article
 "comments" }o--o| "comments" : parent
 "comment_snapshots" }o--|| "comments" : comment
+"attachments" }o--|| "users" : owner
 "authentications" }o--|| "users" : user
 "users" }o--|| "memberships" : membership
 ```
@@ -121,24 +124,18 @@ Root Entity of Article
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `author_id`
     > referenced in `users`
     >
-    > `uuid` type
+    > `uuid` string
 -   `board_id`
     > referenced in `boards`
     >
-    > `uuid` type
--   `is_notice`: If true, a article is notification.
+    > `uuid` string
+-   `notice`: Indicate whether a article is notification.
 -   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ### `article_snapshots`
 
@@ -150,14 +147,11 @@ When a user edit an article, a new snapshot record is created, and readers will 
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `article_id`
     > referenced in `articles`
     >
-    > `uuid` type
+    > `uuid` string
 -   `title`: title of article
 -   `body_url`: URL path of article body resource
 -   `body_format`: one of `html`, `md`, `txt`
@@ -173,19 +167,16 @@ If author add attachment to an article, a new record of `article_attachment_snap
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `snapshot_id`
+-   `id`: `uuid` string
+-   `article_snapshot_id`
     > referenced in `article_snapshots`
     >
-    > `uuid` type
+    > `uuid` string
 -   `attachment_id`
     > referenced in `attachments`
     >
-    > `uuid` type
--   `sequence`: `sequence` is used to distinguish each individual `attachment`.
+    > `uuid` string
+-   `sequence`:
 
 ### `boards`
 
@@ -193,41 +184,35 @@ Root Entity of Board
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `name`:
 -   `description`:
 -   `manager_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `read_article_list_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `read_article_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `write_article_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `read_comment_list_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `write_comment_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ### `comments`
 
@@ -237,29 +222,23 @@ a user can comment short text on article or other comment
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `author_id`
     > referenced in `users`
     >
-    > `uuid` type
+    > `uuid` string
 -   `article_id`
     > referenced in `articles`
     >
-    > `uuid` type
+    > `uuid` string
 -   `parent_id`
+    > a parent comment id in a hierarchical structure
+    >
     > referenced in `comments`
     >
-    > `uuid` type
-    >
-    > a parent comment id in a hierarchical structure
+    > `uuid` string
 -   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ### `comment_snapshots`
 
@@ -271,14 +250,11 @@ When a user edit an comment, a new snapshot record is created, and readers will 
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `comment_id`
     > referenced in `comments`
     >
-    > `uuid` type
+    > `uuid` string
 -   `body`:
 -   `created_at`: creation time of record
 
@@ -290,14 +266,18 @@ All the attachment resources managed in the BBS
 
 **Properties**
 
--   `id`
-    > record identity
+-   `id`: `uuid` string
+-   `owner_id`
+    > `attachment` file can only be attached by the owner
     >
-    > `uuid` type
+    > referenced in `users`
+    >
+    > `uuid` string
 -   `name`: name of attachment resource
 -   `extension`: extension of resource like `md`, `html`, `jpeg`...
 -   `url`: URL path of real resource
 -   `created_at`: creation time of record
+-   `deleted_at`: deletion time of record
 
 ### `memberships`
 
@@ -307,45 +287,33 @@ a user can receive one or zero membership, which signifies their permission leve
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `name`: displayed name of membership
+-   `id`: `uuid` string
+-   `name`: displated name of membership
 -   `rank`: `rank` is used for membership grade comparison
 -   `image_url`:
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ### `authentications`
 
 Authentication Entity of User
 
-combination of `oauth_sub` and `oauth_type` is unique
+combination of `oauth_sub` and `oauth_type` is unique.
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `user_id`
     > referenced in `users`
     >
-    > `uuid` type
--   `oauth_type`: one of `github`, `kakao`
+    > `uuid` string
+-   `oauth_type`: one of `github`, `kakao`,
 -   `oauth_sub`: oauth server user id
 -   `email`: verified email
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ### `users`
 
@@ -353,24 +321,18 @@ Root Entity of User
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `membership_id`
+    > Indicate user permission level
+    >
     > referenced in `memberships`
     >
-    > `uuid` type
-    >
-    > If null, user membership is same with unauthorized user
+    > `uuid` string
 -   `name`: displayed name of user
 -   `image_url`: url of user profile image
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ## Comment
 
@@ -380,7 +342,7 @@ erDiagram
     String id PK
     String author_id FK
     String board_id FK
-    Boolean is_notice
+    Boolean notice
     DateTime created_at
     DateTime deleted_at "nullable"
 }
@@ -420,24 +382,18 @@ Root Entity of Article
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `author_id`
     > referenced in `users`
     >
-    > `uuid` type
+    > `uuid` string
 -   `board_id`
     > referenced in `boards`
     >
-    > `uuid` type
--   `is_notice`: If true, a article is notification.
+    > `uuid` string
+-   `notice`: Indicate whether a article is notification.
 -   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ### `comments`
 
@@ -447,29 +403,23 @@ a user can comment short text on article or other comment
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `author_id`
     > referenced in `users`
     >
-    > `uuid` type
+    > `uuid` string
 -   `article_id`
     > referenced in `articles`
     >
-    > `uuid` type
+    > `uuid` string
 -   `parent_id`
+    > a parent comment id in a hierarchical structure
+    >
     > referenced in `comments`
     >
-    > `uuid` type
-    >
-    > a parent comment id in a hierarchical structure
+    > `uuid` string
 -   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ### `comment_snapshots`
 
@@ -481,14 +431,11 @@ When a user edit an comment, a new snapshot record is created, and readers will 
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `comment_id`
     > referenced in `comments`
     >
-    > `uuid` type
+    > `uuid` string
 -   `body`:
 -   `created_at`: creation time of record
 
@@ -498,24 +445,18 @@ Root Entity of User
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `membership_id`
+    > Indicate user permission level
+    >
     > referenced in `memberships`
     >
-    > `uuid` type
-    >
-    > If null, user membership is same with unauthorized user
+    > `uuid` string
 -   `name`: displayed name of user
 -   `image_url`: url of user profile image
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ## Article
 
@@ -525,7 +466,7 @@ erDiagram
     String id PK
     String author_id FK
     String board_id FK
-    Boolean is_notice
+    Boolean notice
     DateTime created_at
     DateTime deleted_at "nullable"
 }
@@ -539,7 +480,7 @@ erDiagram
 }
 "article_attachment_snapshots" {
     String id PK
-    String snapshot_id FK
+    String article_snapshot_id FK
     String attachment_id FK
     Int sequence
 }
@@ -558,10 +499,12 @@ erDiagram
 }
 "attachments" {
     String id PK
+    String owner_id FK
     String name
     String extension
     String url
     DateTime created_at
+    DateTime deleted_at "nullable"
 }
 "users" {
     String id PK
@@ -575,8 +518,9 @@ erDiagram
 "articles" }o--|| "users" : author
 "articles" }o--|| "boards" : board
 "article_snapshots" }o--|| "articles" : article
-"article_attachment_snapshots" }o--|| "article_snapshots" : snapshot
+"article_attachment_snapshots" }o--|| "article_snapshots" : article_snapshot
 "article_attachment_snapshots" }o--|| "attachments" : attachment
+"attachments" }o--|| "users" : owner
 ```
 
 ### `articles`
@@ -585,24 +529,18 @@ Root Entity of Article
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `author_id`
     > referenced in `users`
     >
-    > `uuid` type
+    > `uuid` string
 -   `board_id`
     > referenced in `boards`
     >
-    > `uuid` type
--   `is_notice`: If true, a article is notification.
+    > `uuid` string
+-   `notice`: Indicate whether a article is notification.
 -   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ### `article_snapshots`
 
@@ -614,14 +552,11 @@ When a user edit an article, a new snapshot record is created, and readers will 
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `article_id`
     > referenced in `articles`
     >
-    > `uuid` type
+    > `uuid` string
 -   `title`: title of article
 -   `body_url`: URL path of article body resource
 -   `body_format`: one of `html`, `md`, `txt`
@@ -637,19 +572,16 @@ If author add attachment to an article, a new record of `article_attachment_snap
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `snapshot_id`
+-   `id`: `uuid` string
+-   `article_snapshot_id`
     > referenced in `article_snapshots`
     >
-    > `uuid` type
+    > `uuid` string
 -   `attachment_id`
     > referenced in `attachments`
     >
-    > `uuid` type
--   `sequence`: `sequence` is used to distinguish each individual `attachment`.
+    > `uuid` string
+-   `sequence`:
 
 ### `boards`
 
@@ -657,41 +589,35 @@ Root Entity of Board
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `name`:
 -   `description`:
 -   `manager_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `read_article_list_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `read_article_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `write_article_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `read_comment_list_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `write_comment_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ### `attachments`
 
@@ -701,14 +627,18 @@ All the attachment resources managed in the BBS
 
 **Properties**
 
--   `id`
-    > record identity
+-   `id`: `uuid` string
+-   `owner_id`
+    > `attachment` file can only be attached by the owner
     >
-    > `uuid` type
+    > referenced in `users`
+    >
+    > `uuid` string
 -   `name`: name of attachment resource
 -   `extension`: extension of resource like `md`, `html`, `jpeg`...
 -   `url`: URL path of real resource
 -   `created_at`: creation time of record
+-   `deleted_at`: deletion time of record
 
 ### `users`
 
@@ -716,24 +646,18 @@ Root Entity of User
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `membership_id`
+    > Indicate user permission level
+    >
     > referenced in `memberships`
     >
-    > `uuid` type
-    >
-    > If null, user membership is same with unauthorized user
+    > `uuid` string
 -   `name`: displayed name of user
 -   `image_url`: url of user profile image
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ## Board
 
@@ -775,41 +699,35 @@ Root Entity of Board
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `name`:
 -   `description`:
 -   `manager_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `read_article_list_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `read_article_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `write_article_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `read_comment_list_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `write_comment_membership_id`
     > referenced in `memberships`
     >
-    > `uuid` type
+    > `uuid` string
 -   `created_at`: creation time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ### `memberships`
 
@@ -819,19 +737,13 @@ a user can receive one or zero membership, which signifies their permission leve
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `name`: displayed name of membership
+-   `id`: `uuid` string
+-   `name`: displated name of membership
 -   `rank`: `rank` is used for membership grade comparison
 -   `image_url`:
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ## User
 
@@ -877,45 +789,33 @@ a user can receive one or zero membership, which signifies their permission leve
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
--   `name`: displayed name of membership
+-   `id`: `uuid` string
+-   `name`: displated name of membership
 -   `rank`: `rank` is used for membership grade comparison
 -   `image_url`:
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ### `authentications`
 
 Authentication Entity of User
 
-combination of `oauth_sub` and `oauth_type` is unique
+combination of `oauth_sub` and `oauth_type` is unique.
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `user_id`
     > referenced in `users`
     >
-    > `uuid` type
--   `oauth_type`: one of `github`, `kakao`
+    > `uuid` string
+-   `oauth_type`: one of `github`, `kakao`,
 -   `oauth_sub`: oauth server user id
 -   `email`: verified email
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record
 
 ### `users`
 
@@ -923,21 +823,15 @@ Root Entity of User
 
 **Properties**
 
--   `id`
-    > record identity
-    >
-    > `uuid` type
+-   `id`: `uuid` string
 -   `membership_id`
+    > Indicate user permission level
+    >
     > referenced in `memberships`
     >
-    > `uuid` type
-    >
-    > If null, user membership is same with unauthorized user
+    > `uuid` string
 -   `name`: displayed name of user
 -   `image_url`: url of user profile image
 -   `created_at`: creation time of record
 -   `updated_at`: revision time of record
--   `deleted_at`
-    > deletion time of record
-    >
-    > if null, a record is soft-deleted
+-   `deleted_at`: deletion time of record

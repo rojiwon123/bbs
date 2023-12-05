@@ -1,3 +1,4 @@
+import { Prisma } from "@PRISMA";
 import { filter, isNull, map, pipe, toArray } from "@fxts/core";
 
 import { prisma } from "@APP/infrastructure/DB";
@@ -10,7 +11,6 @@ import { Failure } from "@APP/utils/failure";
 import { Entity } from "@APP/utils/fx";
 import { Result } from "@APP/utils/result";
 
-import { Prisma } from "../../db/edge";
 import { Membership } from "./membership";
 
 export namespace Board {

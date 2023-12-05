@@ -1,6 +1,5 @@
-import typia from "typia";
-
 import { OauthType } from "../../db/edge";
+import { Regex } from "./global";
 
 export namespace IOauth {
     export type Type = OauthType;
@@ -13,8 +12,8 @@ export namespace IOauth {
         /** 사용자명 */
         name: string;
         /** 인증된 이메일 */
-        email: (string & typia.tags.Format<"email">) | null;
+        email: Regex.Email | null;
         /** profile image url */
-        image_url: (string & typia.tags.Format<"url">) | null;
+        image_url: Regex.URL | null;
     }
 }

@@ -9,7 +9,7 @@ on:
 permissions:
     id-token: write
     contents: write
-    packages: write
+    packages: read
 
 env:
     DATABASE_URL: postgresql://test:test@localhost:5432/test
@@ -40,6 +40,10 @@ jobs:
               uses: actions/setup-node@main
               with:
                   node-version: 18
+                  registry-url: https://npm.pkg.github.com
+                  scope: "@rojiwon123"
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Install
               run: npm ci && npm run build:prisma && npm run build:sdk
@@ -61,6 +65,10 @@ jobs:
               uses: actions/setup-node@main
               with:
                   node-version: 18
+                  registry-url: https://npm.pkg.github.com
+                  scope: "@rojiwon123"
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Install & Build
               run: npm ci && npm run build:prisma && npm run build:swagger

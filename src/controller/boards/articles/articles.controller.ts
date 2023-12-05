@@ -136,7 +136,9 @@ export class BoardsArticlesController {
     @core.TypedException<ErrorCode.Permission.Insufficient>(
         nest.HttpStatus.FORBIDDEN,
     )
-    @core.TypedException<ErrorCode.Board.NotFound>(nest.HttpStatus.NOT_FOUND)
+    @core.TypedException<
+        ErrorCode.Board.NotFound | ErrorCode.Attachment.NotFound
+    >(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Post()
     async create(
         @core.TypedParam("board_id")
@@ -164,6 +166,7 @@ export class BoardsArticlesController {
                         nest.HttpStatus.FORBIDDEN,
                     );
                 case "NOT_FOUND_BOARD":
+                case "NOT_FOUND_ATTACHMENT":
                     throw Failure.Http.fromInternal(
                         error,
                         nest.HttpStatus.NOT_FOUND,

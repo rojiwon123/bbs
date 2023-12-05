@@ -1,10 +1,5 @@
 import { isNull } from "@fxts/core";
 
-/** module 타입 체크용 */
-export const assertModule = <T>(module: T): void => {
-    module;
-};
-
 export const compare =
     (sort: "asc" | "desc") =>
     <T>(map: (input: T) => number) =>

@@ -25,334 +25,323 @@ enum ArticleBodyFormat {
   txt
 }
 
-/// Root Entity of Article
-/// 
-/// @namespace All
-/// 
-/// @namespace Comment
-/// 
-/// @namespace Article
-/// 
-/// @author industriously
-/// 
+///  Root Entity of Article
+///
+///  @namespace All
+///
+///  @namespace Comment
+///
+///  @namespace Article
+///
+///  @author rojiwon
+///
 model articles {
-  /// record identity
-  /// 
-  /// `uuid` type
-  /// 
+  ///  `uuid` string
+  ///
   id         String              @id @database.Uuid
-  /// referenced in `users`
-  /// 
-  /// `uuid` type
-  /// 
+  ///  referenced in `users`
+  ///
+  ///  `uuid` string
+  ///
   author_id  String              @database.Uuid
   author     users               @relation(fields: [author_id], references: [id])
-  /// referenced in `boards`
-  /// 
-  /// `uuid` type
-  /// 
+  ///  referenced in `boards`
+  ///
+  ///  `uuid` string
+  ///
   board_id   String              @database.Uuid
   board      boards              @relation(fields: [board_id], references: [id])
-  /// If true, a article is notification.
-  /// 
-  is_notice  Boolean
-  /// creation time of record
-  /// 
+  ///  Indicate whether a article is notification.
+  ///
+  notice     Boolean            
+  ///  creation time of record
+  ///
   created_at DateTime            @database.Timestamptz
-  /// deletion time of record
-  /// 
-  /// if null, a record is soft-deleted
-  /// 
+  ///  deletion time of record
+  ///
   deleted_at DateTime?           @database.Timestamptz
   snapshots  article_snapshots[]
-  comments   comments[]
+  comments   comments[]         
+
+  @@index([created_at])
 }
 
-/// Snapshot of Article
-/// 
-/// an `article_snapshots` record contains the content of an article's specific version.
-/// 
-/// When a user edit an article, a new snapshot record is created, and readers will view the snapshot record linked to the most recently created version among the connected records.
-/// 
-/// @namespace All
-/// 
-/// @namespace Article
-/// 
-/// @author industriously
-/// 
+///  Snapshot of Article
+///
+///  an `article_snapshots` record contains the content of an article's specific version.
+///
+///  When a user edit an article, a new snapshot record is created, and readers will view the snapshot record linked to the most recently created version among the connected records.
+///
+///  @namespace All
+///
+///  @namespace Article
+///
+///  @author rojiwon
+///
 model article_snapshots {
-  /// record identity
-  /// 
-  /// `uuid` type
-  /// 
-  id                   String                         @id @database.Uuid
-  /// referenced in `articles`
-  /// 
-  /// `uuid` type
-  /// 
-  article_id           String                         @database.Uuid
-  article              articles                       @relation(fields: [article_id], references: [id])
-  /// title of article
-  /// 
-  title                String
-  /// URL path of article body resource
-  /// 
-  body_url             String
-  /// one of `html`, `md`, `txt`
-  /// 
-  body_format          ArticleBodyFormat
-  /// creation time of record
-  /// 
-  created_at           DateTime                       @database.Timestamptz
-  attachment_snapshots article_attachment_snapshots[]
-}
-
-/// Attachment Snapshot for Article
-/// 
-/// an `article_attachment_snapshots` entity connects an `article_snapshots` record with an `attachments` record.
-/// 
-/// If author add attachment to an article, a new record of `article_attachment_snapshots` is created.
-/// 
-/// @namespace All
-/// 
-/// @namespace Article
-/// 
-/// @author industriously
-/// 
-model article_attachment_snapshots {
-  /// record identity
-  /// 
-  /// `uuid` type
-  /// 
-  id            String            @id @database.Uuid
-  /// referenced in `article_snapshots`
-  /// 
-  /// `uuid` type
-  /// 
-  snapshot_id   String            @database.Uuid
-  snapshot      article_snapshots @relation(fields: [snapshot_id], references: [id])
-  /// referenced in `attachments`
-  /// 
-  /// `uuid` type
-  /// 
-  attachment_id String            @database.Uuid
-  attachment    attachments       @relation(fields: [attachment_id], references: [id])
-  /// `sequence` is used to distinguish each individual `attachment`.
-  /// 
-  sequence      Int
-}
-
-/// Root Entity of Board
-/// 
-/// @namespace All
-/// 
-/// @namespace Board
-/// 
-/// @namespace Article
-/// 
-/// @author industriously
-/// 
-model boards {
-  /// record identity
-  /// 
-  /// `uuid` type
-  /// 
-  id                              String       @id @database.Uuid
-  name                            String
-  description                     String
-  /// referenced in `memberships`
-  /// 
-  /// `uuid` type
-  /// 
-  manager_membership_id           String       @database.Uuid
-  manager_membership              memberships  @relation(fields: [manager_membership_id], references: [id], name: "ManagerMembership")
-  /// referenced in `memberships`
-  /// 
-  /// `uuid` type
-  /// 
-  read_article_list_membership_id String?      @database.Uuid
-  read_article_list_membership    memberships? @relation(fields: [read_article_list_membership_id], references: [id], name: "ReadArticleListMembership")
-  /// referenced in `memberships`
-  /// 
-  /// `uuid` type
-  /// 
-  read_article_membership_id      String?      @database.Uuid
-  read_article_membership         memberships? @relation(fields: [read_article_membership_id], references: [id], name: "ReadArticleMembership")
-  /// referenced in `memberships`
-  /// 
-  /// `uuid` type
-  /// 
-  write_article_membership_id     String       @database.Uuid
-  write_article_membership        memberships  @relation(fields: [write_article_membership_id], references: [id], name: "WriteArticleMembership")
-  /// referenced in `memberships`
-  /// 
-  /// `uuid` type
-  /// 
-  read_comment_list_membership_id String?      @database.Uuid
-  read_comment_list_membership    memberships? @relation(fields: [read_comment_list_membership_id], references: [id], name: "ReadCommentListMembership")
-  /// referenced in `memberships`
-  /// 
-  /// `uuid` type
-  /// 
-  write_comment_membership_id     String       @database.Uuid
-  write_comment_membership        memberships  @relation(fields: [write_comment_membership_id], references: [id], name: "WriteCommentMembership")
-  /// creation time of record
-  /// 
-  created_at                      DateTime     @database.Timestamptz
-  /// deletion time of record
-  /// 
-  /// if null, a record is soft-deleted
-  /// 
-  deleted_at                      DateTime?    @database.Timestamptz
-  articles                        articles[]
-}
-
-/// Root Entity of Comment
-/// 
-/// a user can comment short text on article or other comment
-/// 
-/// @namespace All
-/// 
-/// @namespace Comment
-/// 
-/// @author industriously
-/// 
-model comments {
-  /// record identity
-  /// 
-  /// `uuid` type
-  /// 
-  id         String              @id @database.Uuid
-  /// referenced in `users`
-  /// 
-  /// `uuid` type
-  /// 
-  author_id  String              @database.Uuid
-  author     users               @relation(fields: [author_id], references: [id])
-  /// referenced in `articles`
-  /// 
-  /// `uuid` type
-  /// 
-  article_id String              @database.Uuid
-  article    articles            @relation(fields: [article_id], references: [id])
-  /// referenced in `comments`
-  /// 
-  /// `uuid` type
-  /// 
-  /// a parent comment id in a hierarchical structure
-  /// 
-  parent_id  String?             @database.Uuid
-  parent     comments?           @relation(fields: [parent_id], references: [id], name: "HierarchicalComment")
-  /// creation time of record
-  /// 
-  created_at DateTime            @database.Timestamptz
-  /// deletion time of record
-  /// 
-  /// if null, a record is soft-deleted
-  /// 
-  deleted_at DateTime?           @database.Timestamptz
-  snapshots  comment_snapshots[]
-  children   comments[]          @relation(name: "HierarchicalComment")
-}
-
-/// Snapshot of Comment
-/// 
-/// an `comment_snapshots` record contains the content of an comment's specific version.
-/// 
-/// When a user edit an comment, a new snapshot record is created, and readers will view the snapshot record linked to the most recently created version among the connected records.
-/// 
-/// @namespace All
-/// 
-/// @namespace Comment
-/// 
-/// @author industriously
-/// 
-model comment_snapshots {
-  /// record identity
-  /// 
-  /// `uuid` type
-  /// 
-  id         String   @id @database.Uuid
-  /// referenced in `comments`
-  /// 
-  /// `uuid` type
-  /// 
-  comment_id String   @database.Uuid
-  comment    comments @relation(fields: [comment_id], references: [id])
-  body       String
-  /// creation time of record
-  /// 
-  created_at DateTime @database.Timestamptz
-}
-
-/// Attachment Entity
-/// 
-/// All the attachment resources managed in the BBS
-/// 
-/// @namespace All
-/// 
-/// @namespace Article
-/// 
-/// @author industriously
-/// 
-model attachments {
-  /// record identity
-  /// 
-  /// `uuid` type
-  /// 
+  ///  `uuid` string
+  ///
   id                           String                         @id @database.Uuid
-  /// name of attachment resource
-  /// 
-  name                         String
-  /// extension of resource like `md`, `html`, `jpeg`...
-  /// 
-  extension                    String
-  /// URL path of real resource
-  /// 
-  url                          String
-  /// creation time of record
-  /// 
+  ///  referenced in `articles`
+  ///
+  ///  `uuid` string
+  ///
+  article_id                   String                         @database.Uuid
+  article                      articles                       @relation(fields: [article_id], references: [id])
+  ///  title of article
+  ///
+  title                        String                        
+  ///  URL path of article body resource
+  ///
+  body_url                     String                        
+  ///  one of `html`, `md`, `txt`
+  ///
+  body_format                  ArticleBodyFormat             
+  ///  creation time of record
+  ///
   created_at                   DateTime                       @database.Timestamptz
   article_attachment_snapshots article_attachment_snapshots[]
 }
 
-/// Membership Entity
-/// 
-/// a user can receive one or zero membership, which signifies their permission level in the BBS.
-/// 
-/// @namespace All
-/// 
-/// @namespace Board
-/// 
-/// @namespace User
-/// 
-/// @author industriously
-/// 
+///  Attachment Snapshot for Article
+///
+///  an `article_attachment_snapshots` entity connects an `article_snapshots` record with an `attachments` record.
+///
+///  If author add attachment to an article, a new record of `article_attachment_snapshots` is created.
+///
+///  @namespace All
+///
+///  @namespace Article
+///
+///  @author rojiwon
+///
+model article_attachment_snapshots {
+  ///  `uuid` string
+  ///
+  id                  String            @id @database.Uuid
+  ///  referenced in `article_snapshots`
+  ///
+  ///  `uuid` string
+  ///
+  article_snapshot_id String            @database.Uuid
+  article_snapshot    article_snapshots @relation(fields: [article_snapshot_id], references: [id])
+  ///  referenced in `attachments`
+  ///
+  ///  `uuid` string
+  ///
+  attachment_id       String            @database.Uuid
+  attachment          attachments       @relation(fields: [attachment_id], references: [id])
+  sequence            Int              
+}
+
+///  Root Entity of Board
+///
+///  @namespace All
+///
+///  @namespace Board
+///
+///  @namespace Article
+///
+///  @author rojiwon
+///
+model boards {
+  ///  `uuid` string
+  ///
+  id                              String       @id @database.Uuid
+  name                            String      
+  description                     String      
+  ///  referenced in `memberships`
+  ///
+  ///  `uuid` string
+  ///
+  manager_membership_id           String       @database.Uuid
+  manager_membership              memberships  @relation(name: "ManagerMembership", fields: [manager_membership_id], references: [id])
+  ///  referenced in `memberships`
+  ///
+  ///  `uuid` string
+  ///
+  read_article_list_membership_id String?      @database.Uuid
+  read_article_list_membership    memberships? @relation(name: "ReadArticleListMembership", fields: [read_article_list_membership_id], references: [id])
+  ///  referenced in `memberships`
+  ///
+  ///  `uuid` string
+  ///
+  read_article_membership_id      String?      @database.Uuid
+  read_article_membership         memberships? @relation(name: "ReadArticleMembership", fields: [read_article_membership_id], references: [id])
+  ///  referenced in `memberships`
+  ///
+  ///  `uuid` string
+  ///
+  write_article_membership_id     String       @database.Uuid
+  write_article_membership        memberships  @relation(name: "WriteArticleMembership", fields: [write_article_membership_id], references: [id])
+  ///  referenced in `memberships`
+  ///
+  ///  `uuid` string
+  ///
+  read_comment_list_membership_id String?      @database.Uuid
+  read_comment_list_membership    memberships? @relation(name: "ReadCommentListMembership", fields: [read_comment_list_membership_id], references: [id])
+  ///  referenced in `memberships`
+  ///
+  ///  `uuid` string
+  ///
+  write_comment_membership_id     String       @database.Uuid
+  write_comment_membership        memberships  @relation(name: "WriteCommentMembership", fields: [write_comment_membership_id], references: [id])
+  ///  creation time of record
+  ///
+  created_at                      DateTime     @database.Timestamptz
+  ///  deletion time of record
+  ///
+  deleted_at                      DateTime?    @database.Timestamptz
+  articles                        articles[]  
+}
+
+///  Root Entity of Comment
+///
+///  a user can comment short text on article or other comment
+///
+///  @namespace All
+///
+///  @namespace Comment
+///
+///  @author rojiwon
+///
+model comments {
+  ///  `uuid` string
+  ///
+  id         String              @id @database.Uuid
+  ///  referenced in `users`
+  ///
+  ///  `uuid` string
+  ///
+  author_id  String              @database.Uuid
+  author     users               @relation(fields: [author_id], references: [id])
+  ///  referenced in `articles`
+  ///
+  ///  `uuid` string
+  ///
+  article_id String              @database.Uuid
+  article    articles            @relation(fields: [article_id], references: [id])
+  ///  a parent comment id in a hierarchical structure
+  ///
+  ///  referenced in `comments`
+  ///
+  ///  `uuid` string
+  ///
+  parent_id  String?             @database.Uuid
+  parent     comments?           @relation(name: "HierarchicalComment", fields: [parent_id], references: [id])
+  ///  creation time of record
+  ///
+  created_at DateTime            @database.Timestamptz
+  ///  deletion time of record
+  ///
+  deleted_at DateTime?           @database.Timestamptz
+  snapshots  comment_snapshots[]
+  children   comments[]          @relation(name: "HierarchicalComment")
+
+  @@index([created_at])
+}
+
+///  Snapshot of Comment
+///
+///  an `comment_snapshots` record contains the content of an comment's specific version.
+///
+///  When a user edit an comment, a new snapshot record is created, and readers will view the snapshot record linked to the most recently created version among the connected records.
+///
+///  @namespace All
+///
+///  @namespace Comment
+///
+///  @author rojiwon
+///
+model comment_snapshots {
+  ///  `uuid` string
+  ///
+  id         String   @id @database.Uuid
+  ///  referenced in `comments`
+  ///
+  ///  `uuid` string
+  ///
+  comment_id String   @database.Uuid
+  comment    comments @relation(fields: [comment_id], references: [id])
+  body       String  
+  ///  creation time of record
+  ///
+  created_at DateTime @database.Timestamptz
+}
+
+///  Attachment Entity
+///
+///  All the attachment resources managed in the BBS
+///
+///  @namespace All
+///
+///  @namespace Article
+///
+///  @author rojiwon
+///
+model attachments {
+  ///  `uuid` string
+  ///
+  id                           String                         @id @database.Uuid
+  ///  `attachment` file can only be attached by the owner
+  ///
+  ///  referenced in `users`
+  ///
+  ///  `uuid` string
+  ///
+  owner_id                     String                         @database.Uuid
+  owner                        users                          @relation(fields: [owner_id], references: [id])
+  ///  name of attachment resource
+  ///
+  name                         String                        
+  ///  extension of resource like `md`, `html`, `jpeg`...
+  ///
+  extension                    String                        
+  ///  URL path of real resource
+  ///
+  url                          String                        
+  ///  creation time of record
+  ///
+  created_at                   DateTime                       @database.Timestamptz
+  ///  deletion time of record
+  ///
+  deleted_at                   DateTime?                      @database.Timestamptz
+  article_attachment_snapshots article_attachment_snapshots[]
+}
+
+///  Membership Entity
+///
+///  a user can receive one or zero membership, which signifies their permission level in the BBS.
+///
+///  @namespace All
+///
+///  @namespace Board
+///
+///  @namespace User
+///
+///  @author rojiwon
+///
 model memberships {
-  /// record identity
-  /// 
-  /// `uuid` type
-  /// 
+  ///  `uuid` string
+  ///
   id                           String    @id @database.Uuid
-  /// displayed name of membership
-  /// 
-  name                         String
-  /// `rank` is used for membership grade comparison
-  /// 
-  rank                         Int
-  image_url                    String?
-  /// creation time of record
-  /// 
+  ///  displated name of membership
+  ///
+  name                         String   
+  ///  `rank` is used for membership grade comparison
+  ///
+  rank                         Int      
+  image_url                    String?  
+  ///  creation time of record
+  ///
   created_at                   DateTime  @database.Timestamptz
-  /// revision time of record
-  /// 
+  ///  revision time of record
+  ///
   updated_at                   DateTime? @database.Timestamptz
-  /// deletion time of record
-  /// 
-  /// if null, a record is soft-deleted
-  /// 
+  ///  deletion time of record
+  ///
   deleted_at                   DateTime? @database.Timestamptz
-  users                        users[]
+  users                        users[]  
   readable_article_list_boards boards[]  @relation(name: "ReadArticleListMembership")
   readable_article_boards      boards[]  @relation(name: "ReadArticleMembership")
   writable_article_boards      boards[]  @relation(name: "WriteArticleMembership")
@@ -361,96 +350,89 @@ model memberships {
   managed_boards               boards[]  @relation(name: "ManagerMembership")
 }
 
-/// Authentication Entity of User
-/// 
-/// combination of `oauth_sub` and `oauth_type` is unique
-/// 
-/// @namespace All
-/// 
-/// @namespace User
-/// 
-/// @author industriously
-/// 
+///  Authentication Entity of User
+///
+///  combination of `oauth_sub` and `oauth_type` is unique.
+///
+///  @namespace All
+///
+///  @namespace User
+///
+///  @author rojiwon
+///
 model authentications {
-  /// record identity
-  /// 
-  /// `uuid` type
-  /// 
+  ///  `uuid` string
+  ///
   id         String    @id @database.Uuid
-  /// referenced in `users`
-  /// 
-  /// `uuid` type
-  /// 
+  ///  referenced in `users`
+  ///
+  ///  `uuid` string
+  ///
   user_id    String?   @database.Uuid
   user       users?    @relation(fields: [user_id], references: [id])
-  /// one of `github`, `kakao`
-  /// 
+  ///  one of `github`, `kakao`,
+  ///
   oauth_type OauthType
-  /// oauth server user id
-  /// 
-  oauth_sub  String
-  /// verified email
-  /// 
-  email      String?
-  /// creation time of record
-  /// 
+  ///  oauth server user id
+  ///
+  oauth_sub  String   
+  ///  verified email
+  ///
+  email      String?  
+  ///  creation time of record
+  ///
   created_at DateTime  @database.Timestamptz
-  /// revision time of record
-  /// 
+  ///  revision time of record
+  ///
   updated_at DateTime? @database.Timestamptz
-  /// deletion time of record
-  /// 
-  /// if null, a record is soft-deleted
-  /// 
+  ///  deletion time of record
+  ///
   deleted_at DateTime? @database.Timestamptz
 
   @@unique([oauth_sub, oauth_type])
 }
 
-/// Root Entity of User
-/// 
-/// @namespace All
-/// 
-/// @namespace Article
-/// 
-/// @namespace Comment
-/// 
-/// @namespace User
-/// 
-/// @author industriously
-/// 
+///  Root Entity of User
+///
+///  @namespace All
+///
+///  @namespace Article
+///
+///  @namespace Comment
+///
+///  @namespace User
+///
+///  @author rojiwon
+///
 model users {
-  /// record identity
-  /// 
-  /// `uuid` type
-  /// 
+  ///  `uuid` string
+  ///
   id              String            @id @database.Uuid
-  /// referenced in `memberships`
-  /// 
-  /// `uuid` type
-  /// 
-  /// If null, user membership is same with unauthorized user
-  /// 
+  ///  Indicate user permission level
+  ///
+  ///  referenced in `memberships`
+  ///
+  ///  `uuid` string
+  ///
   membership_id   String?           @database.Uuid
   membership      memberships?      @relation(fields: [membership_id], references: [id])
-  /// displayed name of user
-  /// 
-  name            String
-  /// url of user profile image
-  /// 
-  image_url       String?
-  /// creation time of record
-  /// 
+  ///  displayed name of user
+  ///
+  name            String           
+  ///  url of user profile image
+  ///
+  image_url       String?          
+  ///  creation time of record
+  ///
   created_at      DateTime          @database.Timestamptz
-  /// revision time of record
-  /// 
+  ///  revision time of record
+  ///
   updated_at      DateTime?         @database.Timestamptz
-  /// deletion time of record
-  /// 
-  /// if null, a record is soft-deleted
-  /// 
+  ///  deletion time of record
+  ///
   deleted_at      DateTime?         @database.Timestamptz
   authentications authentications[]
-  articles        articles[]
-  comments        comments[]
+  articles        articles[]       
+  comments        comments[]       
+  attachments     attachments[]    
 }

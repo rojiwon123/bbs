@@ -44,7 +44,12 @@ export namespace ErrorCode {
     export namespace Comment {
         export type NotFound = "NOT_FOUND_COMMENT";
     }
+
     export namespace Board {
         export type NotFound = "NOT_FOUND_BOARD";
+    }
+
+    export namespace Attachment {
+        export type NotFound = "NOT_FOUND_ATTACHMENT";
     }
 }

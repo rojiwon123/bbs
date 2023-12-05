@@ -1,11 +1,9 @@
-import typia from "typia";
-
 import { IArticle } from "./IArticle";
 import { IPage } from "./IPage";
-import { Omit } from "./global";
+import { Omit, Regex } from "./global";
 
 export interface IComment {
-    id: string & typia.tags.Format<"uuid">;
+    id: Regex.UUID;
     /** 댓글 본문 */
     body: string | null;
     /** 댓글 생성자 정보 */
@@ -14,13 +12,13 @@ export interface IComment {
     parent: IComment.ISummary | null;
     /** 소속 게시글 정보 */
     article: IArticle.ISummary;
-    created_at: string & typia.tags.Format<"date-time">;
-    updated_at: (string & typia.tags.Format<"date-time">) | null;
+    created_at: Regex.DateTime;
+    updated_at: Regex.DateTime | null;
 }
 
 export namespace IComment {
     export interface Identity {
-        comment_id: string & typia.tags.Format<"uuid">;
+        comment_id: Regex.UUID;
     }
     export interface ISummary
         extends Pick<
@@ -34,13 +32,13 @@ export namespace IComment {
     }
 
     export interface ICreate extends Omit<IUpdate, "id"> {
-        author_id: string & typia.tags.Format<"uuid">;
-        parent_id: (string & typia.tags.Format<"uuid">) | null;
-        article_id: string & typia.tags.Format<"uuid">;
+        author_id: Regex.UUID;
+        parent_id: Regex.UUID | null;
+        article_id: Regex.UUID;
     }
 
     export interface ISearch extends IPage.ISearch {
-        parent_id?: string & typia.tags.Format<"uuid">;
+        parent_id?: Regex.UUID;
         sort?: IPage.SortType;
     }
 
@@ -58,7 +56,7 @@ export namespace IComment {
 
     export namespace IBulk {
         export interface ISearch extends IComment.ISearch {
-            article_id?: string & typia.tags.Format<"uuid">;
+            article_id?: Regex.UUID;
         }
         export interface IPaginated extends IPage.IResponse<IBulk> {}
     }
