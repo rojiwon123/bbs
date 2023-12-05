@@ -1,7 +1,6 @@
-import typia from "typia";
-
 import { IOauth } from "./IOauth";
 import { IToken } from "./IToken";
+import { Regex } from "./global";
 
 export interface IAuthentication {
     status: "active";
@@ -13,10 +12,7 @@ export namespace IAuthentication {
     // pending 상태일 때는 사용자 생성 권한 밖에 없음
     // pending 상태인 경우, oauth profile을 함께 리턴함
     // export type Type = "pending" | "active";
-    export type IOauthUrls = Record<
-        IOauth.Type,
-        string & typia.tags.Format<"url">
-    >;
+    export type IOauthUrls = Record<IOauth.Type, Regex.URL>;
 
     export interface IOauthInput {
         oauth_type: IOauth.Type;

@@ -26,6 +26,7 @@ export namespace BoardsArticlesUsecase {
                       | ErrorCode.Permission.Invalid
                       | ErrorCode.Permission.Insufficient
                       | ErrorCode.Board.NotFound
+                      | ErrorCode.Attachment.NotFound
                   >
             >
         > => {
@@ -43,7 +44,7 @@ export namespace BoardsArticlesUsecase {
                 ...body,
                 author_id: user.id,
                 board_id: identity.board_id,
-                is_notice: false,
+                notice: false,
             });
         };
 

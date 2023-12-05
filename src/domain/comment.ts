@@ -1,3 +1,4 @@
+import { Prisma } from "@PRISMA";
 import { isNull, map, pipe, toArray } from "@fxts/core";
 
 import { prisma } from "@APP/infrastructure/DB";
@@ -9,7 +10,6 @@ import { Entity } from "@APP/utils/fx";
 import { Random } from "@APP/utils/random";
 import { Result } from "@APP/utils/result";
 
-import { Prisma } from "../../db/edge";
 import { ArticleJson } from "./article";
 
 export namespace Comment {
@@ -83,8 +83,8 @@ export namespace Comment {
                 updated_at: isNull(snapshot)
                     ? null
                     : comment.created_at < snapshot.created_at
-                    ? DateMapper.toISO(snapshot.created_at)
-                    : null,
+                      ? DateMapper.toISO(snapshot.created_at)
+                      : null,
             });
         };
 
@@ -217,8 +217,8 @@ export namespace CommentJson {
             updated_at: isNull(snapshot)
                 ? null
                 : comment.created_at < snapshot.created_at
-                ? DateMapper.toISO(snapshot.created_at)
-                : null,
+                  ? DateMapper.toISO(snapshot.created_at)
+                  : null,
         };
     };
 
@@ -245,8 +245,8 @@ export namespace CommentJson {
             updated_at: isNull(snapshot)
                 ? null
                 : comments.created_at < snapshot.created_at
-                ? DateMapper.toISO(snapshot.created_at)
-                : null,
+                  ? DateMapper.toISO(snapshot.created_at)
+                  : null,
         };
     };
 }

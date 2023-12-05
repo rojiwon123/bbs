@@ -8,6 +8,8 @@ import { Result } from "@APP/utils/result";
 @nest.Controller("memberships")
 export class MembershipsController {
     /**
+     * 멤버십 목록 불러오기
+     *
      * @summary 멤버십 목록 불러오기
      * @tag public
      * @return 활성화된 멤버십 목록

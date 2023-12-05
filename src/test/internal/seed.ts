@@ -234,11 +234,11 @@ export namespace Seed {
         {
             author,
             board,
-            is_notice = false,
+            notice = false,
         }: {
             author: string;
             board: string;
-            is_notice?: boolean;
+            notice?: boolean;
         },
         {
             is_updated = false,
@@ -259,7 +259,7 @@ export namespace Seed {
                 deleted_at: is_deleted ? now : null,
                 author_id: await getUserId(author),
                 board_id: await getBoardId(board),
-                is_notice,
+                notice,
             },
         });
         await prisma.article_snapshots.create({
@@ -347,7 +347,7 @@ export namespace Seed {
 
     export const deleteArticle = async (id: string) => {
         await prisma.article_attachment_snapshots.deleteMany({
-            where: { snapshot: { article_id: id } },
+            where: { article_snapshot_id: id },
         });
         await prisma.article_snapshots.deleteMany({
             where: { article_id: id },
@@ -526,10 +526,7 @@ export namespace Seed {
                         {
                             author: "user1",
                             board: "board1",
-                            is_notice: !!+idx
-                                .toString(2)
-                                .padStart(3, "0")
-                                .at(-1)!,
+                            notice: !!+idx.toString(2).padStart(3, "0").at(-1)!,
                         },
                         {
                             is_updated: !!+idx
@@ -548,10 +545,7 @@ export namespace Seed {
                         {
                             author: "user3",
                             board: "board2",
-                            is_notice: !!+idx
-                                .toString(2)
-                                .padStart(3, "0")
-                                .at(-1)!,
+                            notice: !!+idx.toString(2).padStart(3, "0").at(-1)!,
                         },
                         {
                             is_updated: !!+idx
@@ -570,10 +564,7 @@ export namespace Seed {
                         {
                             author: "user3",
                             board: "board3",
-                            is_notice: !!+idx
-                                .toString(2)
-                                .padStart(3, "0")
-                                .at(-1)!,
+                            notice: !!+idx.toString(2).padStart(3, "0").at(-1)!,
                         },
                         {
                             is_updated: !!+idx

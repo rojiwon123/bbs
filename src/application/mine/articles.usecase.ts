@@ -147,6 +147,7 @@ export namespace MineArticlesUsecase {
                       | ErrorCode.Permission.Invalid
                       | ErrorCode.Permission.Insufficient
                       | ErrorCode.Article.NotFound
+                      | ErrorCode.Attachment.NotFound
                   >
             >
         > => {

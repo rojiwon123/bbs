@@ -21,7 +21,7 @@ export const test_get_mine_article_when_board_membership_insufficient = async (
         {
             author: username,
             board: "board2",
-            is_notice: false,
+            notice: false,
         },
         {},
     );
@@ -137,7 +137,7 @@ export const test_get_mine_article_when_article_is_deleted = async (
         {
             author: username,
             board: boardname,
-            is_notice: false,
+            notice: false,
         },
         { is_deleted: true },
     );

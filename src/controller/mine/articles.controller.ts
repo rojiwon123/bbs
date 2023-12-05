@@ -123,7 +123,9 @@ export class MineArticlesController {
     @core.TypedException<ErrorCode.Permission.Insufficient>(
         nest.HttpStatus.FORBIDDEN,
     )
-    @core.TypedException<ErrorCode.Article.NotFound>(nest.HttpStatus.NOT_FOUND)
+    @core.TypedException<
+        ErrorCode.Article.NotFound | ErrorCode.Attachment.NotFound
+    >(nest.HttpStatus.NOT_FOUND)
     @core.TypedRoute.Put(":article_id")
     async update(
         @core.TypedParam("article_id")
@@ -151,6 +153,7 @@ export class MineArticlesController {
                         nest.HttpStatus.FORBIDDEN,
                     );
                 case "NOT_FOUND_ARTICLE":
+                case "NOT_FOUND_ATTACHMENT":
                     throw Failure.Http.fromInternal(
                         error,
                         nest.HttpStatus.NOT_FOUND,

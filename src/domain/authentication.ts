@@ -1,3 +1,4 @@
+import { Prisma } from "@PRISMA";
 import { isNull } from "@fxts/core";
 import { Request } from "express";
 
@@ -7,7 +8,6 @@ import { IUser } from "@APP/types/IUser";
 import { Failure } from "@APP/utils/failure";
 import { Result } from "@APP/utils/result";
 
-import { Prisma } from "../../db/edge";
 import { Token } from "./token";
 import { User } from "./user";
 
@@ -94,7 +94,6 @@ export namespace Authentication {
                       | ErrorCode.Permission.Required
                       | ErrorCode.Permission.Expired
                       | ErrorCode.Permission.Invalid
-                      | ErrorCode.Permission.Insufficient
                   >
             >
         > => {
@@ -119,7 +118,6 @@ export namespace Authentication {
                 | Failure.Internal<
                       | ErrorCode.Permission.Expired
                       | ErrorCode.Permission.Invalid
-                      | ErrorCode.Permission.Insufficient
                   >
             >
         > => {

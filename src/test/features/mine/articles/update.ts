@@ -10,11 +10,17 @@ import { Seed } from "@APP/test/internal/seed";
 import { APIValidator } from "@APP/test/internal/validator";
 import { ErrorCode } from "@APP/types/ErrorCode";
 import { IArticle } from "@APP/types/IArticle";
+import { Regex } from "@APP/types/global";
 import { Random } from "@APP/utils/random";
 
 const test = api.functional.mine.articles.update;
 
-const createBody = typia.createRandom<IArticle.IUpdateBody>();
+const createBody = (
+    attachment_ids: Regex.UUID[] = [],
+): IArticle.IUpdateBody => ({
+    ...typia.random<IArticle.IUpdateBody>(),
+    attachment_ids,
+});
 
 export const test_update_mine_article_successfully = async (
     connection: IConnection,
@@ -24,7 +30,7 @@ export const test_update_mine_article_successfully = async (
     const token = await get_token(connection, username);
     const body = createBody();
     const article = await Seed.createArticle(
-        { author: username, board: boardname, is_notice: false },
+        { author: username, board: boardname, notice: false },
         {},
     );
 
@@ -173,7 +179,7 @@ export const test_update_mine_article_when_article_is_deleted = async (
         {
             author: username,
             board: boardname,
-            is_notice: false,
+            notice: false,
         },
         { is_deleted: true },
     );

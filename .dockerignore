@@ -18,6 +18,8 @@ README.md
 .env
 .env.*
 
+.npmrc
+
 .DS_Store
 
 # config
@@ -29,3 +31,4 @@ tsconfig.test.json
 .gitignore
 .prettierignore
 prettier.config.js
+.npmrc
