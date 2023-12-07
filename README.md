@@ -5,7 +5,7 @@
 ![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
 
-[![Release 🔖](https://github.com/rojiwon123/bbs/actions/workflows/push_to_release.yml/badge.svg)](https://github.com/rojiwon123/bbs/actions/workflows/push_to_release.yml)
+[![Release 🔖](https://github.com/rojiwon123/bbs/actions/workflows/release.yml/badge.svg)](https://github.com/rojiwon123/bbs/actions/workflows/release.yml)
 
 </div>
 
