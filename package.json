@@ -1,6 +1,6 @@
 {
     "name": "@rojiwon123/bbs",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "description": "Bulletin Board System RESTFul API Server",
     "main": "build/main",
     "scripts": {
